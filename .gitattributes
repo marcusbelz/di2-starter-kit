@@ -1,0 +1,6 @@
+# Normalize line endings; shell scripts and SQL must check out with LF everywhere
+# (a CRLF bash script fails on Linux with ": command not found").
+* text=auto
+*.sh  text eol=lf
+*.sql text eol=lf
+*.yml text eol=lf

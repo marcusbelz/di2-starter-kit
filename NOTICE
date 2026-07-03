@@ -1,0 +1,34 @@
+DI² Starter Kit - NOTICE
+========================
+
+This repository (di2-starter-kit) is a tech-stack-agnostic, skill-driven
+development-workflow toolkit for Claude Code. It is licensed under the MIT
+License (see LICENSE).
+
+Lineage
+-------
+  di2-starter-kit
+    +-- derived from the DI² project (Marcus Belz)
+          +-- descends from the "AI Coding Starter Kit" by AlexPEClub
+              https://github.com/AlexPEClub/ai-coding-starter-kit
+              (stated as "MIT License" in its README)
+
+Third-party attribution
+------------------------
+Workflow structure and scaffolding concepts originate from the AI Coding
+Starter Kit:
+
+    Copyright (c) 2026 AlexPEClub
+    MIT License
+    https://github.com/AlexPEClub/ai-coding-starter-kit
+
+    NOTE: As of this writing the upstream repository states "MIT License" in
+    its README but does not ship a formal LICENSE file. The attribution above
+    is provided in good faith; the exact copyright holder is to be confirmed
+    with the original author (the maintainer of di2-starter-kit is contacting
+    them to add a formal LICENSE upstream and confirm attribution).
+
+New and modified work
+---------------------
+    Copyright (c) 2026 Marcus Belz
+    MIT License (see LICENSE)

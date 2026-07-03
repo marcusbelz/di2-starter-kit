@@ -1,0 +1,60 @@
+# db/scripts — runner scripts
+
+## Table of Contents
+- [Scripts](#scripts)
+- [Load logic (deploy)](#load-logic-deploy)
+- [Deploy tracker](#deploy-tracker)
+- [Environments & secrets](#environments--secrets)
+- [Adapting to your project](#adapting-to-your-project)
+
+Reproducible setup / deploy / teardown. The **directory structure + file numbering under
+`db/schemas/` is the source of truth** — there is no central `deploy.sql`.
+
+> Step-by-step runbooks (incl. verification and common failures) live in the knowledge base:
+> [KB-001 bootstrap](../../docs/kb/kb-001-db-bootstrap-new-environment.md) ·
+> [KB-002 deploy](../../docs/kb/kb-002-db-deploy-schema-objects.md) ·
+> [KB-003 clean](../../docs/kb/kb-003-db-clean-and-redeploy-schema.md) ·
+> [KB-004 drop](../../docs/kb/kb-004-db-drop-environment.md) ·
+> [KB-006 apply-smoke/tests](../../docs/kb/kb-006-db-apply-smoke-and-tests.md).
+
+## Scripts
+| Script | Purpose | Connects as |
+|--------|---------|-------------|
+| `create.sh <env>` | one-time: database, extensions, schema(s), roles (runs `db/database/00…07`) | superuser |
+| `deploy.sh <schema-dir\|all> <env>` | apply schema objects idempotently + record a `schema_apply_log` row | schema owner |
+| `clean.sh <schema\|all> <env>` | drop schema objects via introspection (`clean.schema.sql`; schema stays) | schema owner |
+| `drop.sh <env>` | drop the whole database + roles (runs `db/database/99…`) | superuser |
+
+All are bash scripts (Linux / macOS / Git Bash on Windows) around plain `psql`; every call runs
+with `-v ON_ERROR_STOP=1`, so the first error aborts with a non-zero exit code.
+
+## Load logic (deploy)
+Per schema directory, sections in fixed order; within a section, by 3-digit prefix:
+
+    tables → policies → functions → procedures → trigger → views → data
+
+`deploy.sh all` walks the schema directories in the `DEPLOY_ORDER` configured at the top of the
+script (dependency-safe, foundation first); `clean.sh all` uses the reverse `CLEAN_ORDER`.
+
+> `clean.sh` takes the **deployed schema name** (e.g. `app`), while `deploy.sh` takes the
+> **directory name** under `db/schemas/` (e.g. `example`) — the directory is a template whose
+> objects deploy into the schema set in `db/config/<env>.env.sql` (`\set schema_app app`).
+
+## Deploy tracker
+After a successful run, `deploy.sh` inserts one row into `schema_apply_log` via
+`sp_ins_schema_apply` (version from `APP_VERSION_*` in `<env>.env`, `git_sha` from the checkout,
+the target env, and a note). This is the in-house equivalent of a migration framework's history
+table — see `.claude/rules/db-migrations.md`.
+
+## Environments & secrets
+`<env>` is any name with a `db/config/<env>.env` + `<env>.env.sql` pair (the kit ships the
+committed `example.env` templates; real env files are git-ignored). Non-local passwords come from
+environment variables (`DB_ADMIN_PASSWORD_POSTGRES`, `DB_OWNER_PASSWORD`, `DB_FW_PASSWORD`,
+`DB_SA_PASSWORD`) — provided by CI as secrets, never from files. `local` falls back to the
+hardcoded throwaway password `pw`.
+
+## Adapting to your project
+1. Copy `db/config/example.env` / `example.env.sql` to `<env>.env` / `<env>.env.sql` per stage.
+2. Rename/copy the `db/schemas/example/` directory for your schema(s) and update `DEPLOY_ORDER`
+   (deploy.sh) + `CLEAN_ORDER` (clean.sh).
+3. If you rename the schema that holds the deploy tracker, update `TRACKER_SCHEMA` in `deploy.sh`.

@@ -1,0 +1,63 @@
+name: DB - clean
+
+# Drop all objects of a schema (the schema itself stays) — calls db/scripts/clean.sh.
+# DESTRUCTIVE: guarded by a typed confirmation in addition to the manual dispatch.
+
+on:
+  workflow_dispatch:
+    inputs:
+      schema:
+        description: 'Deployed schema name'
+        required: true
+        default: 'app'
+        type: choice
+        options: [app, all]
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options: [dev, int, test, prod]
+      confirm:
+        description: 'Type "clean" to confirm dropping all objects of the schema'
+        required: true
+
+jobs:
+  guard:
+    name: Confirmation guard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require typed confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "clean" ]; then
+            echo "ERROR: confirmation input must be exactly 'clean' (got '${{ github.event.inputs.confirm }}')."
+            exit 1
+          fi
+
+  clean:
+    name: Clean ${{ github.event.inputs.schema }} on ${{ github.event.inputs.environment }}
+    needs: guard
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: clean.sh via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          DB_FW_PASSWORD: ${{ secrets.DB_FW_PASSWORD }}
+        with:
+          host: ${{ secrets.DEPLOY_SSH_HOST }}
+          username: ${{ secrets.DEPLOY_SSH_USER }}
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          port: ${{ vars.SSH_PORT || 22 }}
+          envs: DB_FW_PASSWORD
+          script: |
+            set -e
+            if [ -z "${{ vars.DEPLOY_PATH }}" ]; then
+              echo "ERROR: environment variable DEPLOY_PATH is not set for '${{ github.event.inputs.environment }}'."
+              exit 1
+            fi
+            cd "${{ vars.DEPLOY_PATH }}"
+            git fetch origin "${{ github.ref_name }}"
+            git reset --hard "origin/${{ github.ref_name }}"
+            bash db/scripts/clean.sh "${{ github.event.inputs.schema }}" "${{ github.event.inputs.environment }}"

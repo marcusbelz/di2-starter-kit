@@ -1,0 +1,49 @@
+# Secrets / env
+.env
+.env.*
+!.env.example
+*.local
+
+# DB per-environment config (real files carry credentials; example.* templates and the
+# throwaway local.* pair stay committed)
+db/config/*.env
+db/config/*.env.sql
+!db/config/example.env
+!db/config/example.env.sql
+!db/config/local.env
+!db/config/local.env.sql
+
+# Dependencies
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pdm-build/
+vendor/
+
+# Build / output
+dist/
+build/
+out/
+.next/
+target/
+*.egg-info/
+
+# Caches / tooling
+.cache/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+coverage/
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Claude Code local overrides (keep settings.json shared, ignore local)
+.claude/settings.local.json

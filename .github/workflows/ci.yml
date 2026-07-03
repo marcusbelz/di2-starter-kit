@@ -1,0 +1,81 @@
+name: CI
+
+# DB-focused CI: the primary SQL gate is a real dry-run deploy against a throwaway
+# PostgreSQL 17 service, followed by the db/tests assertions and an idempotency
+# re-deploy. NO secrets — ephemeral DB in the runner, committed local creds 'pw'
+# (see db/config/local.env*), so this also runs from fork PRs.
+#
+# When your project gets an application stack, add its lint/build/test jobs here
+# (commands from .claude/rules/stack.md). If /init pruned the database, delete the
+# db jobs (or this file).
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [dev]
+
+permissions:
+  contents: read
+
+jobs:
+  db-dry-run-deploy:
+    name: db-dry-run-deploy
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: pw
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # postgres superuser password = the service's POSTGRES_PASSWORD (not a secret; local).
+      DB_ADMIN_PASSWORD_POSTGRES: pw
+      PGPASSWORD: pw
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure psql client
+        run: |
+          command -v psql >/dev/null 2>&1 || { sudo apt-get update && sudo apt-get install -y postgresql-client; }
+          psql --version
+
+      - name: create.sh local (database, schema, roles, users)
+        run: bash db/scripts/create.sh local
+
+      - name: deploy.sh all local (all schema objects)
+        run: bash db/scripts/deploy.sh all local
+
+      - name: db/tests assertions
+        run: |
+          for f in db/tests/example/*.sql; do
+            echo ">>> test $f"
+            psql -h localhost -p 5432 -U postgres -d app_local \
+              -v ON_ERROR_STOP=1 \
+              -f db/config/local.env.sql \
+              -f "$f"
+          done
+
+      - name: deploy.sh all local again (idempotency check)
+        run: bash db/scripts/deploy.sh all local
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: shellcheck (bash runners)
+        run: shellcheck --severity=warning db/scripts/*.sh db/tests/*.sh scripts/*.sh

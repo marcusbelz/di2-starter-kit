@@ -1,0 +1,46 @@
+name: DB - create
+
+# One-time bootstrap of a database environment (calls db/scripts/create.sh).
+# Manual dispatch only. Branch -> environment mapping is enforced natively via the
+# GitHub Environment deployment-branch rules (see .github/workflows/README.md).
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options: [dev, int, test, prod]
+
+jobs:
+  create:
+    name: Create DB on ${{ github.event.inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: create.sh via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          DB_ADMIN_PASSWORD_POSTGRES: ${{ secrets.DB_ADMIN_PASSWORD_POSTGRES }}
+          DB_OWNER_PASSWORD: ${{ secrets.DB_OWNER_PASSWORD }}
+          DB_FW_PASSWORD: ${{ secrets.DB_FW_PASSWORD }}
+          DB_SA_PASSWORD: ${{ secrets.DB_SA_PASSWORD }}
+        with:
+          host: ${{ secrets.DEPLOY_SSH_HOST }}
+          username: ${{ secrets.DEPLOY_SSH_USER }}
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          port: ${{ vars.SSH_PORT || 22 }}
+          envs: DB_ADMIN_PASSWORD_POSTGRES,DB_OWNER_PASSWORD,DB_FW_PASSWORD,DB_SA_PASSWORD
+          script: |
+            set -e
+            if [ -z "${{ vars.DEPLOY_PATH }}" ]; then
+              echo "ERROR: environment variable DEPLOY_PATH is not set for '${{ github.event.inputs.environment }}'."
+              exit 1
+            fi
+            cd "${{ vars.DEPLOY_PATH }}"
+            git fetch origin "${{ github.ref_name }}"
+            git reset --hard "origin/${{ github.ref_name }}"
+            bash db/scripts/create.sh "${{ github.event.inputs.environment }}"
