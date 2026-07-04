@@ -3,9 +3,9 @@
 Every `*.md` in this tree auto-loads into each Claude Code session. Rules are the project's
 standing conventions; skills (in `../skills/`) are the workflow steps that apply them. How the
 loading works (and what it means for pruning and rule edits):
-[KB-007](../../docs/kb/kb-007-how-rules-and-skills-are-loaded.md). How rules and skills relate to
+[KB-008](../../docs/kb/kb-008-how-rules-and-skills-are-loaded.md). How rules and skills relate to
 **agents** (`.claude/agents/`) and when subagents are dispatched:
-[KB-008](../../docs/kb/kb-008-skills-vs-agents-subagent-dispatch.md).
+[KB-009](../../docs/kb/kb-009-skills-vs-agents-subagent-dispatch.md).
 
 | Rule | Scope | Pruned by `/init` when… |
 |------|-------|-------------------------|

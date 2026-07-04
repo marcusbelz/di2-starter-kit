@@ -9,7 +9,7 @@ workflow also land here).
 | [`new-project.sh`](new-project.sh) | macOS / Linux / Git Bash | Same, for POSIX shells |
 
 Usage — full walkthrough incl. verification and troubleshooting:
-[KB-009](../docs/kb/kb-009-create-new-project-from-template.md) (short form: root
+[KB-001](../docs/kb/kb-001-create-new-project-from-template.md) (short form: root
 [README](../README.md) → "Getting started"). After copying, open the new project in Claude Code
 and run `/init`.
 

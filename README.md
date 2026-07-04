@@ -65,7 +65,7 @@ A Python service with no UI, for example, ends up without `/ux`, `/frontend`, th
 ## Getting started — use this template for a new project
 
 Two equivalent ways; the full walkthrough (what the scripts do, verification, troubleshooting) is
-[KB-009: Create a new project from the starter-kit template](docs/kb/kb-009-create-new-project-from-template.md).
+[KB-001: Create a new project from the starter-kit template](docs/kb/kb-001-create-new-project-from-template.md).
 
 - **GitHub "Use this template"** (recommended — the repo must be marked as a *template repository*):
   ```bash

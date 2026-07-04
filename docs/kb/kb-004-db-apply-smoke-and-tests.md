@@ -1,4 +1,4 @@
-# KB-006: Apply-smoke & database object tests (`db/tests/run.sh`)
+# KB-004: Apply-smoke & database object tests (`db/tests/run.sh`)
 
 > Runbook — verify every DDL change **end-to-end against an empty throwaway database** before it
 > is merged. This is the apply-smoke discipline from `.claude/rules/db-migrations.md`: a merged
@@ -44,5 +44,5 @@ then deploys a second time as an **idempotency check**.
 | Port/name conflict starting the container | A previous run's container survived a hard abort | `docker rm -f di2-kit-test-pg`, re-run |
 
 ## Related
-- [KB-002: Deploy schema objects](kb-002-db-deploy-schema-objects.md) — the deploy this smoke protects.
+- [KB-003: Deploy schema objects](kb-003-db-deploy-schema-objects.md) — the deploy this smoke protects.
 - Reference: [db/tests/README.md](../../db/tests/README.md).

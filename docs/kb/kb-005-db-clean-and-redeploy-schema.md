@@ -1,4 +1,4 @@
-# KB-003: Clean a schema and redeploy (`clean.sh`)
+# KB-005: Clean a schema and redeploy (`clean.sh`)
 
 > Runbook — drop **all objects** of a schema while keeping the schema itself, then rebuild via
 > `deploy.sh`. The middle ground between a routine deploy and a full drop.
@@ -29,14 +29,14 @@ functions, procedures, and sequences (`db/scripts/clean.schema.sql`) — all `IF
 re-run.
 
 Via GitHub Actions instead: the **DB - clean** workflow — it additionally requires typing the
-literal word `clean` as confirmation (see [KB-005](kb-005-github-actions-db-deployment-setup.md)).
+literal word `clean` as confirmation (see [KB-006](kb-006-github-actions-db-deployment-setup.md)).
 
 ## Verification
 ```sql
 SELECT count(*) FROM pg_tables WHERE schemaname = 'app';   -- 0 after clean, > 0 after redeploy
 ```
 After the redeploy, check the new `schema_apply_log` row as in
-[KB-002](kb-002-db-deploy-schema-objects.md).
+[KB-003](kb-003-db-deploy-schema-objects.md).
 
 ## Common failures
 
@@ -47,5 +47,5 @@ After the redeploy, check the new `schema_apply_log` row as in
 | Service account loses access after redeploy | The schema was dropped/recreated manually instead of via `clean.sh` (default privileges lost) | Re-run the RW grant block from `db/database/05.create.role.rw.sql`, or bootstrap the env cleanly |
 
 ## Related
-- [KB-004: Drop an environment](kb-004-db-drop-environment.md) — when even the schema/roles must go.
+- [KB-007: Drop an environment](kb-007-db-drop-environment.md) — when even the schema/roles must go.
 - Reference: [db/scripts/README.md](../../db/scripts/README.md).

@@ -3,9 +3,9 @@
 Each subdirectory is one skill (`SKILL.md` + optional templates), invoked as `/name` in Claude
 Code. The numbered workflow is the spine of the kit; cross-cutting skills run anytime.
 How skills are loaded (on-demand, vs. the always-on rules):
-[KB-007](../../docs/kb/kb-007-how-rules-and-skills-are-loaded.md). How skills relate to
+[KB-008](../../docs/kb/kb-008-how-rules-and-skills-are-loaded.md). How skills relate to
 **agents** (`.claude/agents/`) and when subagents are dispatched:
-[KB-008](../../docs/kb/kb-008-skills-vs-agents-subagent-dispatch.md).
+[KB-009](../../docs/kb/kb-009-skills-vs-agents-subagent-dispatch.md).
 
 ## Numbered workflow
 | Step | Skill | Purpose |

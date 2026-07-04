@@ -1,4 +1,4 @@
-# KB-009: Create a new project from the starter-kit template
+# KB-001: Create a new project from the starter-kit template
 
 > How to turn the DI² Starter Kit into a fresh project repository — either via GitHub's
 > *template repository* feature or via the local copy scripts — and what to do immediately
@@ -87,7 +87,7 @@ detectable "uninitialized" state (`{{PLACEHOLDER}}` values in `stack.md`, placeh
 `docs/PRD.md`) and the rules refuse feature work.
 
 If the project keeps a database and CI, the GitHub Actions side needs its own one-time
-provisioning — see [KB-005](kb-005-github-actions-db-deployment-setup.md).
+provisioning — see [KB-006](kb-006-github-actions-db-deployment-setup.md).
 
 ## Verification
 

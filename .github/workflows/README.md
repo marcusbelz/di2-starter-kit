@@ -29,7 +29,7 @@ the same.
 ## GitHub Environments: secrets, variables, branch rules
 
 > Step-by-step provisioning runbook (incl. verification and common failures):
-> [KB-005](../../docs/kb/kb-005-github-actions-db-deployment-setup.md).
+> [KB-006](../../docs/kb/kb-006-github-actions-db-deployment-setup.md).
 
 Create one **GitHub Environment** per stage (`dev`, `int`, `test`, `prod` — match your
 `env_stages` in `.claude/rules/stack.md`) and configure per environment:

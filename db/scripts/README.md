@@ -11,11 +11,11 @@ Reproducible setup / deploy / teardown. The **directory structure + file numberi
 `db/schemas/` is the source of truth** — there is no central `deploy.sql`.
 
 > Step-by-step runbooks (incl. verification and common failures) live in the knowledge base:
-> [KB-001 bootstrap](../../docs/kb/kb-001-db-bootstrap-new-environment.md) ·
-> [KB-002 deploy](../../docs/kb/kb-002-db-deploy-schema-objects.md) ·
-> [KB-003 clean](../../docs/kb/kb-003-db-clean-and-redeploy-schema.md) ·
-> [KB-004 drop](../../docs/kb/kb-004-db-drop-environment.md) ·
-> [KB-006 apply-smoke/tests](../../docs/kb/kb-006-db-apply-smoke-and-tests.md).
+> [KB-002 bootstrap](../../docs/kb/kb-002-db-bootstrap-new-environment.md) ·
+> [KB-003 deploy](../../docs/kb/kb-003-db-deploy-schema-objects.md) ·
+> [KB-005 clean](../../docs/kb/kb-005-db-clean-and-redeploy-schema.md) ·
+> [KB-007 drop](../../docs/kb/kb-007-db-drop-environment.md) ·
+> [KB-004 apply-smoke/tests](../../docs/kb/kb-004-db-apply-smoke-and-tests.md).
 
 ## Scripts
 | Script | Purpose | Connects as |

@@ -9,7 +9,7 @@
 |---|---|---|---|
 | **`docs/`** (top level) | Project-wide docs — PRD, security audit, update check. | Single file per topic. | `PRD.md`, `security-audit.md`, `update-check.md` |
 | **`docs/bugs/`** | Bug tracking — one file per bug + index + quarterly archive. | One-per-bug; closed bugs `git mv`'d to `archive/<quarter>/`. | `INDEX.md`, `bug-NNNN-…md`, `archive/2026-Q2/…` |
-| **`docs/kb/`** | **Knowledge base** — troubleshooting articles and recovery/rotation runbooks. Pattern: Symptom → Cause → Diagnosis → Fix. | Append-only (KB number grows monotonically). | `kb-001-…md` … `kb-NNN-…md` + `README.md` (index) |
+| **`docs/kb/`** | **Knowledge base** — troubleshooting articles and recovery/rotation runbooks. Pattern: Symptom → Cause → Diagnosis → Fix. | Ordered by lifecycle step; may be renumbered atomically to keep the sequence right. | `kb-001-…md` … `kb-NNN-…md` + `README.md` (index) |
 | **`docs/setup/`** | **Setup guides** — one-time configuration/setup walkthroughs (local dev, server/deploy, CI, service accounts). | Grows; survives refactors. | `setup-001-…md` … `setup-NNN-…md` + `README.md` (index) |
 | **`docs/production/`** | Generic production hardening guides. | Single file per topic. | `error-tracking.md`, `rate-limiting.md` |
 
@@ -17,13 +17,16 @@ Feature specs stay in **`features/`** at the repo root — they are the workflow
 (every skill reads `features/INDEX.md` at start), not documentation output.
 
 ## Naming convention
-- **KB articles:** `kb-XXX-<kebab-slug>.md` — `XXX` is a 3-digit zero-padded running number; the slug
-  describes the symptom compactly.
+- **KB articles:** `kb-XXX-<kebab-slug>.md` — `XXX` is a 3-digit zero-padded number reflecting the
+  onboarding / project-lifecycle order (like setup guides), not authoring order; the slug describes
+  the symptom compactly.
 - **Setup guides:** `setup-XXX-<kebab-slug>.md` — `XXX` reflects the typical order a new contributor
   follows (local → server → CI → …), not alphabetical.
 - Directories and files lowercase, kebab-case. No `KB/`, no camelCase, no snake_case.
-- **Numbers are never reassigned.** If `kb-005` becomes obsolete, adapt it or leave a stub — never
-  renumber `kb-006`, `kb-007`, … (it breaks cross-refs and Git history).
+- **Numbers encode lifecycle order, not history.** When a new article belongs mid-sequence, renumber
+  the following articles so the order stays right. Piecemeal renumbering breaks cross-refs and Git
+  history, so always do it as **one atomic change**: `git mv` every affected file and update **all**
+  `kb-00X` / `KB-00X` references across the repo in the same commit, then verify no link dangles.
 
 ## When what goes where
 | Situation | Directory | Example |
