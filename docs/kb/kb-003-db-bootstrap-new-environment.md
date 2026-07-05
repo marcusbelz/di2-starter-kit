@@ -100,6 +100,8 @@ bash and `psql`:
   `/c/sandbox/…`; `cd` there and run the `bash db/scripts/….sh` commands as on Linux.
 - **From PowerShell**, call Git's bash explicitly (a bare `bash` may resolve to WSL, whose
   filesystem/tooling is separate): `& "$env:ProgramFiles\Git\bin\bash.exe" db/scripts/create.sh local`.
+  The leading `&` (call operator) is **required** — without it PowerShell treats the quoted path
+  as a plain string and fails with `Unexpected token 'db/scripts/…'`.
 - **`psql` must be installed on the host** (it is not part of Docker). If you don't want to
   install it, run the script inside a disposable `postgres:17` container instead — this is the
   one case where the repo **is** mounted, and the container shares the DB container's network so
