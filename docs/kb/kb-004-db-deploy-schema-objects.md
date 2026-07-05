@@ -15,7 +15,7 @@
 ## Procedure
 
 All commands run from the **repo root**; the scripts are bash — on Windows see
-[KB-003 → Running the scripts on Windows](kb-003-db-bootstrap-new-environment.md#running-the-scripts-on-windows).
+[Running the scripts on Windows](#running-the-scripts-on-windows) below.
 
 ### Local
 
@@ -61,6 +61,42 @@ Environment secret.
   privileges — no separate grant step.
 - After a successful run it records one row in `app.schema_apply_log` (version from
   `APP_VERSION_*` in `<env>.env`, git SHA, environment, note).
+
+## Running the scripts on Windows
+
+Same ground rules as in
+[KB-003](kb-003-db-bootstrap-new-environment.md#running-the-scripts-on-windows): the runner is a
+bash script executing **on the host** against `localhost:5432` — Git Bash sees the repo directly
+(no Docker mount), and from PowerShell you call Git's bundled bash with the leading `&`
+(call operator, required):
+
+```powershell
+# Windows / PowerShell
+& "$env:ProgramFiles\Git\bin\bash.exe" db/scripts/deploy.sh all local
+```
+
+**No `psql` on the host?** Run the deploy inside a disposable `postgres:17` container instead —
+the one case where the repo **is** mounted, sharing the DB container's network so
+`localhost:5432` still resolves:
+
+```powershell
+# Windows / PowerShell
+docker run --rm -it -v "${PWD}:/repo" -w /repo --network container:app-local-pg postgres:17 `
+  bash db/scripts/deploy.sh all local
+```
+
+```bash
+# macOS / Linux / Git Bash
+docker run --rm -it -v "$PWD:/repo" -w /repo --network container:app-local-pg postgres:17 \
+  bash db/scripts/deploy.sh all local
+```
+
+- `deploy.sh` prompts for nothing on `local` (`DB_FW_PASSWORD` → `pw`); for non-local envs add
+  `-e DB_FW_PASSWORD='…'`.
+- The `postgres:17` image has no `git`, so the run ends with
+  `Warning: GIT_SHA empty — schema_apply_log row not written` — the deploy itself is complete;
+  only the informational apply-log row is skipped. Run from a host shell with `git` + `psql` when
+  that row matters.
 
 ## Verification
 ```sql
