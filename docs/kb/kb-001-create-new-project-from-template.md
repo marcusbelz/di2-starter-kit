@@ -64,8 +64,8 @@ Both scripts do the same four things:
    aborts rather than overwrite anything.
 2. **Copy the template** excluding `.git` and dependency/build directories (`node_modules`,
    `.venv`, `dist`, `build`, `.next`).
-3. **Initialize a fresh repo:** `git init` + `git add -A` + initial commit
-   `chore: initialize from di2-starter-kit`.
+3. **Initialize a fresh repo** on branch `main`: `git init -b main` + `git add -A` + initial
+   commit `chore: initialize from di2-starter-kit`.
 4. **Remind you** to open the new project in Claude Code and run `/init`.
 
 The new repo has no remote. If the project should live on GitHub, create the remote afterwards

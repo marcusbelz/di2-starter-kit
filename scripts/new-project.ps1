@@ -35,7 +35,8 @@ if ($LASTEXITCODE -ge 8) { throw "robocopy failed (exit $LASTEXITCODE)." }
 
 Push-Location $Target
 try {
-  git init -q
+  # -b main: deterministic initial branch regardless of the user's init.defaultBranch (git >= 2.28)
+  git init -q -b main
   git add -A
   git commit -q -m "chore: initialize from di2-starter-kit"
   Write-Host ""
