@@ -40,6 +40,27 @@ What it does:
 CI runs the same assertions in `ci.yml` after a real `create.sh local` + `deploy.sh all local`,
 then deploys a second time as an **idempotency check**.
 
+## Running the scripts on Windows
+
+Same ground rules as in
+[KB-003](kb-003-db-bootstrap-new-environment.md#running-the-scripts-on-windows): the runner is a
+bash script — Git Bash sees the repo directly (no Docker mount), and from PowerShell you call
+Git's bundled bash with the leading `&` (call operator, required):
+
+```powershell
+# Windows / PowerShell
+& "$env:ProgramFiles\Git\bin\bash.exe" db/tests/run.sh
+```
+
+Differences from the bootstrap/deploy runners ([KB-003](kb-003-db-bootstrap-new-environment.md),
+[KB-004](kb-004-db-deploy-schema-objects.md)):
+
+- **No `psql` needed on the host** — every psql call runs *inside* the throwaway container
+  (`docker exec`), so there is no containerized-psql fallback to reach for.
+- **No mount, no `-it`, no passwords** — the runner streams the SQL files into the container over
+  stdin and prompts for nothing; it also brings (and removes) its own container, independent of
+  `app-local-pg` from [KB-002](kb-002-local-postgres-docker-container.md).
+
 ## Adding a test for a new object
 - File name reuses the object's 3-digit number: `db/tests/example/NNN.<object>.sql`.
 - Cover: the happy path, at least one guard (expected `RAISE`, asserted via
