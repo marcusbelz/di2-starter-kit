@@ -182,6 +182,38 @@ Every DDL file under `db/schemas/<schema>/<objecttype>/` carries a **3-digit num
 - **Numbers are assigned in the order tables enter the schema.** Once assigned, never reassigned — even if a table becomes obsolete.
 - **Disambiguation happens via the object-name suffix**, not via the number. `003.sp_ins_project.sql` and `003.sp_upd_project.sql` deliberately have the same prefix.
 
+### Claim protocol (`NUMBERS.md` registry)
+
+Every schema directory carries a registry `db/schemas/<schema>/NUMBERS.md` (one markdown table:
+Number | Table | Ref | Claimed on). It makes number assignment visible at **development start**, so
+two developers on parallel branches cannot silently claim the same next number. The claim happens
+the moment a feature/bug that introduces a new table moves to in-progress — **before any DDL file
+is created**:
+
+1. Update to the current default-branch state (`git pull`).
+2. Read `db/schemas/<schema>/NUMBERS.md`, take the highest number + 1.
+3. Add the registry row (number, table name, feature/bug ref, date).
+4. Commit **only this change**: `chore(db): claim table number NNN for <table>`.
+5. Push **directly to the default branch** — the claim must be visible to all developers
+   immediately; on a feature branch it would surface only at merge time, too late.
+6. If the push is rejected (non-fast-forward — someone else claimed concurrently): pull, take the
+   next number, amend, push again. **`git push` acts as the atomic lock**; the race resolves itself
+   without extra infrastructure.
+
+Notes:
+
+- Numbers are **never reassigned** — an abandoned feature leaves a burned number in the registry
+  (matches the "once assigned, never reassigned" rule above).
+- Requires that direct registry-only commits to the default branch are allowed. If the project
+  enables strict branch protection later, switch the claim channel (e.g. annotated git tags
+  `dbnum/<schema>/NNN`) — record that as a follow-up decision then.
+- Exception: `predeploy`/`postdeploy` transition scripts use timestamp prefixes
+  (`YYYYMMDDHHMM.<name>.sql`, see `.claude/rules/db-migrations.md`), **no** table-group numbers,
+  and therefore no registry entry.
+- CI backstop: `db/scripts/lint-numbers.sh` (wired into `.github/workflows/ci.yml`) fails the build
+  on duplicate prefixes in `tables/`, prefixes missing from the registry, or duplicate registry
+  numbers.
+
 ### Cross-table objects (procedure / function touching multiple tables)
 
 Choose the prefix by this heuristic (in this order):

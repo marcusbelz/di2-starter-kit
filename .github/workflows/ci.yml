@@ -79,3 +79,6 @@ jobs:
 
       - name: shellcheck (bash runners)
         run: shellcheck --severity=warning db/scripts/*.sh db/tests/*.sh scripts/*.sh
+
+      - name: table-group number lint (NUMBERS.md registry)
+        run: bash db/scripts/lint-numbers.sh
