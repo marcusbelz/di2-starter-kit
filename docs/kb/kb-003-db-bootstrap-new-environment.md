@@ -109,15 +109,20 @@ bash and `psql`:
 
   ```powershell
   # Windows / PowerShell
-  docker run --rm -v "${PWD}:/repo" -w /repo --network container:app-local-pg postgres:17 `
+  docker run --rm -it -v "${PWD}:/repo" -w /repo --network container:app-local-pg postgres:17 `
     bash db/scripts/create.sh local
   ```
 
   ```bash
   # macOS / Linux / Git Bash
-  docker run --rm -v "$PWD:/repo" -w /repo --network container:app-local-pg postgres:17 \
+  docker run --rm -it -v "$PWD:/repo" -w /repo --network container:app-local-pg postgres:17 \
     bash db/scripts/create.sh local
   ```
+
+  `-it` attaches your terminal — required for scripts that prompt (the superuser password in
+  `create.sh` / `drop.sh`): without it the prompt reads EOF and the script **exits silently with
+  no output at all**. Alternative for non-interactive runs: pass the password instead,
+  `-e DB_ADMIN_PASSWORD_POSTGRES=pw`.
 
   (Caveat for `deploy.sh` in this mode: the `postgres:17` image has no `git`, so the informational
   `schema_apply_log` row is skipped with a warning — the deploy itself is unaffected.)

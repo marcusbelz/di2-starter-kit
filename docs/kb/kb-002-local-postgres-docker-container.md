@@ -126,7 +126,8 @@ the server starts empty: run the bootstrap again.
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `Bind for 0.0.0.0:5432 failed: port is already allocated` | Another PostgreSQL (native install or container) already listens on 5432 | Stop the other server, or map a different host port (`-p 5433:5432`) and set `DB_PORT=5433` in `db/config/local.env` |
+| `Bind for 0.0.0.0:5432 failed: port is already allocated` | Another PostgreSQL (native install or container) listens on 5432 — or, right after a `docker rm -f`, the removed container's port proxy is still being torn down | Stop the other server (or map a different host port, `-p 5433:5432`, and set `DB_PORT=5433` in `db/config/local.env`); after a `rm -f` race just wait a moment and `docker start app-local-pg` |
+| `docker run` prints a container id but then errors; the container sits in status `Created` | `docker run` = create **then** start — the create succeeded, the start failed (typically the port bind above). The named container exists but never ran | Fix the start error, then `docker start app-local-pg` — no need to re-create; check with `docker ps -a --filter name=app-local-pg` |
 | `The container name "/app-local-pg" is already in use` | The container already exists (maybe stopped) | `docker start app-local-pg` — or `docker rm -f app-local-pg` and re-create |
 | Changed `POSTGRES_PASSWORD` in the run command has no effect | The variable only applies when an **empty** data volume is initialized; an existing cluster keeps its old password | Either wipe the volume (teardown above) or change it in place: `docker exec -it app-local-pg psql -U postgres -c "ALTER ROLE postgres PASSWORD 'new';"` |
 | `connection refused` / `pg_isready` not ready right after create | initdb is still running in the fresh container | Wait a few seconds and re-run `pg_isready`; check `docker logs` if it never turns ready |
