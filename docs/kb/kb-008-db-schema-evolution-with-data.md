@@ -6,6 +6,13 @@
 > data-dependent, a **run-once transition script**. Model reference:
 > `.claude/rules/db-migrations.md`.
 
+## Table of Contents
+- [When to use](#when-to-use)
+- [Procedure](#procedure)
+- [Verification](#verification)
+- [Common failures](#common-failures)
+- [Related](#related)
+
 ## When to use
 - Any DDL change (new column, new table, constraint change) targeting an environment that holds
   data to protect.

@@ -4,6 +4,13 @@
 > Read this to understand why rules and skills are separate directories, why `/init` pruning
 > matters, and why a rule edit does not take effect mid-session.
 
+## Table of Contents
+- [The two mechanisms](#the-two-mechanisms)
+- [Why skills still mention specific rule files](#why-skills-still-mention-specific-rule-files)
+- [Practical consequences](#practical-consequences)
+- [Common misconceptions](#common-misconceptions)
+- [Related](#related)
+
 ## The two mechanisms
 
 | | Rules (`.claude/rules/**/*.md`) | Skills (`.claude/skills/<name>/SKILL.md`) |

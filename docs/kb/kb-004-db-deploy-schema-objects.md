@@ -3,6 +3,16 @@
 > Runbook — the **repeatable, idempotent** rollout of all schema objects. This is the normal
 > deploy you run after every merged DDL change; re-running it on an unchanged state is a no-op.
 
+## Table of Contents
+- [When to use](#when-to-use)
+- [Prerequisites](#prerequisites)
+- [Procedure](#procedure)
+- [Expected output & reading the log](#expected-output--reading-the-log)
+- [Running the scripts on Windows](#running-the-scripts-on-windows)
+- [Verification](#verification)
+- [Common failures](#common-failures)
+- [Related](#related)
+
 ## When to use
 - After bootstrap ([KB-003](kb-003-db-bootstrap-new-environment.md)) to load the objects the
   first time.

@@ -3,6 +3,16 @@
 > Runbook — the **one-time** setup of a database environment: database, extensions, schema(s),
 > roles, and users. Run once per environment (and again only after a full teardown).
 
+## Table of Contents
+- [When to use](#when-to-use)
+- [Prerequisites](#prerequisites)
+- [Passwords: what and where](#passwords-what-and-where)
+- [Procedure](#procedure)
+- [Running the scripts on Windows](#running-the-scripts-on-windows)
+- [Verification](#verification)
+- [Common failures](#common-failures)
+- [Related](#related)
+
 ## When to use
 - First-time setup of `local`, `dev`, `int`, `test`, or `prod`.
 - Full reset while pre-launch (always as `drop` → `create`, never `create` on top).

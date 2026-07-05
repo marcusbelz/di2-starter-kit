@@ -3,6 +3,15 @@
 > Runbook — drop **all objects** of a schema while keeping the schema itself, then rebuild via
 > `deploy.sh`. The middle ground between a routine deploy and a full drop.
 
+## Table of Contents
+- [When to use](#when-to-use)
+- [Why the schema itself stays](#why-the-schema-itself-stays)
+- [Prerequisites](#prerequisites)
+- [Procedure](#procedure)
+- [Verification](#verification)
+- [Common failures](#common-failures)
+- [Related](#related)
+
 ## When to use
 - A schema's object state is broken/diverged and you want a guaranteed clean rebuild **without**
   touching the database, roles, or other schemas.

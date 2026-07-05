@@ -5,6 +5,16 @@
 > DDL change that does not run on an empty DB is broken by definition — and typically surfaces on
 > the **next** environment, not the one where it was written.
 
+## Table of Contents
+- [When to use](#when-to-use)
+- [Prerequisites](#prerequisites)
+- [Procedure](#procedure)
+- [Expected output & reading the log](#expected-output--reading-the-log)
+- [Running the scripts on Windows](#running-the-scripts-on-windows)
+- [Adding a test for a new object](#adding-a-test-for-a-new-object)
+- [Common failures](#common-failures)
+- [Related](#related)
+
 ## When to use
 - Before merging any change under `db/` (mandatory per the migration rule).
 - After porting/renaming schema objects, to prove the load order still resolves.

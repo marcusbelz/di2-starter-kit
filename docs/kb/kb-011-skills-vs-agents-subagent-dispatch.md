@@ -5,6 +5,15 @@
 > citizen — **agents** (`.claude/agents/*.md`) — and the part that is invisible in daily use:
 > **who decides that a subagent is launched, and which one**.
 
+## Table of Contents
+- [Skills vs. agents in one table](#skills-vs-agents-in-one-table)
+- [The anatomy of an agent file — and what is actually loaded](#the-anatomy-of-an-agent-file--and-what-is-actually-loaded)
+- [The built-in (generic) agents](#the-built-in-generic-agents)
+- [Who decides — the three trigger paths](#who-decides--the-three-trigger-paths)
+- [Steering dispatch deliberately](#steering-dispatch-deliberately)
+- [Common misconceptions](#common-misconceptions)
+- [Related](#related)
+
 ## Skills vs. agents in one table
 
 Both are markdown files, but they are executed in completely different ways:

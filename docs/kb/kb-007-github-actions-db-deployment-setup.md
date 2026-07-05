@@ -3,6 +3,13 @@
 > Runbook — everything needed **once per repository** so the shipped workflows (`ci.yml`,
 > `db-create/deploy/clean/drop.yml`) actually run: environments, secrets, variables, branch rules.
 
+## Table of Contents
+- [What ships](#what-ships)
+- [Procedure](#procedure)
+- [Verification](#verification)
+- [Common failures](#common-failures)
+- [Related](#related)
+
 ## What ships
 | Workflow | Trigger | Runs |
 |----------|---------|------|

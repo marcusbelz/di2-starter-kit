@@ -3,6 +3,14 @@
 > Runbook — the **full teardown**: terminates connections, drops the database and all four roles.
 > Destructive and final; the only way back is a fresh bootstrap (plus a restore, if you have one).
 
+## Table of Contents
+- [When to use](#when-to-use)
+- [Prerequisites](#prerequisites)
+- [Procedure](#procedure)
+- [Verification](#verification)
+- [Common failures](#common-failures)
+- [Related](#related)
+
 ## When to use
 - Before re-running a bootstrap (the create path is drop-and-recreate, see
   [KB-003](kb-003-db-bootstrap-new-environment.md)).
