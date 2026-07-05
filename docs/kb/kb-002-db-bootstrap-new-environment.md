@@ -8,11 +8,46 @@
 - Full reset while pre-launch (always as `drop` → `create`, never `create` on top).
 
 ## Prerequisites
+- A **running PostgreSQL server** the env's coordinates point to — for `local` typically a Docker
+  container, see [Providing the server (local env)](#providing-the-server-local-env) below;
+  non-local envs run their own server (see `.claude/rules/deploy-infra.md`).
 - A `db/config/<env>.env` + `<env>.env.sql` pair exists (copy from `example.*`; the committed
   `local.*` pair works out of the box).
 - `psql` available; network access to the PostgreSQL server.
 - Passwords for non-local envs — see [Passwords: what and where](#passwords-what-and-where).
   `local` falls back to the throwaway password `pw`.
+
+## Providing the server (local env)
+
+`create.sh` creates the database *inside* an existing server — it does not start one. For the
+committed `local` env (`localhost:5432`, superuser `postgres`, see `db/config/local.env`), a
+Docker container matches out of the box:
+
+```powershell
+# Windows / PowerShell
+docker run -d --name app-local-pg `
+  -p 5432:5432 `
+  -e POSTGRES_PASSWORD=pw `
+  -v app_local_pgdata:/var/lib/postgresql/data `
+  postgres:17
+```
+
+```bash
+# macOS / Linux / Git Bash
+docker run -d --name app-local-pg \
+  -p 5432:5432 \
+  -e POSTGRES_PASSWORD=pw \
+  -v app_local_pgdata:/var/lib/postgresql/data \
+  postgres:17
+```
+
+- `POSTGRES_PASSWORD` is the superuser password `create.sh` asks for
+  (`DB_ADMIN_PASSWORD_POSTGRES`; it prompts if unset) — `pw` is fine for a local throwaway.
+- The named volume keeps the data across container restarts/recreates; drop the `-v` flag if the
+  instance is truly disposable.
+- Wait until `docker exec app-local-pg pg_isready -U postgres` reports ready before running
+  `create.sh`. (The object tests spin up their own throwaway container the same way — see
+  [KB-004](kb-004-db-apply-smoke-and-tests.md); this one is your persistent local dev server.)
 
 ## Passwords: what and where
 
@@ -72,7 +107,7 @@ psql -h <host> -U <db>_sa -d <db> -c "SELECT 1;"    # service account can connec
 | `Error: database or roles for env '<env>' already exist` (exit 3 hint) | Bootstrap is **drop-and-recreate**; roles are cluster-global and survive `DROP DATABASE` | `bash db/scripts/drop.sh <env>` first, then re-run `create.sh` — see [KB-008](kb-008-db-drop-environment.md) |
 | `Error: DB_OWNER_PASSWORD must be set for env '<env>'` | Non-local env without password env vars | Export the four `DB_*_PASSWORD` variables (locally) or configure them as GitHub Environment secrets (CI) — see [Passwords: what and where](#passwords-what-and-where) |
 | `psql: command not found` | No PostgreSQL client on the machine | Install `postgresql-client`, or run the script inside a `postgres:17` container with the repo mounted |
-| Connection refused / timeout in preflight | Wrong `DB_HOST`/`DB_PORT` in `<env>.env`, or the server is not reachable | Verify the `.env` coordinates and firewall/tunnel |
+| Connection refused / timeout in preflight | Wrong `DB_HOST`/`DB_PORT` in `<env>.env`, or the server is not running/reachable | Local: start the container ([Providing the server](#providing-the-server-local-env)); otherwise verify the `.env` coordinates and firewall/tunnel |
 
 ## Related
 - [KB-003: Deploy schema objects](kb-003-db-deploy-schema-objects.md) — the next step after bootstrap.
