@@ -11,6 +11,7 @@
 - [Everyday commands](#everyday-commands)
 - [The data volume](#the-data-volume)
 - [Teardown](#teardown)
+- [Diagnosis: who holds port 5432?](#diagnosis-who-holds-port-5432)
 - [Symptom → Cause → Fix](#symptom--cause--fix)
 - [Related](#related)
 
@@ -122,11 +123,40 @@ the existing volume up again — databases, roles, and passwords are all still t
 [KB-003](kb-003-db-bootstrap-new-environment.md) re-run needed). After removing the volume too,
 the server starts empty: run the bootstrap again.
 
+## Diagnosis: who holds port 5432?
+
+5432 is PostgreSQL's default port, so on a developer machine it is often taken **more than once**:
+another project's long-running DB container, a natively installed PostgreSQL (service or
+manually started), or — right after a `docker rm -f` — the removed container's port proxy that is
+still being torn down. Find the holder before fighting the symptom:
+
+```powershell
+# Windows / PowerShell
+docker ps -a --filter publish=5432                     # containers publishing 5432
+Get-NetTCPConnection -LocalPort 5432 -State Listen |
+  Select-Object LocalAddress, OwningProcess            # host listeners incl. native processes
+Get-Process -Id <pid>                                  # name the owning process
+```
+
+```bash
+# macOS / Linux
+docker ps -a --filter publish=5432
+sudo lsof -iTCP:5432 -sTCP:LISTEN                      # host listeners incl. native processes
+```
+
+**Dual-stack pitfall:** `localhost` resolves to both `127.0.0.1` (IPv4) and `::1` (IPv6). If a
+native PostgreSQL holds only `0.0.0.0:5432` (IPv4), Docker may still bind `[::]:5432` (IPv6) —
+then **two different servers answer on "localhost:5432"** depending on which stack the client
+picks. The symptom is maddening: connections "work" but land on the wrong server, e.g.
+`FATAL: role "app_local_fw" does not exist` right after a successful bootstrap. If the listener
+list shows 5432 split across different owning processes per address, free the port properly (stop
+the other server) or move this container to a different host port.
+
 ## Symptom → Cause → Fix
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `Bind for 0.0.0.0:5432 failed: port is already allocated` | Another PostgreSQL (native install or container) listens on 5432 — or, right after a `docker rm -f`, the removed container's port proxy is still being torn down | Stop the other server (or map a different host port, `-p 5433:5432`, and set `DB_PORT=5433` in `db/config/local.env`); after a `rm -f` race just wait a moment and `docker start app-local-pg` |
+| `Bind for 0.0.0.0:5432 failed: port is already allocated` | Another PostgreSQL (native install or container) listens on 5432 — or, right after a `docker rm -f`, the removed container's port proxy is still being torn down | Identify the holder ([Diagnosis](#diagnosis-who-holds-port-5432)), then stop the other server or map a different host port (`-p 5433:5432` + `DB_PORT=5433` in `db/config/local.env`); after a `rm -f` race just wait a moment and `docker start app-local-pg` |
 | `docker run` prints a container id but then errors; the container sits in status `Created` | `docker run` = create **then** start — the create succeeded, the start failed (typically the port bind above). The named container exists but never ran | Fix the start error, then `docker start app-local-pg` — no need to re-create; check with `docker ps -a --filter name=app-local-pg` |
 | `The container name "/app-local-pg" is already in use` | The container already exists (maybe stopped) | `docker start app-local-pg` — or `docker rm -f app-local-pg` and re-create |
 | Changed `POSTGRES_PASSWORD` in the run command has no effect | The variable only applies when an **empty** data volume is initialized; an existing cluster keeps its old password | Either wipe the volume (teardown above) or change it in place: `docker exec -it app-local-pg psql -U postgres -c "ALTER ROLE postgres PASSWORD 'new';"` |
