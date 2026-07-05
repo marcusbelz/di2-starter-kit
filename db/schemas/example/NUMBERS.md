@@ -17,3 +17,4 @@
 | 001 | example | — (pre-registry) | 2026-07-04 |
 | 002 | example_item | — (pre-registry) | 2026-07-04 |
 | 003 | schema_apply_log | — (pre-registry) | 2026-07-04 |
+| 004 | schema_change_log | — (kit scaffold) | 2026-07-04 |
