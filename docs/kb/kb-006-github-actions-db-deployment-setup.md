@@ -65,4 +65,4 @@ also enable *Required reviewers* (human approval before the job starts).
 - Reference: [.github/workflows/README.md](../../.github/workflows/README.md).
 - The runbooks per operation: [KB-002](kb-002-db-bootstrap-new-environment.md) ·
   [KB-003](kb-003-db-deploy-schema-objects.md) · [KB-005](kb-005-db-clean-and-redeploy-schema.md) ·
-  [KB-007](kb-007-db-drop-environment.md).
+  [KB-008](kb-008-db-drop-environment.md).

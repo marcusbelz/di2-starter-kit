@@ -38,12 +38,12 @@ psql -h <host> -U <db>_sa -d <db> -c "SELECT 1;"    # service account can connec
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| `Error: database or roles for env '<env>' already exist` (exit 3 hint) | Bootstrap is **drop-and-recreate**; roles are cluster-global and survive `DROP DATABASE` | `bash db/scripts/drop.sh <env>` first, then re-run `create.sh` — see [KB-007](kb-007-db-drop-environment.md) |
+| `Error: database or roles for env '<env>' already exist` (exit 3 hint) | Bootstrap is **drop-and-recreate**; roles are cluster-global and survive `DROP DATABASE` | `bash db/scripts/drop.sh <env>` first, then re-run `create.sh` — see [KB-008](kb-008-db-drop-environment.md) |
 | `Error: DB_OWNER_PASSWORD must be set for env '<env>'` | Non-local env without password env vars | Export the four `DB_*_PASSWORD` variables (locally) or configure them as GitHub Environment secrets (CI) |
 | `psql: command not found` | No PostgreSQL client on the machine | Install `postgresql-client`, or run the script inside a `postgres:17` container with the repo mounted |
 | Connection refused / timeout in preflight | Wrong `DB_HOST`/`DB_PORT` in `<env>.env`, or the server is not reachable | Verify the `.env` coordinates and firewall/tunnel |
 
 ## Related
 - [KB-003: Deploy schema objects](kb-003-db-deploy-schema-objects.md) — the next step after bootstrap.
-- [KB-007: Drop an environment](kb-007-db-drop-environment.md) — the inverse operation.
+- [KB-008: Drop an environment](kb-008-db-drop-environment.md) — the inverse operation.
 - Reference: [db/database/README.md](../../db/database/README.md), [db/scripts/README.md](../../db/scripts/README.md).

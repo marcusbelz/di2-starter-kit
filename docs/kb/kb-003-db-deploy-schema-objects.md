@@ -18,8 +18,12 @@ bash db/scripts/deploy.sh all <env>           # all schema directories, dependen
 bash db/scripts/deploy.sh example <env>       # or a single directory under db/schemas/
 ```
 - There is **no central deploy.sql** — the runner walks `db/schemas/<dir>/` in section order
-  `tables → policies → functions → procedures → trigger → views → data`, within a section by the
-  3-digit prefix.
+  `predeploy → tables → policies → functions → procedures → trigger → views → data → postdeploy`,
+  within the object sections by the 3-digit prefix, in `predeploy`/`postdeploy` by the
+  `YYYYMMDDHHMM` timestamp prefix.
+- `predeploy`/`postdeploy` transition scripts run **once per database**: applied files (tracked by
+  filename + checksum in `app.schema_change_log`) are skipped on every later deploy; an applied
+  file that was edited afterwards **aborts** the deploy (immutability guard).
 - It connects as the **schema owner**, so new objects are auto-granted to the RW role via default
   privileges — no separate grant step.
 - After a successful run it records one row in `app.schema_apply_log` (version from
@@ -45,6 +49,7 @@ Drift check: compare the newest `git_sha` here with the SHA your application bui
 | `relation/schema "…" does not exist` on first deploy | Environment was never bootstrapped | Run [KB-002](kb-002-db-bootstrap-new-environment.md) first |
 | A single object file fails mid-run | The failing script violates a convention or references an object with a higher load order | Fix the file, re-run — the runner is idempotent, already-applied objects are skipped/replaced harmlessly |
 | `schema_apply_log row not written` warning | No git checkout (SHA unresolvable) | Deploy from a git checkout; the warning is non-fatal but the history row is skipped |
+| `… was applied with checksum … but now hashes to …` abort | An already-applied `predeploy`/`postdeploy` file was edited | Applied change files are immutable — revert the edit and put the correction into a **new** timestamped transition file |
 
 ## Related
 - [KB-004: Apply-smoke & object tests](kb-004-db-apply-smoke-and-tests.md) — run this before merging DDL.

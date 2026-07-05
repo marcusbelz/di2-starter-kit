@@ -4,7 +4,7 @@
 > [`../sql/`](../sql/): one implemented reference flavor, other stacks get sibling directories,
 > `/init` keeps exactly one. Every rule file inside auto-loads each session.
 > Pruned entirely at `/init` time when `ui == none`. How the auto-loading works and why pruning
-> matters: [KB-008](../../../docs/kb/kb-008-how-rules-and-skills-are-loaded.md).
+> matters: [KB-009](../../../docs/kb/kb-009-how-rules-and-skills-are-loaded.md).
 
 ## Contents of this directory
 

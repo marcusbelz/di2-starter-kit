@@ -1,6 +1,6 @@
-# KB-009: Skills vs. agents — and how subagent dispatch works
+# KB-010: Skills vs. agents — and how subagent dispatch works
 
-> Concept article — the sibling of [KB-008](kb-008-how-rules-and-skills-are-loaded.md). KB-008
+> Concept article — the sibling of [KB-009](kb-009-how-rules-and-skills-are-loaded.md). KB-009
 > explains how *rules* and *skills* get into a session; this article explains the third `.claude/`
 > citizen — **agents** (`.claude/agents/*.md`) — and the part that is invisible in daily use:
 > **who decides that a subagent is launched, and which one**.
@@ -114,6 +114,6 @@ on the file name, not on the body.
 | "Agents replace skills" | They compose: the skill is the process (checkpoints, tracking), the agent is the delegated worker | Process → skill; autonomous work package → agent |
 
 ## Related
-- [KB-008](kb-008-how-rules-and-skills-are-loaded.md) — how rules and skills are loaded (auto-load vs. on-demand); this article extends that picture by the agents axis.
+- [KB-009](kb-009-how-rules-and-skills-are-loaded.md) — how rules and skills are loaded (auto-load vs. on-demand); this article extends that picture by the agents axis.
 - [.claude/skills/README.md](../../.claude/skills/README.md) — index of the workflow skills.
 - `.claude/rules/general.md` — handoffs between skills are user-initiated; agent delegation inside a skill does not change that.

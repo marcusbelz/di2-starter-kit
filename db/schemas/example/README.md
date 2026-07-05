@@ -12,16 +12,21 @@ The runner applies these in a fixed order; within each, by 3-digit numeric prefi
 
 | # | Directory | Objects |
 |---|-----------|---------|
-| 1 | [`tables/`](tables/) | `CREATE TABLE` |
-| 2 | [`policies/`](policies/) | Row-Level-Security policies |
-| 3 | [`functions/`](functions/) | `fn_…` stored functions |
-| 4 | [`procedures/`](procedures/) | `sp_…` stored procedures |
-| 5 | [`trigger/`](trigger/) | `tf_…` / `tr_…` |
-| 6 | [`views/`](views/) | `vw_…` |
-| 7 | [`data/`](data/) | seed / reference data |
+| 1 | [`predeploy/`](predeploy/) | run-once transition scripts (before object DDL) |
+| 2 | [`tables/`](tables/) | `CREATE TABLE` |
+| 3 | [`policies/`](policies/) | Row-Level-Security policies |
+| 4 | [`functions/`](functions/) | `fn_…` stored functions |
+| 5 | [`procedures/`](procedures/) | `sp_…` stored procedures |
+| 6 | [`trigger/`](trigger/) | `tf_…` / `tr_…` |
+| 7 | [`views/`](views/) | `vw_…` |
+| 8 | [`data/`](data/) | seed / reference data |
+| 9 | [`postdeploy/`](postdeploy/) | run-once transition scripts (after seed; backfills etc.) |
 
-All objects belonging to one table share that table's 3-digit number across these subdirectories
-(see `.claude/rules/sql/postgres/sql.md` → "File Naming & Numbering").
+All objects belonging to one table share that table's 3-digit number across the object
+subdirectories (see `.claude/rules/sql/postgres/sql.md` → "File Naming & Numbering"; numbers are
+claimed in [`NUMBERS.md`](NUMBERS.md)). `predeploy`/`postdeploy` files use `YYYYMMDDHHMM`
+timestamp prefixes instead and run **once per database** (tracked in `schema_change_log` — see
+`.claude/rules/db-migrations.md`).
 
 ## Shipped worked examples
 
@@ -34,6 +39,8 @@ A small, complete, **tested** slice (deployed into `:schema_app` = `app`; exerci
 | `001` | `example` (master) | table · `sp_ins_example` / `sp_upd_example` / `sp_del_example` · `tr_u_example` · `vw_example_overview` · seed data |
 | `002` | `example_item` (detail, FK → example) | table · `sp_ins_example_item` · `tr_u_example_item` |
 | `003` | `schema_apply_log` (deploy tracker) | table (append-only, audit-exempt) · `sp_ins_schema_apply` (called by `db/scripts/deploy.sh`) |
+| `004` | `schema_change_log` (run-once tracker) | table (append-only, audit-exempt, `filename` UNIQUE) · `sp_ins_schema_change` (called by `db/scripts/deploy.sh` per applied `predeploy`/`postdeploy` file) |
+| — | transition scripts | `postdeploy/202607050900.backfill-example-notes.sql` (backfills the convergently added `example.notes` column — worked example of the run-once path) |
 
 The trio demonstrates the core conventions end-to-end: identity PKs, audit columns + actor-email
 convention, UNIQUE / FK as separate `ALTER TABLE`, speaking reference-guard deletes, the

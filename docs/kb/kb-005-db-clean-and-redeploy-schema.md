@@ -47,5 +47,5 @@ After the redeploy, check the new `schema_apply_log` row as in
 | Service account loses access after redeploy | The schema was dropped/recreated manually instead of via `clean.sh` (default privileges lost) | Re-run the RW grant block from `db/database/05.create.role.rw.sql`, or bootstrap the env cleanly |
 
 ## Related
-- [KB-007: Drop an environment](kb-007-db-drop-environment.md) — when even the schema/roles must go.
+- [KB-008: Drop an environment](kb-008-db-drop-environment.md) — when even the schema/roles must go.
 - Reference: [db/scripts/README.md](../../db/scripts/README.md).

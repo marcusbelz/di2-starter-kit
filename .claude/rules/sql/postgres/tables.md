@@ -57,7 +57,17 @@
 - **`UNIQUE` and `FOREIGN KEY` do NOT live in the `CREATE TABLE`,** but as separate `ALTER TABLE` statements **after** the `ALTER … OWNER` — grouped by family: first all `UNIQUE` under `-- Unique constraints`, then all `FOREIGN KEY` under `-- Foreign keys`.
   - **Idempotency:** per constraint `ALTER TABLE … DROP CONSTRAINT IF EXISTS <name>;` directly followed by `ALTER TABLE … ADD CONSTRAINT <name> …;` (PostgreSQL has no `ADD CONSTRAINT IF NOT EXISTS`; a `DO` guard is out because psql does not interpolate `:schema_*` inside dollar-quoting). **Trade-off:** the re-add validates FKs / rebuilds UNIQUE indexes on **every** deploy — use deliberately on very large tables.
 - Audit columns under `-- Audit`, set off by a blank line.
-- **Order after `ALTER … OWNER`:** `-- Unique constraints` → `-- Foreign keys` → indexes → `ENABLE`/`FORCE ROW LEVEL SECURITY` → `-- Comments` (`COMMENT ON TABLE` + `COMMENT ON COLUMN`, see [Comments](#comments-table--columns)). `CREATE … INDEX` linearized (`CREATE [UNIQUE] INDEX IF NOT EXISTS <name> ON <table> (…) [WHERE …];`).
+- **Order after `ALTER … OWNER`:** `-- Unique constraints` → `-- Foreign keys` → `-- Convergent evolution` (see below) → indexes → `ENABLE`/`FORCE ROW LEVEL SECURITY` → `-- Comments` (`COMMENT ON TABLE` + `COMMENT ON COLUMN`, see [Comments](#comments-table--columns)). `CREATE … INDEX` linearized (`CREATE [UNIQUE] INDEX IF NOT EXISTS <name> ON <table> (…) [WHERE …];`).
+- **Convergent evolution (columns added after initial creation):** the table file describes the
+  **desired state** and converges existing databases toward it. Columns added after the initial
+  `CREATE` do **not** go into the `CREATE TABLE` block — they live as idempotent
+  `ALTER TABLE … ADD COLUMN IF NOT EXISTS <column> <type> …;` statements under a
+  `-- Convergent evolution` banner after the constraint blocks (so a greenfield deploy and an
+  existing environment both end up with the identical shape). A data-dependent follow-up (backfill,
+  `SET NOT NULL` after backfill) is **not** part of the table file — it goes into a run-once
+  `predeploy`/`postdeploy` transition script (see `.claude/rules/db-migrations.md`, incl. the
+  expand/contract sequencing rule). Worked example: `db/schemas/example/tables/001.example.sql`
+  (column `notes`) + `db/schemas/example/postdeploy/`.
 
 ```sql
 CREATE TABLE IF NOT EXISTS :schema_name.example

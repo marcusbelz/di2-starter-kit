@@ -1,4 +1,4 @@
-# KB-007: Drop a database environment (`drop.sh`)
+# KB-008: Drop a database environment (`drop.sh`)
 
 > Runbook — the **full teardown**: terminates connections, drops the database and all four roles.
 > Destructive and final; the only way back is a fresh bootstrap (plus a restore, if you have one).

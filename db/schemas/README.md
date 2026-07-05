@@ -15,6 +15,11 @@ For reference, the source framework defines schemas like `config` (app configura
 project defines its own.
 
 ## Load order
-Per schema: `tables → policies → functions → procedures → trigger → views → data` (within a section,
-by 3-digit prefix). Across schemas (`deploy all`), in dependency order — framework example:
-`helper → config → log → etl`; `clean all` reverses it.
+Per schema: `predeploy → tables → policies → functions → procedures → trigger → views → data →
+postdeploy` (within the object sections by 3-digit table-group prefix; `predeploy`/`postdeploy`
+are **run-once** transition scripts with `YYYYMMDDHHMM` prefixes — see
+`.claude/rules/db-migrations.md`). Across schemas (`deploy all`), in dependency order — framework
+example: `helper → config → log → etl`; `clean all` reverses it.
+
+Each schema directory also carries a `NUMBERS.md` — the table-group number registry (claim
+protocol in `.claude/rules/sql/postgres/sql.md`, CI lint via `db/scripts/lint-numbers.sh`).

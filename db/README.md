@@ -30,22 +30,22 @@
 ## Deploy model
 There is **no central `deploy.sql`** — the runner walks the directory tree and applies objects in a
 fixed order. `scripts/deploy.sh <schema> <env>` connects as the schema owner and is idempotent
-(re-runnable). One-time cluster setup (`scripts/create.sh <env>`) connects as a superuser and is
-drop-and-recreate, not idempotent.
-
-> **Heads-up — two apply models exist in this kit.** `.claude/rules/db-migrations.md` documents a
-> `deploy.full.sql` / `deploy.sql` two-script convention; this scaffold instead uses the
-> **directory-structure + numbered-file runner** above. Both share the same `schema_apply_log`
-> deploy tracker (shipped in the example schema and written by `deploy.sh` on every run). Pick one
-> apply model per project and align `db-migrations.md` accordingly.
+(re-runnable) — this is the **only apply model, including after go-live** on environments that hold
+data: object files are convergently idempotent (desired state), data-dependent transitions live in
+run-once `predeploy`/`postdeploy` scripts (tracked in `schema_change_log`; see
+`.claude/rules/db-migrations.md`). One-time cluster setup (`scripts/create.sh <env>`) connects as a
+superuser and is drop-and-recreate, not idempotent.
 
 ## Object load order
-Per schema, sections load in this order (within a section, by 3-digit numeric prefix):
+Per schema, sections load in this order (within a section, by prefix — 3-digit table-group numbers
+in the object sections, `YYYYMMDDHHMM` timestamps in `predeploy`/`postdeploy`):
 
-    tables → policies → functions → procedures → trigger → views → data
+    predeploy → tables → policies → functions → procedures → trigger → views → data → postdeploy
 
-For a multi-schema `all` deploy, schemas load in dependency order (framework example:
-`helper → config → log → etl`); `clean all` runs the reverse.
+`predeploy`/`postdeploy` transition scripts are **run-once per database** (skipped once applied;
+edited-after-apply aborts the deploy — applied change files are immutable). For a multi-schema
+`all` deploy, schemas load in dependency order (framework example: `helper → config → log → etl`);
+`clean all` runs the reverse.
 
 ## Conventions
 - File numbering = **table-group indicator** (all objects of one table share its `NNN`), never a

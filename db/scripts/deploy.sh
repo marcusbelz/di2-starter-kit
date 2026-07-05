@@ -3,10 +3,18 @@
 #
 # Loads the objects of a schema directory (or 'all') straight from the directory
 # structure db/schemas/<dir>/ — there is NO central deploy.sql. Section order:
-#   tables -> policies -> functions -> procedures -> trigger -> views -> data
-# Within a section: by 3-digit number prefix (glob sort order).
+#   predeploy -> tables -> policies -> functions -> procedures -> trigger
+#             -> views -> data -> postdeploy
+# Within a section: by prefix (glob sort order) — 3-digit table-group numbers in
+# the object sections, YYYYMMDDHHMM timestamps in predeploy/postdeploy.
 # Connects as the schema owner, so created objects belong to the owner and are
 # auto-granted to the RW role via its default privileges (no separate grant step).
+#
+# predeploy/postdeploy transition scripts are RUN-ONCE per database: each file is
+# executed individually, tracked by filename + sha256 checksum in
+# <app>.schema_change_log (via sp_ins_schema_change). Already-applied files are
+# skipped; an applied file whose checksum changed ABORTS the deploy (applied
+# change files are immutable — create a new file). See .claude/rules/db-migrations.md.
 #
 # After a successful run it records one row in <app>.schema_apply_log via
 # sp_ins_schema_apply (the deploy tracker from .claude/rules/db-migrations.md).
@@ -23,10 +31,14 @@ set -e
 #   DEPLOY_ORDER   : dependency-safe order of the schema DIRECTORIES for 'all'
 #                    (foundation first). One entry per directory under db/schemas/.
 #   TRACKER_SCHEMA : psql variable name (from <env>.env.sql) of the schema that
-#                    holds schema_apply_log / sp_ins_schema_apply.
+#                    holds schema_apply_log / sp_ins_schema_apply and
+#                    schema_change_log / sp_ins_schema_change.
+#   TRACKER_DIR    : directory under db/schemas/ that carries the tracker object
+#                    files (applied up front so predeploy can run before tables).
 # --------------------------------------------------------------------------------
 DEPLOY_ORDER=(example)
 TRACKER_SCHEMA="schema_app"
+TRACKER_DIR="example"
 
 if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
   echo "Usage: deploy.sh <schema-dir> <env>" >&2
@@ -74,16 +86,92 @@ export PGPASSWORD="$DB_FW_PASSWORD"
 GIT_SHA="$(git -C "$SCRIPT_DIR/../.." rev-parse HEAD 2>/dev/null || echo '')"
 APP_VERSION="${APP_VERSION_MAJOR:-0}.${APP_VERSION_MINOR:-0}.${APP_VERSION_BUILD:-0}"
 
-# Section order within a schema.
-SECTIONS=(tables policies functions procedures trigger views data)
+# Full section order within a schema:
+#   predeploy -> tables -> policies -> functions -> procedures -> trigger
+#             -> views -> data -> postdeploy
+# The object sections are batched into one psql call; predeploy/postdeploy run
+# file-by-file with run-once tracking (schema_change_log).
+BATCH_SECTIONS=(tables policies functions procedures trigger views data)
+
+PSQL=(psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_FW_USER" -d "$DB_NAME" -v ON_ERROR_STOP=1)
+
+# --------------------------------------------------------------------------------
+# Apply one predeploy/postdeploy transition file with run-once semantics:
+#   not applied                 -> execute, then record filename/checksum/git_sha
+#                                  via sp_ins_schema_change
+#   applied, same checksum      -> skip
+#   applied, different checksum -> ABORT (applied change files are immutable)
+# git_sha falls back to 'unknown' outside a git checkout — unlike the informational
+# schema_apply_log row, the run-once row is functional and must always be written.
+# --------------------------------------------------------------------------------
+run_once_file() {
+  local schema="$1" section="$2" file="$3"
+  local name checksum applied
+  name="$schema/$section/$(basename "$file")"
+  checksum="$(sha256sum "$file" | cut -d' ' -f1)"
+
+  applied="$("${PSQL[@]}" -tA \
+    -v "fname=$name" \
+    -f "$ENV_SQL" \
+    -f - <<SQL
+SELECT checksum FROM :${TRACKER_SCHEMA}.schema_change_log WHERE filename = :'fname';
+SQL
+)"
+
+  if [ -z "$applied" ]; then
+    echo "    $section: applying $name"
+    "${PSQL[@]}" -f "$ENV_SQL" -f "$file"
+    "${PSQL[@]}" \
+      -v "fname=$name" \
+      -v "sum=$checksum" \
+      -v "sha=${GIT_SHA:-unknown}" \
+      -f "$ENV_SQL" \
+      -f - <<SQL
+CALL :${TRACKER_SCHEMA}.sp_ins_schema_change(NULL, :'fname', :'sum', :'sha');
+SQL
+  elif [ "$applied" = "$checksum" ]; then
+    echo "    $section: $name skipped (already applied)"
+  else
+    echo "Error: $name was applied with checksum $applied but now hashes to $checksum." >&2
+    echo "       Applied change files are immutable — create a new file instead of editing." >&2
+    exit 1
+  fi
+}
 
 echo "--- deploying schema(s): ${SCHEMAS[*]} | env: $ENV ($DB_NAME) as $DB_FW_USER ---"
+
+# --------------------------------------------------------------------------------
+# Ensure the run-once tracker exists BEFORE any predeploy file runs (predeploy
+# precedes the tables section — on a greenfield deploy schema_change_log would
+# not exist yet). Both tracker files are idempotent; their second application in
+# the regular tables/procedures sections below is harmless.
+# --------------------------------------------------------------------------------
+tracker_args=()
+for f in "$SCHEMAS_DIR/$TRACKER_DIR"/tables/*.schema_change_log.sql \
+         "$SCHEMAS_DIR/$TRACKER_DIR"/procedures/*.sp_ins_schema_change.sql; do
+  [ -e "$f" ] || continue
+  tracker_args+=(-f "$f")
+done
+if [ "${#tracker_args[@]}" -gt 0 ]; then
+  echo ">>> ensuring run-once tracker (schema_change_log)"
+  "${PSQL[@]}" -f "$ENV_SQL" "${tracker_args[@]}"
+fi
 
 for schema in "${SCHEMAS[@]}"; do
   echo ">>> schema dir: $schema (version $APP_VERSION, git ${GIT_SHA:-unknown})"
 
+  # ----- predeploy: file-by-file, run-once ---------------------------------------
+  dir="$SCHEMAS_DIR/$schema/predeploy"
+  if [ -d "$dir" ]; then
+    for f in "$dir"/*.sql; do
+      [ -e "$f" ] || continue
+      run_once_file "$schema" predeploy "$f"
+    done
+  fi
+
+  # ----- object sections: batched into one psql call -----------------------------
   files=()
-  for section in "${SECTIONS[@]}"; do
+  for section in "${BATCH_SECTIONS[@]}"; do
     dir="$SCHEMAS_DIR/$schema/$section"
     [ -d "$dir" ] || continue
     for f in "$dir"/*.sql; do
@@ -93,21 +181,28 @@ for schema in "${SCHEMAS[@]}"; do
   done
 
   if [ "${#files[@]}" -eq 0 ]; then
-    echo "    (no objects for schema dir '$schema' — skipping)"
-    continue
+    echo "    (no objects for schema dir '$schema')"
+  else
+    args=()
+    for f in "${files[@]}"; do
+      args+=(-f "$f")
+    done
+
+    "${PSQL[@]}" \
+      -v "db_version=$APP_VERSION" \
+      -v "git_sha=$GIT_SHA" \
+      -f "$ENV_SQL" \
+      "${args[@]}"
   fi
 
-  args=()
-  for f in "${files[@]}"; do
-    args+=(-f "$f")
-  done
-
-  psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_FW_USER" -d "$DB_NAME" \
-    -v ON_ERROR_STOP=1 \
-    -v "db_version=$APP_VERSION" \
-    -v "git_sha=$GIT_SHA" \
-    -f "$ENV_SQL" \
-    "${args[@]}"
+  # ----- postdeploy: file-by-file, run-once ---------------------------------------
+  dir="$SCHEMAS_DIR/$schema/postdeploy"
+  if [ -d "$dir" ]; then
+    for f in "$dir"/*.sql; do
+      [ -e "$f" ] || continue
+      run_once_file "$schema" postdeploy "$f"
+    done
+  fi
 done
 
 # --------------------------------------------------------------------------------
@@ -119,8 +214,7 @@ if [ -z "$GIT_SHA" ]; then
   echo "Warning: GIT_SHA empty — schema_apply_log row not written (no git checkout?)." >&2
 else
   echo ">>> schema_apply_log: recording $APP_VERSION ($ENV, git $GIT_SHA)"
-  psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_FW_USER" -d "$DB_NAME" \
-    -v ON_ERROR_STOP=1 \
+  "${PSQL[@]}" \
     -v "db_version=$APP_VERSION" \
     -v "sha=$GIT_SHA" \
     -v "env=$ENV" \

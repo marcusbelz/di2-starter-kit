@@ -9,23 +9,49 @@
 >
 > Pruned at `/init` time if `database == none`.
 
-## Two-script convention
-| Script | Purpose | When |
-|---|---|---|
-| **`deploy.full.sql`** | Greenfield rebuild from the current object DDL. `CREATE` only, no `ALTER`. | Initial setup of a new env; disaster recovery; dev resets while pre-launch. |
-| **`deploy.sql`** | Change-set — chronological, **immutable** changes (`ALTER`, `ADD CONSTRAINT`, `CREATE INDEX`; procs/functions via `CREATE OR REPLACE`). | Routine deploys on envs with real data (after go-live). |
+## One apply model: the directory runner
+There is **no central `deploy.sql`** — the runner (`db/scripts/deploy.sh`) walks the schema
+directories under `db/schemas/<schema>/` and applies them section by section. This is the only
+apply model, **including after go-live on environments that hold data**:
 
-**While the app is not yet live** (no user data to protect), both scripts are identical (both
-rebuild). Once an env holds data to protect, they diverge: `deploy.full.sql` grows new `CREATE`
-definitions (greenfield stays consistent); `deploy.sql` grows new **immutable** change-set entries —
-existing entries are **never** removed or reordered (they are the change log). The user signals when
-to switch from "synchronized" to "diverging".
+    predeploy → tables → policies → functions → procedures → trigger → views → data → postdeploy
 
-## Tracker table: `schema_apply_log`
-An append-only audit table — one row per apply run (timestamp, applied_by, db_version, git_sha, note).
-The most recent row = current schema state. The in-house equivalent of a migration framework's
-history table. The apply script passes `git_sha = git rev-parse HEAD` + a version through and inserts
-a row on every run.
+Within a section, files apply in prefix order (3-digit table-group numbers in the object sections,
+`YYYYMMDDHHMM` timestamps in `predeploy`/`postdeploy`). Two complementary file kinds:
+
+1. **Object files are convergently idempotent (desired state).** A table file describes the desired
+   state *and* converges existing databases toward it: `CREATE TABLE IF NOT EXISTS` for the initial
+   shape, followed by idempotent `ALTER TABLE … ADD COLUMN IF NOT EXISTS` (etc.) for columns added
+   later. Constraints keep the `DROP CONSTRAINT IF EXISTS` + `ADD CONSTRAINT` idiom; modules use
+   `CREATE OR REPLACE`. See `.claude/rules/sql/postgres/tables.md` → "Convergent evolution".
+2. **Data-dependent transitions get dedicated run-once slots.** `predeploy` (before `tables`) and
+   `postdeploy` (after `data`) hold transition scripts — e.g. saving data aside before a
+   destructive change, or backfilling a new column before it becomes `NOT NULL`. These scripts are
+   **run-once per database**, tracked by filename + sha256 checksum in `schema_change_log`:
+   already-applied files are skipped; an applied file whose checksum changed **aborts** the deploy
+   (applied change files are immutable — a correction is a new file). Applied files stay in the
+   tree; tracking makes them inert. Write every transition to also succeed on an
+   empty-but-current schema (greenfield deploys run them all once, in chronological order).
+
+### Sequencing rule: NOT NULL column on a populated table (expand/contract)
+1. Table file: add the column as **nullable** via `ADD COLUMN IF NOT EXISTS`.
+2. Postdeploy script: backfill the column, then `SET NOT NULL` **at the end of the same script**
+   (the tables section would otherwise run `SET NOT NULL` before the backfill on the first deploy).
+3. After the transition has been applied everywhere: move the `SET NOT NULL` into the table file as
+   an idempotent `ALTER` so the desired state is fully described by the object file again
+   (greenfield deploys then don't depend on the transition script's effect).
+
+## Tracker tables: `schema_apply_log` and `schema_change_log`
+Two append-only siblings, both written by the runner:
+
+- **`schema_apply_log`** — one row per apply **run** (timestamp, applied_by, db_version, git_sha,
+  note). The most recent row = current schema state; the in-house equivalent of a migration
+  framework's history table. The runner passes `git_sha = git rev-parse HEAD` + a version through
+  and inserts a row on every run.
+- **`schema_change_log`** — one row per applied **transition file** (filename UNIQUE = run-once
+  key, sha256 checksum = immutability guard, git_sha). Consulted before every `predeploy`/
+  `postdeploy` file; the runner ensures this tracker exists before the `predeploy` section runs
+  (greenfield chicken-and-egg).
 
 ## Code vs. schema version — separate axes
 The schema version lives in `schema_apply_log` (in the DB). The application/code version lives in a
