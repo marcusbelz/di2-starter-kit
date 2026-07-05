@@ -13,6 +13,13 @@
 #   DB_OWNER_PASSWORD           - database owner        (script 01)
 #   DB_FW_PASSWORD              - schema owner          (script 03)
 #   DB_SA_PASSWORD              - service account       (script 06)
+#
+# Example (non-local manual run; export in the same shell, directly before the call):
+#   export DB_ADMIN_PASSWORD_POSTGRES='<existing superuser password>'   # optional - prompted if unset
+#   export DB_OWNER_PASSWORD='<new password you choose>'
+#   export DB_FW_PASSWORD='<new password you choose>'
+#   export DB_SA_PASSWORD='<new password you choose>'
+#   bash db/scripts/create.sh dev
 set -e
 
 ENV="${1:-local}"
