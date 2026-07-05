@@ -11,12 +11,25 @@
 
 ## Prerequisites
 - Docker (the runner spins up a disposable `postgres:17` container).
-- On Windows: run from Git Bash.
+- A bash — on Windows see
+  [KB-003 → Running the scripts on Windows](kb-003-db-bootstrap-new-environment.md#running-the-scripts-on-windows).
+  No `psql` needed on the host: the runner executes everything inside its container.
 
 ## Procedure
+
+Run from the **repo root**. The smoke is local by design (throwaway container, independent of any
+environment); CI runs the same assertions on every push (see below).
+
+```powershell
+# Windows / PowerShell — call Git's bundled bash
+& "$env:ProgramFiles\Git\bin\bash.exe" db/tests/run.sh
+```
+
 ```bash
+# macOS / Linux / Git Bash
 bash db/tests/run.sh
 ```
+
 What it does:
 1. Starts a throwaway container + creates an empty DB, minimal owner role, and the `app` schema.
 2. Applies **all** objects from `db/schemas/example/` in deploy order (same section order as

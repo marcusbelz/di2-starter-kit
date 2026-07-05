@@ -15,9 +15,37 @@
 - For prod-like envs: a current dump if the data may ever be needed again.
 
 ## Procedure
+
+All commands run from the **repo root**; the scripts are bash — on Windows see
+[KB-003 → Running the scripts on Windows](kb-003-db-bootstrap-new-environment.md#running-the-scripts-on-windows).
+
+### Local
+
+The superuser prompt is answered with the container password from
+[KB-002](kb-002-local-postgres-docker-container.md) (`pw`):
+
+```powershell
+# Windows / PowerShell — call Git's bundled bash
+& "$env:ProgramFiles\Git\bin\bash.exe" db/scripts/drop.sh local
+```
+
 ```bash
+# macOS / Linux / Git Bash
+bash db/scripts/drop.sh local
+```
+
+### Non-local (dev / int / test / prod)
+
+```bash
+export DB_ADMIN_PASSWORD_POSTGRES='<superuser password>'   # optional - prompted if unset
 bash db/scripts/drop.sh <env>
 ```
+
+Or via GitHub Actions: the **DB - drop** workflow — it additionally requires typing the literal
+word `drop` as confirmation (see [KB-007](kb-007-github-actions-db-deployment-setup.md)).
+
+### What it does
+
 Runs `db/database/99.drop.database.sql` against the `postgres` maintenance DB:
 1. Terminates active connections (a `DROP DATABASE` fails while sessions are open).
 2. Drops the database.
@@ -25,9 +53,6 @@ Runs `db/database/99.drop.database.sql` against the `postgres` maintenance DB:
    would otherwise block the role drops).
 4. Drops service account, RW role, schema owner, database owner — all `IF EXISTS`, so the script
    is safe to re-run and safe after a partial failure.
-
-Via GitHub Actions instead: the **DB - drop** workflow — it additionally requires typing the
-literal word `drop` as confirmation (see [KB-007](kb-007-github-actions-db-deployment-setup.md)).
 
 ## Verification
 ```bash

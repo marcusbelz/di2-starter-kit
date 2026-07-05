@@ -20,16 +20,40 @@ readable/executable by the service account immediately.
 - Certainty that the schema's data is disposable (take a dump first if in doubt).
 
 ## Procedure
-```bash
-bash db/scripts/clean.sh app <env>       # deployed schema NAME (not the directory name)
-bash db/scripts/deploy.sh all <env>      # rebuild
+
+All commands run from the **repo root**; the scripts are bash — on Windows see
+[KB-003 → Running the scripts on Windows](kb-003-db-bootstrap-new-environment.md#running-the-scripts-on-windows).
+
+### Local
+
+```powershell
+# Windows / PowerShell — call Git's bundled bash
+& "$env:ProgramFiles\Git\bin\bash.exe" db/scripts/clean.sh app local
+& "$env:ProgramFiles\Git\bin\bash.exe" db/scripts/deploy.sh all local
 ```
+
+```bash
+# macOS / Linux / Git Bash
+bash db/scripts/clean.sh app local       # deployed schema NAME (not the directory name)
+bash db/scripts/deploy.sh all local      # rebuild
+```
+
+### Non-local (dev / int / test / prod)
+
+```bash
+export DB_FW_PASSWORD='<schema owner password>'
+bash db/scripts/clean.sh app <env>
+bash db/scripts/deploy.sh all <env>
+```
+
+Or via GitHub Actions: the **DB - clean** workflow — it additionally requires typing the literal
+word `clean` as confirmation (see [KB-007](kb-007-github-actions-db-deployment-setup.md)).
+
+### What it does
+
 `clean.sh` introspects the schema and generates `DROP … CASCADE` for views, matviews, tables,
 functions, procedures, and sequences (`db/scripts/clean.schema.sql`) — all `IF EXISTS`, safe to
 re-run.
-
-Via GitHub Actions instead: the **DB - clean** workflow — it additionally requires typing the
-literal word `clean` as confirmation (see [KB-007](kb-007-github-actions-db-deployment-setup.md)).
 
 ## Verification
 ```sql

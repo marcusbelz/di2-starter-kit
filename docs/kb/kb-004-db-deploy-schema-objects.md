@@ -13,10 +13,39 @@
 - Password of the schema owner: `DB_FW_PASSWORD` (non-local; `local` → `pw`).
 
 ## Procedure
-```bash
-bash db/scripts/deploy.sh all <env>           # all schema directories, dependency order
-bash db/scripts/deploy.sh example <env>       # or a single directory under db/schemas/
+
+All commands run from the **repo root**; the scripts are bash — on Windows see
+[KB-003 → Running the scripts on Windows](kb-003-db-bootstrap-new-environment.md#running-the-scripts-on-windows).
+
+### Local
+
+No password export needed (`local` → `pw`; server: the container from
+[KB-002](kb-002-local-postgres-docker-container.md)):
+
+```powershell
+# Windows / PowerShell — call Git's bundled bash
+& "$env:ProgramFiles\Git\bin\bash.exe" db/scripts/deploy.sh all local
 ```
+
+```bash
+# macOS / Linux / Git Bash
+bash db/scripts/deploy.sh all local           # all schema directories, dependency order
+bash db/scripts/deploy.sh example local       # or a single directory under db/schemas/
+```
+
+### Non-local (dev / int / test / prod)
+
+```bash
+export DB_FW_PASSWORD='<schema owner password>'   # provisioned at bootstrap (KB-003)
+bash db/scripts/deploy.sh all <env>
+```
+
+Or via GitHub Actions: the **DB - deploy** workflow
+([KB-007](kb-007-github-actions-db-deployment-setup.md)) — `DB_FW_PASSWORD` comes from the GitHub
+Environment secret.
+
+### What it does
+
 - There is **no central deploy.sql** — the runner walks `db/schemas/<dir>/` in section order
   `predeploy → tables → policies → functions → procedures → trigger → views → data → postdeploy`,
   within the object sections by the 3-digit prefix, in `predeploy`/`postdeploy` by the
@@ -32,9 +61,6 @@ bash db/scripts/deploy.sh example <env>       # or a single directory under db/s
   privileges — no separate grant step.
 - After a successful run it records one row in `app.schema_apply_log` (version from
   `APP_VERSION_*` in `<env>.env`, git SHA, environment, note).
-
-Via GitHub Actions instead: the **DB - deploy** workflow (see
-[KB-007](kb-007-github-actions-db-deployment-setup.md)).
 
 ## Verification
 ```sql

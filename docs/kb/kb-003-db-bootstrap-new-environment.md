@@ -44,24 +44,81 @@ deploy (`DB_FW_PASSWORD`) and the application's connection config (`DB_SA_PASSWO
 after bootstrap.
 
 ## Procedure
+
+All commands run from the **repo root**. The scripts are bash — on Windows see
+[Running the scripts on Windows](#running-the-scripts-on-windows) below.
+
+### Local
+
+No password exports needed: the three role passwords default to `pw`, and the only prompt
+(postgres superuser) is answered with the container password from
+[KB-002](kb-002-local-postgres-docker-container.md) — `pw` as well.
+
+```powershell
+# Windows / PowerShell — call Git's bundled bash
+& "$env:ProgramFiles\Git\bin\bash.exe" db/scripts/create.sh local
+```
+
 ```bash
-# non-local envs only: set the passwords in the same shell first
-# (see "Passwords: what and where" above)
+# macOS / Linux / Git Bash
+bash db/scripts/create.sh local
+```
+
+### Non-local (dev / int / test / prod)
+
+Set the passwords in the same shell first (see
+[Passwords: what and where](#passwords-what-and-where)), then run with the env name:
+
+```bash
 export DB_ADMIN_PASSWORD_POSTGRES='<existing superuser password>'   # optional - prompted if unset
 export DB_OWNER_PASSWORD='<new password you choose>'
 export DB_FW_PASSWORD='<new password you choose>'
 export DB_SA_PASSWORD='<new password you choose>'
 
-bash db/scripts/create.sh <env>          # e.g. create.sh local
+bash db/scripts/create.sh <env>          # e.g. create.sh dev
 ```
-What it runs, in order (all files in `db/database/`):
+
+Or via GitHub Actions: the **DB - create** workflow
+([KB-007](kb-007-github-actions-db-deployment-setup.md)) — the passwords come from the GitHub
+Environment secrets, nothing to export.
+
+### What it runs
+
+In order (all files in `db/database/`):
 1. `00.preflight.create.sql` — aborts if the database or any role already exists.
 2. `01.create.database.sql` — database + owner role (against the `postgres` maintenance DB).
 3. `02…07` — extensions, schema owner, `app` schema, RW group role (incl. the `lc_messages`
    grant), service account, role grant (against the new database).
 
-Via GitHub Actions instead: the **DB - create** workflow (see
-[KB-007](kb-007-github-actions-db-deployment-setup.md)).
+## Running the scripts on Windows
+
+The `db/scripts/*.sh` runners are bash scripts, and they run **on the host** — they talk to the
+database over `localhost:5432`, so the repo directory needs **no Docker mount**; you just need a
+bash and `psql`:
+
+- **Git Bash** (bundled with Git for Windows) sees the repo directly — `C:\sandbox\…` is
+  `/c/sandbox/…`; `cd` there and run the `bash db/scripts/….sh` commands as on Linux.
+- **From PowerShell**, call Git's bash explicitly (a bare `bash` may resolve to WSL, whose
+  filesystem/tooling is separate): `& "$env:ProgramFiles\Git\bin\bash.exe" db/scripts/create.sh local`.
+- **`psql` must be installed on the host** (it is not part of Docker). If you don't want to
+  install it, run the script inside a disposable `postgres:17` container instead — this is the
+  one case where the repo **is** mounted, and the container shares the DB container's network so
+  `localhost:5432` still resolves:
+
+  ```powershell
+  # Windows / PowerShell
+  docker run --rm -v "${PWD}:/repo" -w /repo --network container:app-local-pg postgres:17 `
+    bash db/scripts/create.sh local
+  ```
+
+  ```bash
+  # macOS / Linux / Git Bash
+  docker run --rm -v "$PWD:/repo" -w /repo --network container:app-local-pg postgres:17 \
+    bash db/scripts/create.sh local
+  ```
+
+  (Caveat for `deploy.sh` in this mode: the `postgres:17` image has no `git`, so the informational
+  `schema_apply_log` row is skipped with a warning — the deploy itself is unaffected.)
 
 ## Verification
 ```bash

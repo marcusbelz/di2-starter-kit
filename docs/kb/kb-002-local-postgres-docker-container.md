@@ -20,6 +20,11 @@ The committed `db/config/local.env` expects a PostgreSQL server on `localhost:54
 superuser `postgres`. The simplest way to provide one is a Docker container with a named volume —
 create it once, then `start`/`stop` it as needed; the data survives restarts and recreates.
 
+This container is **local-only**. Non-local environments (dev/int/test/prod) run their own
+managed/provisioned server — its coordinates and operations facts live in
+`.claude/rules/deploy-infra.md`, and the bootstrap/deploy runbooks each carry a
+"Non-local" subsection for those envs.
+
 Not to be confused with the **throwaway container** the object tests spin up (and remove) on every
 run ([KB-005](kb-005-db-apply-smoke-and-tests.md)) — that one is ephemeral by design. This article
 is about your persistent local dev server.
