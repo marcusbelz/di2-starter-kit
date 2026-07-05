@@ -1,4 +1,4 @@
-# KB-009: How rules and skills are loaded (auto-load vs. on-demand)
+# KB-010: How rules and skills are loaded (auto-load vs. on-demand)
 
 > Concept article — how Claude Code gets from a file under `.claude/` to behavior in a session.
 > Read this to understand why rules and skills are separate directories, why `/init` pruning
@@ -37,7 +37,7 @@ freshness/priority instrument on top of the auto-load.
 ### The same line weighs differently in an agent body
 
 Projects that add **agents** (`.claude/agents/*.md` — see
-[KB-010](kb-010-skills-vs-agents-subagent-dispatch.md)) reuse the identical wording
+[KB-011](kb-011-skills-vs-agents-subagent-dispatch.md)) reuse the identical wording
 ("Read `.claude/rules/backend.md`") in the agent body — but there it is **load-bearing, not
 focus**: a subagent starts with a fresh, empty context where *nothing* is auto-loaded, so without
 the explicit read it does not know the rule exists.
@@ -71,7 +71,7 @@ the explicit read it does not know the rule exists.
 | "I can drop a convention into `CLAUDE.md` instead" | Works (it auto-loads too), but mixes project identity with conventions and bypasses the pruning matrix | `CLAUDE.md` = project frame; conventions = `rules/` |
 
 ## Related
-- [KB-010](kb-010-skills-vs-agents-subagent-dispatch.md) — skills vs. **agents** (`.claude/agents/`) and how subagent dispatch works; extends this picture by the third `.claude/` citizen.
+- [KB-011](kb-011-skills-vs-agents-subagent-dispatch.md) — skills vs. **agents** (`.claude/agents/`) and how subagent dispatch works; extends this picture by the third `.claude/` citizen.
 - [.claude/rules/README.md](../../.claude/rules/README.md) — index of the shipped rules and their pruning conditions.
 - [.claude/skills/README.md](../../.claude/skills/README.md) — index of the workflow skills.
 - `.claude/rules/documentation.md` — where which kind of content lives.

@@ -43,9 +43,9 @@ files (`- [KB-XXX: Title](kb-XXX-….md)`). Update the index with every new arti
 files start with a Table of Contents (markdown heading anchors).
 
 ## Cross-references
-- Within `docs/kb/`: relative links — `[KB-002](kb-002-….md)`.
-- From `docs/setup/` to `kb/`: `[KB-003](../kb/kb-003-….md)`.
-- From skills, features, code comments: full path with slug — `docs/kb/kb-005-….md`.
+- Within `docs/kb/`: relative links — `[KB-003](kb-003-….md)`.
+- From `docs/setup/` to `kb/`: `[KB-004](../kb/kb-004-….md)`.
+- From skills, features, code comments: full path with slug — `docs/kb/kb-006-….md`.
 
 ## What does NOT belong in `docs/kb/` / `docs/setup/`
 - **Bug reports** → `docs/bugs/bug-NNNN-<slug>.md` (index in `docs/bugs/INDEX.md`). Distill a KB

@@ -1,11 +1,11 @@
-# KB-008: Drop a database environment (`drop.sh`)
+# KB-009: Drop a database environment (`drop.sh`)
 
 > Runbook — the **full teardown**: terminates connections, drops the database and all four roles.
 > Destructive and final; the only way back is a fresh bootstrap (plus a restore, if you have one).
 
 ## When to use
 - Before re-running a bootstrap (the create path is drop-and-recreate, see
-  [KB-002](kb-002-db-bootstrap-new-environment.md)).
+  [KB-003](kb-003-db-bootstrap-new-environment.md)).
 - Decommissioning an environment.
 
 **Never** on an environment with data to protect without a verified backup/dump.
@@ -27,7 +27,7 @@ Runs `db/database/99.drop.database.sql` against the `postgres` maintenance DB:
    is safe to re-run and safe after a partial failure.
 
 Via GitHub Actions instead: the **DB - drop** workflow — it additionally requires typing the
-literal word `drop` as confirmation (see [KB-006](kb-006-github-actions-db-deployment-setup.md)).
+literal word `drop` as confirmation (see [KB-007](kb-007-github-actions-db-deployment-setup.md)).
 
 ## Verification
 ```bash
@@ -44,5 +44,5 @@ psql -h <host> -U postgres -d postgres -c "SELECT rolname FROM pg_roles WHERE ro
 | Script "fails" politely on a half-torn-down env | Nothing — all statements are `IF EXISTS` | Just re-run; it is idempotent |
 
 ## Related
-- [KB-002: Bootstrap a new environment](kb-002-db-bootstrap-new-environment.md) — the counterpart.
-- [KB-005: Clean & redeploy](kb-005-db-clean-and-redeploy-schema.md) — the non-destructive alternative when only the objects are broken.
+- [KB-003: Bootstrap a new environment](kb-003-db-bootstrap-new-environment.md) — the counterpart.
+- [KB-006: Clean & redeploy](kb-006-db-clean-and-redeploy-schema.md) — the non-destructive alternative when only the objects are broken.

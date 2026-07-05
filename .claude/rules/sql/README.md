@@ -5,7 +5,7 @@
 > `/init` keeps only the subdirectory for the project's chosen `database` (see
 > `.claude/rules/stack.md`) and prunes the rest. Same pattern as the UI rules under
 > [`../ui/`](../ui/). How the auto-loading works and why pruning matters:
-> [KB-009](../../../docs/kb/kb-009-how-rules-and-skills-are-loaded.md).
+> [KB-010](../../../docs/kb/kb-010-how-rules-and-skills-are-loaded.md).
 
 ## Contents of this directory
 

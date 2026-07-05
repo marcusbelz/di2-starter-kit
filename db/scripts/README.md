@@ -12,12 +12,12 @@ Reproducible setup / deploy / teardown. The **directory structure + file numberi
 `db/schemas/` is the source of truth** — there is no central `deploy.sql`.
 
 > Step-by-step runbooks (incl. verification and common failures) live in the knowledge base:
-> [KB-002 bootstrap](../../docs/kb/kb-002-db-bootstrap-new-environment.md) ·
-> [KB-003 deploy](../../docs/kb/kb-003-db-deploy-schema-objects.md) ·
-> [KB-005 clean](../../docs/kb/kb-005-db-clean-and-redeploy-schema.md) ·
-> [KB-007 schema evolution](../../docs/kb/kb-007-db-schema-evolution-with-data.md) ·
-> [KB-008 drop](../../docs/kb/kb-008-db-drop-environment.md) ·
-> [KB-004 apply-smoke/tests](../../docs/kb/kb-004-db-apply-smoke-and-tests.md).
+> [KB-003 bootstrap](../../docs/kb/kb-003-db-bootstrap-new-environment.md) ·
+> [KB-004 deploy](../../docs/kb/kb-004-db-deploy-schema-objects.md) ·
+> [KB-006 clean](../../docs/kb/kb-006-db-clean-and-redeploy-schema.md) ·
+> [KB-008 schema evolution](../../docs/kb/kb-008-db-schema-evolution-with-data.md) ·
+> [KB-009 drop](../../docs/kb/kb-009-db-drop-environment.md) ·
+> [KB-005 apply-smoke/tests](../../docs/kb/kb-005-db-apply-smoke-and-tests.md).
 
 ## Scripts
 | Script | Purpose | Connects as |

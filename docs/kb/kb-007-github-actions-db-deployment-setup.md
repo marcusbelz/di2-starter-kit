@@ -1,4 +1,4 @@
-# KB-006: Set up GitHub Actions for the DB deployment (one-time provisioning)
+# KB-007: Set up GitHub Actions for the DB deployment (one-time provisioning)
 
 > Runbook — everything needed **once per repository** so the shipped workflows (`ci.yml`,
 > `db-create/deploy/clean/drop.yml`) actually run: environments, secrets, variables, branch rules.
@@ -49,7 +49,7 @@ also enable *Required reviewers* (human approval before the job starts).
 ## Verification
 1. Push a branch, open a PR → the `CI` checks (`db-dry-run-deploy`, `lint`) must go green.
 2. *Actions → DB - deploy → Run workflow* against `dev` → job green, then check the newest
-   `schema_apply_log` row on dev ([KB-003](kb-003-db-deploy-schema-objects.md)).
+   `schema_apply_log` row on dev ([KB-004](kb-004-db-deploy-schema-objects.md)).
 
 ## Common failures
 
@@ -63,6 +63,6 @@ also enable *Required reviewers* (human approval before the job starts).
 
 ## Related
 - Reference: [.github/workflows/README.md](../../.github/workflows/README.md).
-- The runbooks per operation: [KB-002](kb-002-db-bootstrap-new-environment.md) ·
-  [KB-003](kb-003-db-deploy-schema-objects.md) · [KB-005](kb-005-db-clean-and-redeploy-schema.md) ·
-  [KB-008](kb-008-db-drop-environment.md).
+- The runbooks per operation: [KB-003](kb-003-db-bootstrap-new-environment.md) ·
+  [KB-004](kb-004-db-deploy-schema-objects.md) · [KB-006](kb-006-db-clean-and-redeploy-schema.md) ·
+  [KB-009](kb-009-db-drop-environment.md).

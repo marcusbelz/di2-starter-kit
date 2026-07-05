@@ -88,7 +88,7 @@ detectable "uninitialized" state (`{{PLACEHOLDER}}` values in `stack.md`, placeh
 `docs/PRD.md`) and the rules refuse feature work.
 
 If the project keeps a database and CI, the GitHub Actions side needs its own one-time
-provisioning — see [KB-006](kb-006-github-actions-db-deployment-setup.md).
+provisioning — see [KB-007](kb-007-github-actions-db-deployment-setup.md).
 
 ## Verification
 
