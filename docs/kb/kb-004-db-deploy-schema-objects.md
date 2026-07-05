@@ -62,6 +62,42 @@ Environment secret.
 - After a successful run it records one row in `app.schema_apply_log` (version from
   `APP_VERSION_*` in `<env>.env`, git SHA, environment, note).
 
+## Expected output & reading the log
+
+A successful run exits with code 0 and ends with:
+
+```
+>>> schema_apply_log: recording 0.1.0 (local, git <sha>)
+--- done ---
+```
+
+Between the header (`--- deploying schema(s): example | env: local … ---`,
+`>>> ensuring run-once tracker`) and that footer, every object file logs a **header/footer pair**
+from its `\echo` skeleton:
+
+```
+"## CREATE TABLE :schema_app.example"
+…
+"## CREATE TABLE :schema_app.example - DONE"
+```
+
+`predeploy`/`postdeploy` files log `applying <file>` on their first run and
+`skipped (already applied)` on every later one — both are success.
+
+When it fails, read the log like this:
+
+- The run stops at the **first** error (`ON_ERROR_STOP`). **The failing file is the last `## …`
+  header without its `- DONE` footer** — that is exactly what the header/footer convention is for.
+- The SQL error names file and line directly: `psql:/repo/db/schemas/…/<file>.sql:<line>: ERROR: …`.
+- `NOTICE: … does not exist, skipping` and `… already exists, skipping` lines are **normal**
+  idempotency noise (`DROP … IF EXISTS` / `CREATE … IF NOT EXISTS`) — never the cause.
+- `… was applied with checksum … but now hashes to …` aborts the run: an already-applied
+  transition file was edited — revert it and put the correction into a new file (immutability
+  guard, see Common failures).
+- `Warning: GIT_SHA empty — schema_apply_log row not written` is **non-fatal**: the deploy is
+  complete, only the informational apply-log row is skipped (typical for the containerized
+  fallback, which has no `git`).
+
 ## Running the scripts on Windows
 
 Same ground rules as in

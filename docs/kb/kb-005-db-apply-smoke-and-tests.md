@@ -40,6 +40,33 @@ What it does:
 CI runs the same assertions in `ci.yml` after a real `create.sh local` + `deploy.sh all local`,
 then deploys a second time as an **idempotency check**.
 
+## Expected output & reading the log
+
+A successful run exits with code 0 and ends in this line — it only prints when **every** script
+succeeded:
+
+```
+>>> ALL TESTS PASSED
+```
+
+Before that, the log shows the container phase (`>>> starting throwaway container di2-kit-test-pg`
+→ `>>> waiting for readiness` → `>>> creating database + minimal owner role/schema`) and then one
+`>>> apply <file>` line per object file (deploy order) and per test file (numeric order). The
+container is removed at the end — on failure too (exit trap).
+
+When it fails, read the log like this:
+
+- The run stops at the **first** error (`ON_ERROR_STOP` + `set -e`); there is no partial success —
+  a missing `ALL TESTS PASSED` means failure even if the tail looks quiet.
+- **The failing file is the last `>>> apply …` line.** The SQL error itself reads
+  `psql:<stdin>:<line>: ERROR: …` — the line number counts *within that file*; the filename only
+  appears in the apply line above (the runner streams files via stdin).
+- A failed assertion surfaces as `ERROR:  Assertion failed` (or the assert's custom message) from
+  the test file's `DO $$ … ASSERT` block — the object's behavior regressed, or the test encodes an
+  outdated expectation.
+- `NOTICE: … does not exist, skipping` lines are **normal** idempotency noise
+  (`DROP … IF EXISTS` on a fresh DB) — never the cause of a failure.
+
 ## Running the scripts on Windows
 
 Same ground rules as in
