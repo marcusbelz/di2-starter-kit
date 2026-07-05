@@ -33,6 +33,26 @@ Within a section, files apply in prefix order (3-digit table-group numbers in th
    tree; tracking makes them inert. Write every transition to also succeed on an
    empty-but-current schema (greenfield deploys run them all once, in chronological order).
 
+### Why the fixed section order resolves dependencies
+The order only constrains references that are resolved at **`CREATE` time**. PL/pgSQL (and T-SQL
+procedure) bodies are resolved at **runtime** — a function or procedure body may freely reference
+a view or any other later-section object: its `CREATE` succeeds, and by the time anything calls
+it, the completed deploy run has created every object. References resolved at `CREATE` time must
+point to an **earlier section** (or a lower number within the same section):
+
+- **Views** — view-on-function is fine (functions load earlier); view-on-view requires the
+  referenced view's number prefix to sort earlier (pick the higher table-group number, cf. the
+  cross-table heuristic in `sql/<vendor>/sql.md`).
+- **Policy expressions** — policies load *before* functions; a predicate/helper function used by
+  a policy is created **inside the policy file**, not in `functions/` (the mssql ruleset's
+  drop-policy → create-function → create-policy layout does exactly this).
+- **SQL Server `WITH SCHEMABINDING`** objects and **PostgreSQL `LANGUAGE sql` string-body
+  functions** (fully validated at `CREATE` under the default `check_function_bodies = on` — one
+  reason the kit's skeletons are PL/pgSQL).
+
+The mandatory apply-smoke (below) is the enforcement backstop: a backward create-time dependency
+fails on the empty throwaway DB before merge, not on the next environment.
+
 ### Sequencing rule: NOT NULL column on a populated table (expand/contract)
 1. Table file: add the column as **nullable** via `ADD COLUMN IF NOT EXISTS`.
 2. Postdeploy script: backfill the column, then `SET NOT NULL` **at the end of the same script**

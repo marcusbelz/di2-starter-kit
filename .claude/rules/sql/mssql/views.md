@@ -19,6 +19,10 @@
   documented rationale), name/alias columns explicitly — **no `SELECT *` in permanent views**
   (T-SQL additionally freezes the `*` expansion at creation time: a later `ALTER TABLE … ADD
   COLUMN` silently does not appear until `sp_refreshview` — one more reason the rule is hard).
+- `CREATE VIEW` resolves its references at creation time. View-on-function is fine (functions
+  deploy earlier); **view-on-view** requires the referenced view's number prefix to sort earlier
+  in the section (see `.claude/rules/db-migrations.md` → "Why the fixed section order resolves
+  dependencies").
 - **Indexed views instead of materialized views:** SQL Server has no `MATERIALIZED VIEW`; the
   equivalent for expensive aggregations is an **indexed view** — `WITH SCHEMABINDING` plus a
   **unique clustered index** on the view. It is maintained automatically on every base-table

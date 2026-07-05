@@ -21,6 +21,10 @@ bash db/scripts/deploy.sh example <env>       # or a single directory under db/s
   `predeploy → tables → policies → functions → procedures → trigger → views → data → postdeploy`,
   within the object sections by the 3-digit prefix, in `predeploy`/`postdeploy` by the
   `YYYYMMDDHHMM` timestamp prefix.
+- The order only constrains references resolved at `CREATE` time (views, policy expressions) —
+  function/procedure bodies resolve at runtime and may reference later-section objects such as
+  views. Details: `.claude/rules/db-migrations.md` → "Why the fixed section order resolves
+  dependencies".
 - `predeploy`/`postdeploy` transition scripts run **once per database**: applied files (tracked by
   filename + checksum in `app.schema_change_log`) are skipped on every later deploy; an applied
   file that was edited afterwards **aborts** the deploy (immutability guard).

@@ -39,7 +39,10 @@
 - **Determinism instead of volatility:** T-SQL has no `IMMUTABLE`/`STABLE`/`VOLATILE` markers —
   determinism is inferred. Add **`WITH SCHEMABINDING`** to functions that qualify (pure
   computation / stable reads): it lets the engine verify determinism and is a prerequisite for use
-  in indexed views and persisted computed columns.
+  in indexed views and persisted computed columns. **Caveat:** schema binding resolves references
+  at `CREATE` time, but views deploy *after* functions (section order, see
+  `.claude/rules/db-migrations.md`) — a schema-bound function must not reference a view; inline
+  the logic or drop `SCHEMABINDING` with a documented rationale.
 
 ## Skeleton (scalar function)
 

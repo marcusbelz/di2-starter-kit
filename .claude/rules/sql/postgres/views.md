@@ -16,5 +16,9 @@
   (log views: `db/schemas/log/views/`). `<NNN>` = number of the underlying main table.
 - Idempotent (`CREATE OR REPLACE VIEW`), **read-only**, name/alias columns explicitly
   (no `SELECT *` in permanent views).
+- `CREATE VIEW` resolves its references at creation time. View-on-function is fine (functions
+  deploy earlier); **view-on-view** requires the referenced view's number prefix to sort earlier
+  in the section (see `.claude/rules/db-migrations.md` → "Why the fixed section order resolves
+  dependencies").
 - For expensive aggregations, use `MATERIALIZED VIEW` if applicable + a documented refresh strategy.
 - `COMMENT ON VIEW` with a domain description.
