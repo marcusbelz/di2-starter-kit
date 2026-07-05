@@ -26,10 +26,7 @@ template's history and remote into your project. Use one of the two options belo
 
 ## Option A — GitHub "Use this template" (recommended)
 
-**One-time prerequisite (template maintainer):** the template repo must be marked as a *template
-repository* on GitHub — Settings → General → check **"Template repository"**.
-
-Then, per new project, either use the CLI:
+Per new project, either use the CLI:
 
 ```bash
 gh repo create my-new-project --template <owner>/di2-starter-kit --private --clone
@@ -42,6 +39,10 @@ or the GitHub UI: open the template repo → **"Use this template"** → **"Crea
 
 GitHub copies the template's files into a brand-new repository with a single initial commit — no
 template history, no fork relationship.
+
+If the **"Use this template"** button (or the `--template` flag) is missing, the template repo has
+not been marked as a *template repository* yet — a one-time setting only the repo owner can enable;
+see [Symptom → Cause → Fix](#symptom--cause--fix).
 
 ## Option B — local copy script (no GitHub needed)
 
@@ -106,7 +107,7 @@ ls .claude/skills          # the full skill set (still maximal — /init prunes 
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `gh repo create --template` fails with "not a template repository" | The template repo is not marked as a template on GitHub | Settings → General → enable **"Template repository"**, then retry |
+| `gh repo create --template` fails with "not a template repository" / no "Use this template" button | The template repo is not marked as a template on GitHub | The repo owner enables it: Settings → General → **"Template repository"**; then retry |
 | Copy script aborts with "Target … already exists and is not empty" | Deliberate guard against overwriting | Pick a new/empty target directory (a lone `.git/` in the target is tolerated) |
 | New project contains the template's full git history | The template was `git clone`d instead of using Option A/B | Start over with Option A or B; do not build on a direct clone |
 | `robocopy failed (exit ≥ 8)` (Windows) | Real copy error (locked files, permissions) | Close programs locking files (IDE/AV), check target permissions, retry |
