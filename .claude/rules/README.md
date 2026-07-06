@@ -1,6 +1,7 @@
 # .claude/rules — always-on conventions
 
-Every `*.md` in this tree auto-loads into each Claude Code session. Rules are the project's
+Every `*.md` in this tree auto-loads into each Claude Code session (a rule with a `paths:`
+frontmatter would instead load lazily on file match — the shipped rules deliberately use none). Rules are the project's
 standing conventions; skills (in `../skills/`) are the workflow steps that apply them. How the
 loading works (and what it means for pruning and rule edits):
 [KB-010](../../docs/kb/kb-010-how-rules-and-skills-are-loaded.md). How rules and skills relate to

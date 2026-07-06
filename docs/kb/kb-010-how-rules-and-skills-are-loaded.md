@@ -64,9 +64,14 @@ the explicit read it does not know the rule exists.
 
 ## Practical consequences
 
-- **Every file under `rules/` costs context in every session** — including the `README.md` index
-  files (kept deliberately small). This is why `/init` pruning is not cosmetic: a project without
-  a UI would otherwise carry the whole UI ruleset into every single session.
+- **Every rule file without a `paths:` frontmatter costs context in every session** — including
+  the `README.md` index files (kept deliberately small). Rules that carry a `paths:` glob in their
+  frontmatter load **lazily** instead: only when Claude touches files matching the pattern, at
+  zero cost in sessions that never match. The kit's shipped rules deliberately carry no `paths:`
+  — `/init` pruning guarantees the surviving rules are always present instead of depending on
+  file matches; path-scoping remains an extra lever for grown projects (e.g. `paths: ["db/**"]`
+  on a vendor ruleset). Either way pruning is not cosmetic: a project without a UI would
+  otherwise carry the whole UI ruleset into every single session.
 - **The vendor/flavor split acts directly on context size:** `/init` keeps exactly one
   `sql/<vendor>/` and one `ui/<flavor>/` directory — an added vendor (e.g. `mssql/`) is loaded
   *instead of* `postgres/` in a real project, never in addition.
