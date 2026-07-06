@@ -22,7 +22,7 @@ Both are markdown files, but they are executed in completely different ways:
 |---|---|---|
 | What it is | A **procedure** loaded into the *main* conversation | A **separate Claude instance** ("subagent") with its own system prompt |
 | Who executes it | The main model itself, in the current session | A freshly spawned model instance, isolated from the session |
-| Context | Shares the full session context (everything discussed so far, all loaded rules) | Starts with a **fresh, empty context** — it sees only the task prompt it is handed |
+| Context | Shares the full session context (everything discussed so far, all loaded rules) | Starts with a **fresh context** — no session conversation, no `.claude/rules/` files; custom agents do auto-receive `CLAUDE.md` + git status (the built-in `Explore`/`Plan` agents get neither) |
 | Invoked by | The user, via slash command (`/backend`, `/qa`, …) | The **main model**, via a tool call (the `Agent`/`Task` tool) |
 | Visibility | Every step visible in the conversation; user checkpoints work | Runs autonomously; only the **final result** returns to the main conversation |
 | Model / tools | Whatever the session uses | Own `model:`, own `tools:` allowlist, own `maxTurns:` budget (frontmatter) |
@@ -64,10 +64,11 @@ Two practical consequences:
 1. **The `description` is the job posting.** It is the *only* signal the dispatcher has. A vague
    description ("Helps with backend stuff") never gets matched; a sharp one ("Use this agent
    whenever building or changing API endpoints or DB schemas") gets picked reliably.
-2. **The body must be self-sufficient.** The subagent starts with an empty context — it has *not*
-   auto-inherited the session's conversation. This is why agent bodies explicitly say
-   "Read `.claude/rules/backend.md`": the isolated instance is told where the conventions live
-   instead of assuming it saw them.
+2. **The body must be self-sufficient.** The subagent has *not* inherited the session's
+   conversation or the `.claude/rules/` files — what it does receive automatically is `CLAUDE.md`
+   and the git status (the built-in `Explore`/`Plan` agents get neither). This is why agent
+   bodies explicitly say "Read `.claude/rules/backend.md`": the isolated instance is told where
+   the conventions live instead of assuming it saw them.
 
 ## The built-in (generic) agents
 
@@ -118,7 +119,7 @@ on the file name, not on the body.
 |------------|---------|---------------|
 | "The whole agent file sits in the session context" | Only `name` + `description` are loaded; the body is read at spawn time as the subagent's system prompt | Put dispatch-relevant wording into the `description`, role instructions into the body |
 | "My custom agent runs whenever I allow subagents" | Generic permission triggers matching; without a `description` hit the fallback is `general-purpose` | Name the agent, or sharpen its `description` |
-| "The subagent knows our conversation" | It starts with a fresh context and sees only the task prompt it was handed | Make the task prompt self-contained; have the body point at the rule files it needs |
+| "The subagent knows our conversation" | It never sees the session conversation or the rules — its fresh context holds `CLAUDE.md` + git status (custom agents) plus the task prompt it was handed | Make the task prompt self-contained; have the body point at the rule files it needs |
 | "Subagents only exist if I create agent files" | `general-purpose`, `Explore`, `Plan` & co. are always available | Create custom agents only for recurring roles that need their own rules/model/tool limits |
 | "Agents replace skills" | They compose: the skill is the process (checkpoints, tracking), the agent is the delegated worker | Process → skill; autonomous work package → agent |
 

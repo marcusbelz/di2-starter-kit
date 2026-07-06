@@ -54,7 +54,8 @@ freshness/priority instrument on top of the auto-load.
 Projects that add **agents** (`.claude/agents/*.md` — see
 [KB-011](kb-011-skills-vs-agents-subagent-dispatch.md)) reuse the identical wording
 ("Read `.claude/rules/backend.md`") in the agent body — but there it is **load-bearing, not
-focus**: a subagent starts with a fresh, empty context where *nothing* is auto-loaded, so without
+focus**: a subagent starts with a fresh context into which the `.claude/rules/` files are *not*
+auto-loaded (a custom agent receives only `CLAUDE.md` + the git status automatically), so without
 the explicit read it does not know the rule exists.
 
 | Where the line "Read rules/X.md" appears | Effect |
