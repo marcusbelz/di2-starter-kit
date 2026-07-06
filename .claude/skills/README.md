@@ -1,7 +1,9 @@
 # .claude/skills — workflow skills (slash commands)
 
 Each subdirectory is one skill (`SKILL.md` + optional templates), invoked as `/name` in Claude
-Code. The numbered workflow is the spine of the kit; cross-cutting skills run anytime.
+Code — or auto-invoked by Claude itself when a skill's `description` matches the task (opt out
+per skill via `disable-model-invocation: true`). The numbered workflow is the spine of the kit;
+cross-cutting skills run anytime.
 How skills are loaded (on-demand, vs. the always-on rules):
 [KB-010](../../docs/kb/kb-010-how-rules-and-skills-are-loaded.md). How skills relate to
 **agents** (`.claude/agents/`) and when subagents are dispatched:

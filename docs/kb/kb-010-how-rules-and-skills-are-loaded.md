@@ -15,13 +15,21 @@
 
 | | Rules (`.claude/rules/**/*.md`) | Skills (`.claude/skills/<name>/SKILL.md`) |
 |---|---|---|
-| Loaded | **Automatically at session start** — every file, injected into the context alongside `CLAUDE.md` and its `@`-imports (`docs/PRD.md`, `features/INDEX.md`) | **On demand** — only when the user invokes `/name` |
+| Loaded | **Automatically at session start** — every file, injected into the context alongside `CLAUDE.md` and its `@`-imports (`docs/PRD.md`, `features/INDEX.md`) | **On demand** — when the user invokes `/name`, **or** when Claude matches the task against the skill's `description` (only `name` + `description` sit in context from session start) |
 | Role | Always-on conventions: language policy, SQL style, security floor, doc structure | Workflow steps: a procedure with inputs, checkpoints, and outputs |
-| Who "finds" them | Nobody has to — the harness loads them before the first prompt; no skill needs to say "read language.md" | The user, by typing the slash command |
+| Who "finds" them | Nobody has to — the harness loads them before the first prompt; no skill needs to say "read language.md" | The user (slash command) **or Claude itself** — the model sees every skill's `name` + `description` and can self-invoke on a match |
 
 Consequence of the first row: rules apply to **every** action, including ad-hoc requests that use
 no skill at all ("change table X"). That is the reason a convention belongs in `rules/` and not
 inside a skill text — a skill-only convention would silently not apply outside that skill.
+
+Consequence of the second row: **a skill's `description` is dispatch surface, not just
+documentation** — it is what Claude matches against when deciding to invoke the skill on its own,
+the same "job posting" role that agent descriptions play
+([KB-011](kb-011-skills-vs-agents-subagent-dispatch.md)). A vague description never triggers; a
+sharp one triggers reliably. A skill that must only ever run when the user types it can opt out
+via `disable-model-invocation: true` in its frontmatter — the skill becomes invisible to the model
+(zero context cost) until the user invokes it explicitly.
 
 ## Why skills still mention specific rule files
 
