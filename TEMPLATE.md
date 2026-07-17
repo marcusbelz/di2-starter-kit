@@ -25,8 +25,10 @@ still being present in `stack.md` (and the PRD placeholder text).
 
 ## What `/init` asks
 Vision (→ `docs/PRD.md`) plus these axes (→ `stack.md` + `CLAUDE.md`):
-runtime · UI yes/no · backend yes/no · database · migrations · auth · deploy target · CI ·
-env stages · feature-ID prefix · build/test/run/audit commands.
+runtime · UI yes/no · backend yes/no · database · migrations (only when a database exists) ·
+tests (keep the DB test scaffold? — only when a database exists) · auth · deploy target · CI ·
+env stages · feature-ID prefix. Two `stack.md` keys are derived rather than asked and confirmed
+with the user: `package_manager` (from the runtime) and the build/test/run/audit commands.
 
 ## Pruning matrix
 | Condition (from /init answers) | Removed |
@@ -34,8 +36,9 @@ env stages · feature-ID prefix · build/test/run/audit commands.
 | `ui == none` | `skills/ux`, `skills/frontend`, `rules/ui/`, `rules/cookies.md`; UX+Frontend lines dropped from the `CLAUDE.md` workflow |
 | `ui` is a different stack | only `rules/ui/react-tailwind-shadcn/` ships; add `rules/ui/<flavor>/` (port + adapt), then drop `react-tailwind-shadcn/` — same pattern as the SQL vendors |
 | `backend == none` | `skills/backend`, `rules/backend.md` |
-| `database == none` | `rules/sql/` (whole tree), `rules/db-migrations.md`, `db/` (whole tree), `.github/workflows/db-*.yml` + the db jobs in `ci.yml` |
-| `database in {sqlite, mongodb}` | `rules/sql/` (keep `db-migrations.md` only if migrations are SQL-based) |
+| `database == none` | `rules/sql/` (whole tree), `rules/db-migrations.md`, `db/` (whole tree — includes `db/tests/`), `.github/workflows/db-*.yml` + the db jobs in `ci.yml` |
+| `tests == none` (opt-out, `database != none`) | `db/tests/` (the test scaffold only) + the "db/tests assertions" step in `ci.yml` |
+| `database in {sqlite, mongodb}` | `rules/sql/` (keep `db-migrations.md` only if the migrations answer is SQL-based, i.e. `plain-sql`) |
 | `database == postgres` | `rules/sql/mssql/` (keep only the matching vendor) |
 | `database == mssql` | `rules/sql/postgres/` (keep only the matching vendor; adapt the PostgreSQL `db/` example tree) |
 | `database == mysql` (no shipped ruleset) | both shipped vendors; add `rules/sql/<vendor>/` (port + adapt from a shipped one) |

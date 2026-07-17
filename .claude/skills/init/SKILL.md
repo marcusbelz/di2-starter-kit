@@ -41,6 +41,7 @@ Capture every value in the `stack.md` table:
 | **UI** | Does the project have a user interface? (web UI / CLI / TUI / none) | `/ux`, `/frontend`, `rules/ui/`, `cookies.md` |
 | **Backend** | Does it need server-side logic / APIs? (yes / no) | `/backend`, `rules/backend.md` |
 | **Database** | Data store? (none / postgres / mysql / mssql / sqlite / mongodb) | `rules/sql/`, `rules/db-migrations.md` |
+| **Migrations** | How do schema changes ship? (`plain-sql` — the kit's in-house runner, see `db-migrations.md` / the stack's own tool: `alembic`, `prisma`, … / `none`). **Only ask when `database != none`** (else record `none`); default `plain-sql` for the shipped SQL vendors. | `rules/db-migrations.md` (keep only if SQL-based) |
 | **Tests** *(optional)* | Keep the test scaffold? (yes / no) — currently the DB object tests under `db/tests/`. **Only ask when `database != none`** (with no database there is no scaffold to keep). Default **yes** when unsure. | `db/tests/` |
 | **Auth** | Authentication? (none / OIDC-Keycloak / OIDC-other / custom-JWT / session) | `/auth` |
 | **Deploy** | Hosting / deploy target? (none / Docker on a VPS via SSH+CI / docker-compose / k8s / serverless) | `/deploy`, `rules/deploy-infra.md` |
@@ -48,8 +49,14 @@ Capture every value in the `stack.md` table:
 | **Env stages** | Environments? (single / dev,prod / dev,int,test,prod) | `/deploy` stage list |
 | **Feature prefix** | Feature-ID prefix? (default `feat`) | feature naming |
 
-Also derive the **build / test / run / audit commands** for the chosen runtime (confirm them with
-the user — e.g. Python: `ruff check .`, `pytest`, `docker build .`, `pip-audit`).
+Two `stack.md` keys are **derived, not asked**, and confirmed with the user alongside the commands:
+- **`package_manager`** — follows from the runtime answer (Python → `uv`/`pip`/`poetry`,
+  Node → `npm`/`pnpm`, Go → `go mod`, …).
+- The **build / test / run / audit commands** for the chosen runtime (e.g. Python:
+  `ruff check .`, `pytest`, `docker build .`, `pip-audit`).
+
+Every key in the `stack.md` Profile table must end up with an explicit value — asked or
+derived-and-confirmed, never silently guessed.
 
 ## Step 3 — Write the framework conditions
 1. **`.claude/rules/stack.md`** — replace every `{{PLACEHOLDER}}` with the captured values (the
@@ -75,7 +82,7 @@ Apply this matrix from the Step-2 answers:
 | `backend == none` | `.claude/skills/backend/`, `.claude/rules/backend.md` |
 | `database == none` | `.claude/rules/sql/` (whole tree), `.claude/rules/db-migrations.md`, `db/` (whole tree — includes `db/tests/`), `.github/workflows/db-*.yml` + the db jobs in `.github/workflows/ci.yml` |
 | `tests == none` (user opted out, `database != none`) | `db/tests/` (the test scaffold only — keep the rest of `db/`) + the "db/tests assertions" step in `.github/workflows/ci.yml` |
-| `database in {sqlite, mongodb}` | `.claude/rules/sql/` (keep `db-migrations.md` only if migrations are SQL-based — else remove) |
+| `database in {sqlite, mongodb}` | `.claude/rules/sql/` (keep `db-migrations.md` only if the **Migrations** answer is SQL-based, i.e. `plain-sql` — else remove) |
 | `database == postgres` | `.claude/rules/sql/mssql/` (keep only the matching vendor directory) |
 | `database == mssql` | `.claude/rules/sql/postgres/` (keep only the matching vendor directory). Note: the `db/` artifact tree is a PostgreSQL worked example — adapt it to T-SQL/sqlcmd or rebuild it per `sql/mssql/` |
 | `database in {mysql, sqlite, …}` (SQL, no shipped ruleset) | both shipped vendor dirs. Create `.claude/rules/sql/<vendor>/` by copying + adapting a shipped one (quoting/dialect/identity differ — see `sql/README.md`) |
