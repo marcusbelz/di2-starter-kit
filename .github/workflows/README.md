@@ -19,6 +19,12 @@
 The destructive workflows (`db-clean`, `db-drop`) require typing the literal word
 (`clean` / `drop`) into the confirmation input — a second, deliberate step beyond the dispatch.
 
+`db-deploy.yml` serializes runs **per environment** via a `concurrency:` group
+(`cancel-in-progress: false` — a running deploy finishes, the queued one then no-ops on everything
+already applied): deploy.sh's run-once check is not concurrency-safe, so overlapping deploys of
+the same database must never happen. Manual/local runs inherit the same one-deploy-at-a-time
+discipline (see [KB-004](../../docs/kb/kb-004-db-deploy-schema-objects.md)).
+
 ## How the DB workflows reach the target
 The dispatch workflows **SSH into the deploy host**, `git fetch` + `git reset --hard` the per-env
 checkout at `vars.DEPLOY_PATH`, and run the matching `db/scripts/*.sh` there. The database itself

@@ -19,6 +19,12 @@
 # ABORTS the deploy (applied change files are immutable — create a new file).
 # See .claude/rules/db-migrations.md.
 #
+# CONCURRENCY: one deploy at a time per database. The run-once check
+# (SELECT -> execute -> record) is not safe against a parallel deploy of the
+# same environment — the DB - deploy workflow serializes runs via a per-env
+# concurrency group; keep the same single-runner discipline for manual/local
+# runs (don't start a second deploy while one is in flight).
+#
 # After a successful run it records one row in <app>.schema_apply_log via
 # sp_ins_schema_apply (the deploy tracker from .claude/rules/db-migrations.md).
 #

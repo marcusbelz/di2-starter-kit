@@ -49,6 +49,8 @@
    skip path.
 5. **Deploy.** Routine rollout per environment ([KB-004](kb-004-db-deploy-schema-objects.md)) —
    locally or via the **DB - deploy** workflow ([KB-007](kb-007-github-actions-db-deployment-setup.md)).
+   One deploy at a time per database: the workflow serializes runs per environment; for manual
+   runs, never start a second deploy while one is in flight (see KB-004).
 6. **Contract (optional follow-up).** Once a `SET NOT NULL`-style transition has been applied on
    every environment, move the final state into the object file as an idempotent `ALTER` so the
    desired state is fully described by the object file again.

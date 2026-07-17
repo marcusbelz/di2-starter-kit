@@ -67,6 +67,10 @@ Environment secret.
 - `predeploy`/`postdeploy` transition scripts run **once per database**: applied files (tracked by
   filename + checksum in `app.schema_change_log`) are skipped on every later deploy; an applied
   file that was edited afterwards **aborts** the deploy (immutability guard).
+- **One deploy at a time per database.** The run-once check is not concurrency-safe — two parallel
+  deploys of the same environment could both execute a transition. The **DB - deploy** workflow
+  serializes runs per environment (a `concurrency:` group, queued not cancelled); for manual/local
+  runs, keep the same discipline and never start a second deploy while one is in flight.
 - It connects as the **schema owner**, so new objects are auto-granted to the RW role via default
   privileges — no separate grant step.
 - After a successful run it records one row in `app.schema_apply_log` (version from

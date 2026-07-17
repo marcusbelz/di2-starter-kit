@@ -20,6 +20,15 @@ on:
         type: choice
         options: [dev, int, test, prod]
 
+# Serialize deploys per environment: deploy.sh's run-once check (SELECT ->
+# execute -> record) is not concurrency-safe, so two overlapping runs against
+# the same database could both pass the check and execute a transition twice.
+# cancel-in-progress stays false — a running deploy must finish, the queued one
+# then no-ops on everything already applied.
+concurrency:
+  group: db-deploy-${{ github.event.inputs.environment }}
+  cancel-in-progress: false
+
 jobs:
   deploy:
     name: Deploy ${{ github.event.inputs.schema }} to ${{ github.event.inputs.environment }}
