@@ -41,8 +41,12 @@ The seven **object sections** are batched into one `psql` call per schema. The t
 sections** run **file-by-file with run-once semantics**: per file, `deploy.sh` computes the sha256
 checksum and consults `schema_change_log` —
 
-- **not applied** → execute the file, then record filename/checksum/git_sha via
-  `sp_ins_schema_change`;
+- **not applied** → execute the file **and** record filename/checksum/git_sha via
+  `sp_ins_schema_change` in **one transaction** (`--single-transaction`) — applied and recorded
+  commit atomically, so a deploy killed mid-run never leaves an executed-but-unrecorded
+  transition. Statements that refuse to run inside a transaction block (`CREATE INDEX
+  CONCURRENTLY`, `VACUUM`, …) opt out with `-- no-single-transaction` as the file's **first
+  line**, falling back to the non-atomic two-step apply (keep such files idempotent);
 - **applied, same checksum** → skip (logged as `skipped (already applied)`);
 - **applied, different checksum** → **abort** the deploy: applied change files are immutable —
   create a new file instead of editing.

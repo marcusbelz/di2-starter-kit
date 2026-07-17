@@ -29,7 +29,11 @@ Within a section, files apply in prefix order (3-digit table-group numbers in th
    destructive change, or backfilling a new column before it becomes `NOT NULL`. These scripts are
    **run-once per database**, tracked by filename + sha256 checksum in `schema_change_log`:
    already-applied files are skipped; an applied file whose checksum changed **aborts** the deploy
-   (applied change files are immutable — a correction is a new file). Applied files stay in the
+   (applied change files are immutable — a correction is a new file). The runner executes a
+   transition and records it **atomically in one transaction** — a deploy killed mid-run never
+   leaves an executed-but-unrecorded transition; statements that refuse to run inside a
+   transaction block opt out with `-- no-single-transaction` as the file's first line (non-atomic
+   fallback — write such files idempotent). Applied files stay in the
    tree; tracking makes them inert. Write every transition to also succeed on an
    empty-but-current schema (greenfield deploys run them all once, in chronological order).
 

@@ -27,9 +27,12 @@ not per-table state) — no `NUMBERS.md` entry.
 ## Run-once semantics & immutability
 Each file executes **exactly once per database**: `db/scripts/deploy.sh` runs these files
 individually, records filename + sha256 checksum in `schema_change_log` (via
-`sp_ins_schema_change`), and skips already-applied files on every later deploy. **Once applied
-anywhere, a file is never edited** — the runner compares checksums and **aborts** on a mismatch.
-A correction is a new file.
+`sp_ins_schema_change`), and skips already-applied files on every later deploy. Execution and
+registration commit **atomically in one transaction**; statements that refuse to run inside a
+transaction block (`CREATE INDEX CONCURRENTLY`, `VACUUM`, …) opt out with
+`-- no-single-transaction` as the file's **first line** (non-atomic fallback — write such files
+idempotent). **Once applied anywhere, a file is never edited** — the runner compares checksums
+and **aborts** on a mismatch. A correction is a new file.
 
 ## Lifecycle
 Applied files stay in the tree; tracking makes them inert. No archive step. A greenfield deploy

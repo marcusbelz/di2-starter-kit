@@ -12,9 +12,12 @@
 #
 # predeploy/postdeploy transition scripts are RUN-ONCE per database: each file is
 # executed individually, tracked by filename + sha256 checksum in
-# <app>.schema_change_log (via sp_ins_schema_change). Already-applied files are
-# skipped; an applied file whose checksum changed ABORTS the deploy (applied
-# change files are immutable — create a new file). See .claude/rules/db-migrations.md.
+# <app>.schema_change_log (via sp_ins_schema_change). Execution and registration
+# run in ONE transaction, so "applied" and "recorded" commit atomically (opt-out
+# for non-transactional statements: '-- no-single-transaction' as first line).
+# Already-applied files are skipped; an applied file whose checksum changed
+# ABORTS the deploy (applied change files are immutable — create a new file).
+# See .claude/rules/db-migrations.md.
 #
 # After a successful run it records one row in <app>.schema_apply_log via
 # sp_ins_schema_apply (the deploy tracker from .claude/rules/db-migrations.md).
@@ -97,10 +100,17 @@ PSQL=(psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_FW_USER" -d "$DB_NAME" -v ON_ERRO
 
 # --------------------------------------------------------------------------------
 # Apply one predeploy/postdeploy transition file with run-once semantics:
-#   not applied                 -> execute, then record filename/checksum/git_sha
-#                                  via sp_ins_schema_change
+#   not applied                 -> execute AND record filename/checksum/git_sha
+#                                  (sp_ins_schema_change) in ONE transaction
 #   applied, same checksum      -> skip
 #   applied, different checksum -> ABORT (applied change files are immutable)
+# Executing and recording commit atomically (--single-transaction), so a deploy
+# killed mid-run can never leave an executed-but-unrecorded transition that the
+# next deploy would run a second time. Statements that refuse to run inside a
+# transaction block (CREATE INDEX CONCURRENTLY, VACUUM, ...) cannot use this
+# path: opt out with '-- no-single-transaction' as the file's FIRST line, which
+# falls back to the non-atomic two-step apply (execute, then record) — keep such
+# files idempotent, they may run twice after a crash between the two steps.
 # git_sha falls back to 'unknown' outside a git checkout — unlike the informational
 # schema_apply_log row, the run-once row is functional and must always be written.
 # --------------------------------------------------------------------------------
@@ -120,15 +130,31 @@ SQL
 
   if [ -z "$applied" ]; then
     echo "    $section: applying $name"
-    "${PSQL[@]}" -f "$ENV_SQL" -f "$file"
-    "${PSQL[@]}" \
-      -v "fname=$name" \
-      -v "sum=$checksum" \
-      -v "sha=${GIT_SHA:-unknown}" \
-      -f "$ENV_SQL" \
-      -f - <<SQL
+    if head -n 1 "$file" | grep -q '^-- no-single-transaction'; then
+      # Opt-out path (non-transactional statements): execute, then record in a
+      # second call — the crash window between the two steps is the price of
+      # the opt-out; keep such files idempotent.
+      echo "    $section: $name opted out of single-transaction apply (non-atomic two-step)"
+      "${PSQL[@]}" -f "$ENV_SQL" -f "$file"
+      "${PSQL[@]}" \
+        -v "fname=$name" \
+        -v "sum=$checksum" \
+        -v "sha=${GIT_SHA:-unknown}" \
+        -f "$ENV_SQL" \
+        -f - <<SQL
 CALL :${TRACKER_SCHEMA}.sp_ins_schema_change(NULL, :'fname', :'sum', :'sha');
 SQL
+    else
+      "${PSQL[@]}" --single-transaction \
+        -v "fname=$name" \
+        -v "sum=$checksum" \
+        -v "sha=${GIT_SHA:-unknown}" \
+        -f "$ENV_SQL" \
+        -f "$file" \
+        -f - <<SQL
+CALL :${TRACKER_SCHEMA}.sp_ins_schema_change(NULL, :'fname', :'sum', :'sha');
+SQL
+    fi
   elif [ "$applied" = "$checksum" ]; then
     echo "    $section: $name skipped (already applied)"
   else

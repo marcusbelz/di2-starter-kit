@@ -36,6 +36,14 @@
      (e.g. backfill; a `SET NOT NULL` goes at the **end of the same script**, after its backfill).
    Write it to also succeed on an empty-but-current schema (`WHERE` guards / `IF EXISTS`) — a
    greenfield deploy runs all transitions once, in chronological order.
+
+   **Atomicity guarantee:** the runner executes the transition and records it in
+   `schema_change_log` in **one transaction** — a deploy killed mid-run never leaves an
+   executed-but-unrecorded transition that the next deploy would run twice. The flip side (shared
+   with Flyway/Liquibase): statements that refuse to run inside a transaction block
+   (`CREATE INDEX CONCURRENTLY`, `VACUUM`, some `ALTER SYSTEM`) can't live in such a file — opt
+   out with `-- no-single-transaction` as the file's **first line**. Opt-out files fall back to
+   the non-atomic two-step apply and may run twice after a crash: write them idempotent.
 4. **Apply-smoke.** Run the change end-to-end against a throwaway DB before merging
    ([KB-005](kb-005-db-apply-smoke-and-tests.md)); CI's double deploy also proves the run-once
    skip path.
