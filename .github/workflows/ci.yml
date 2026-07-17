@@ -7,7 +7,10 @@ name: CI
 #
 # When your project gets an application stack, add its lint/build/test jobs here
 # (commands from .claude/rules/stack.md). If /init pruned the database, delete the
-# db jobs (or this file).
+# db jobs (or this file). UI projects (react-tailwind-shadcn flavor): wire the
+# shipped type-scale guard into the lint job —
+# .claude/rules/ui/react-tailwind-shadcn/eslint-rules/no-raw-font-size.mjs
+# (wiring: eslint.config.snippet.mjs next to it, docs: brand.md "Enforcement").
 
 on:
   pull_request:

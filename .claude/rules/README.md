@@ -22,5 +22,13 @@ loading works (and what it means for pruning and rule edits):
 | [`sql/`](sql/) | Vendor-specific SQL rulesets, one subdirectory per vendor (implemented: [`sql/postgres/`](sql/postgres/), [`sql/mssql/`](sql/mssql/)) | `database` picks the vendor; others pruned |
 | [`ui/`](ui/) | Flavor-specific UI rulesets, one subdirectory per UI stack (implemented: [`ui/react-tailwind-shadcn/`](ui/react-tailwind-shadcn/)) | `ui` picks the flavor; `ui == none` prunes all |
 
+**Rules with a machine-checkable core ship an enforcement counterpart** (lint rule, CI check, or
+script). A prose rule raises the hit rate, but at AI generation volume it cannot reach 100 % —
+the prose explains the *why*, the guard closes the gap between a high hit rate and zero drift.
+Existing instances: deploy idempotence (CI deploys twice, [`ci.yml`](../../.github/workflows/ci.yml)),
+table-group numbers ([`db/scripts/lint-numbers.sh`](../../db/scripts/lint-numbers.sh)), the UI
+type scale ([`ui/react-tailwind-shadcn/eslint-rules/no-raw-font-size.mjs`](ui/react-tailwind-shadcn/eslint-rules/no-raw-font-size.mjs)).
+When you add a rule whose core a machine could check, add the guard with it.
+
 Conventions for writing rules: one concern per file, English, and if a rule references a file or
 path, keep that reference valid — rules are loaded verbatim into every session.
