@@ -97,6 +97,11 @@ Bracketed steps are pruned for projects that don't need them (no UI → no `/ux`
 backend for a given feature → skip `/backend`). Cross-cutting: `/bug` (anytime), `/auth` (auth
 projects), `/help` (always).
 
+The canonical step-by-step description of every workflow step (0–10), the cross-cutting skills,
+and the bug-loop lives in [CLAUDE.md § Development Workflow](CLAUDE.md#development-workflow).
+For an interactive "where am I, what's next?" guide, run
+[`/help`](.claude/skills/help/SKILL.md) at any time.
+
 ## What's in the box
 ```
 .claude/skills/   init · requirements · architecture · ux · backend · frontend · qa · review

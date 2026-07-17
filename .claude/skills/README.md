@@ -32,3 +32,5 @@ How skills are loaded (on-demand, vs. the always-on rules):
 | [`help/`](help/) | Where am I in the workflow, what's next |
 
 Handoffs between skills are always user-initiated (`.claude/rules/general.md` → Human-in-the-Loop).
+The canonical step-by-step narrative of the whole chain (incl. the bug-loop) is
+[CLAUDE.md § Development Workflow](../../CLAUDE.md#development-workflow).
