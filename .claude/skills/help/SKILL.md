@@ -56,7 +56,7 @@ no `/deploy`).
 > Run `/security` (or `/security update`) — mandatory gate before prod.
 
 **Security green:**
-> `docs/security-audit.md` shows Go-Live JA with no open Critical/High → run `/deploy prod`.
+> `docs/security-audit.md` shows `Go-Live recommendation: ✅ YES` with no open Critical/High → run `/deploy prod`.
 
 **All features deployed:**
 > Run `/requirements` to add a feature, or check `docs/PRD.md` for planned-but-unspecified ones.
