@@ -39,13 +39,14 @@ no `/deploy`).
 **Has Tech Design, project has a UI, no UX section:**
 > feat-XXXX is ready for UX. Run `/ux` for `features/feat-XXXX-name.md`.
 
-**UX done, but a `*(manual-AC)*` has no test case** (`node scripts/check-testcases.mjs` reports it):
+**UX done, but a `*(manual-AC)*` has no test case** (UI projects; `node scripts/check-testcases.mjs --gate <feature-id>` reports it):
 > The build skills stop until each marked AC has a case. Finish `/ux` for feat-XXXX — it writes the
 > cases from the ACs before any code.
 
 **Ready for implementation:**
-> If the feature needs a backend (per its Tech Design): run `/backend` first, then `/frontend`
-> (UI projects). If it's frontend-only or a no-UI project: run `/frontend` or `/backend` directly.
+> `/backend` builds all non-UI code (server/API, data, CLI, library); `/frontend` builds UI code
+> (UI projects only). A feature with both: `/backend` first, then `/frontend`. Only one of them
+> applies (per the Tech Design / the skills the project has): run that one directly.
 
 **Implemented, no QA:**
 > Run `/qa` to test `features/feat-XXXX-name.md` against its acceptance criteria (it also runs the
@@ -61,14 +62,18 @@ no `/deploy`).
 **Reviewed, not yet on the first env (and a deploy target exists):**
 > Run `/deploy <first-stage>` (per env_stages in stack.md).
 
+**Reviewed, no deploy target (`deploy: none`):**
+> Merge the reviewed change into the production branch (per `release_merge` in stack.md); `/review`
+> then marks the feature Deployed (= released) and archives it.
+
 **On a pre-prod env, `/security` not run or stale:**
 > Run `/security` (or `/security update`) — mandatory gate before prod.
 
 **Security green:**
 > `docs/security-audit.md` shows `Go-Live recommendation: ✅ YES` with no open Critical/High → run `/deploy prod`.
 
-**All features deployed:**
-> Run `/requirements` to add a feature, or check `docs/PRD.md` for planned-but-unspecified ones.
+**All features deployed (or released):**
+> Run `/requirements` to add a feature, or check `docs/roadmap.md` for planned-but-unspecified ones.
 
 ### Step 3: Answer the user's question
 If the user asked something specific, answer it in the context of the current state. Common ones:

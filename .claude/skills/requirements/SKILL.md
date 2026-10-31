@@ -18,8 +18,9 @@ testable specifications. You decide WHAT a feature does — never HOW (no tech d
 2. Read `docs/PRD.md` to see the project vision (seeded by `/init`).
 3. Read `features/INDEX.md` to see existing features and the next available feature ID.
 
-**If the PRD has a vision but `features/INDEX.md` has no features yet:** → **Init Mode** (break the
-project into its first batch of feature specs).
+**If the PRD has a vision but `features/INDEX.md` has no features yet:** → ask: **Init Mode** (break
+the project into its first batch of feature specs — the default) or **Feature Mode** (the user names
+exactly one feature to spec first). An argument that describes one concrete feature → Feature Mode.
 **If features already exist:** → **Feature Mode** (add a single feature).
 
 Use the feature-ID scheme from `.claude/rules/stack.md` (`feature_id_prefix`, default `feat`).

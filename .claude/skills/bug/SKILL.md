@@ -23,9 +23,9 @@ after `/deploy`, from production); a developer spots an unrelated bug during `/f
 affected files, repro steps, proposed fix), status `Open`, and a new row in `docs/bugs/INDEX.md`.
 
 **Fix phase (after `/bug`):**
-- UI / Interaction / Layout / Client-state → `/frontend BUG-NNNN`
-- API / DB / Auth / Server logic → `/backend BUG-NNNN`
-- Login / Session / OIDC / Auth provider → `/auth BUG-NNNN`
+- UI / Interaction / Layout / Client-state → `/frontend BUG-NNNN` (UI projects)
+- API / DB / Server logic / CLI / library code → `/backend BUG-NNNN`
+- Login / Session / OIDC / Auth provider → `/auth BUG-NNNN` (projects with auth)
 - Each fix skill reads the bug file, fixes it **without scope-creep**, and commits per the bug-fix
   convention in `.claude/rules/general.md` (`fix(<prefix>-XXXX): BUG-NNNN; …`).
 
@@ -216,9 +216,10 @@ Ask: "Document this bug as shown? (yes / corrections)"
 
 **Fix commands:** <skill workflow to fix + close — MANDATORY on every new bug>
 1. `/<frontend|backend|auth> BUG-NNNN` — implement the fix. Put the ONE skill matching the Area
-   (not all variants): `/frontend` for UI/interaction/layout/client-state, `/backend` for
-   API/DB/server logic, `/auth` for login/session/OIDC. For cross-cutting/doc bugs with no clear
-   fix skill: describe what to do in prose.
+   **that the project has** (not all variants): `/frontend` for UI/interaction/layout/client-state,
+   `/backend` for API/DB/server logic and CLI/library code, `/auth` for login/session/OIDC — a
+   pruned skill's area falls to `/backend`. For cross-cutting/doc bugs with no clear fix skill:
+   describe what to do in prose.
 2. `/qa BUG-NNNN` — narrow re-test against the repro above.
 3. `/bug close BUG-NNNN` — close + move into the quarterly archive.
 ```

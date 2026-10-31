@@ -1,15 +1,15 @@
 name: CI
 
-# DB-focused CI: the primary SQL gate is a real dry-run deploy against a throwaway
-# PostgreSQL 17 service, followed by the db/tests assertions and an idempotency
-# re-deploy. NO secrets — ephemeral DB in the runner, committed local creds 'pw'
-# (see db/config/local.env*), so this also runs from fork PRs.
-#
-# When your project gets an application stack, add its lint/build/test jobs here
-# (commands from .claude/rules/stack.md). If /init pruned the database, delete the
-# db jobs (or this file). UI projects (react-tailwind-shadcn flavor): wire the
-# shipped type-scale guard into the lint job —
-# .claude/rules/ui/react-tailwind-shadcn/eslint-rules/no-raw-font-size.mjs
+# Template CI (/init rewrites this header for the project). Jobs:
+# - db-dry-run-deploy: the SQL gate - a real dry-run deploy against a throwaway PostgreSQL 17
+#   service, the db/tests assertions and an idempotency re-deploy. NO secrets (ephemeral DB,
+#   committed local creds 'pw', see db/config/local.env*), so it also runs from fork PRs.
+#   /init removes this job when database == none.
+# - lint: shellcheck + the repo guards under scripts/ (stack-independent, prune-proof).
+# - app (added by /init): the project's lint + test commands from .claude/rules/stack.md -
+#   the "green means complete" test gate of .claude/rules/testing.md.
+# UI projects (react-tailwind-shadcn flavor): wire the shipped type-scale guard into the app
+# lint - .claude/rules/ui/react-tailwind-shadcn/eslint-rules/no-raw-font-size.mjs
 # (wiring: eslint.config.snippet.mjs next to it, docs: brand.md "Enforcement").
 
 on:
@@ -82,10 +82,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: shellcheck (bash runners)
-        run: shellcheck --severity=warning db/scripts/*.sh db/tests/*.sh scripts/*.sh
+      # Prune-proof: checks only the shell scripts that exist (a project without db/ has none there).
+      - name: shellcheck (bash scripts)
+        run: |
+          shopt -s nullglob
+          files=(db/scripts/*.sh db/tests/*.sh scripts/*.sh)
+          if [ ${#files[@]} -eq 0 ]; then echo "no shell scripts to check"; exit 0; fi
+          shellcheck --severity=warning "${files[@]}"
 
       - name: table-group number lint (NUMBERS.md registry)
+        if: hashFiles('db/scripts/lint-numbers.sh') != ''
         run: bash db/scripts/lint-numbers.sh
 
       # Guards under scripts/*.mjs are dependency-free Node scripts (node: builtins only,

@@ -7,7 +7,7 @@
 - **Planned** - Requirements written, ready for development
 - **In Progress** - Currently being built
 - **In Review** - QA testing in progress
-- **Deployed** - Live in production
+- **Deployed** - Live in production (projects without a deploy target: released - the reviewed change is on the production branch)
 - **Superseded** - Replaced by another spec; not implemented
 
 **Deployed** and **Superseded** are terminal statuses: the spec file is `git mv`'d to the

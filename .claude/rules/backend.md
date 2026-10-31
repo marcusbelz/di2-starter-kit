@@ -1,7 +1,10 @@
-# Backend Rules (API / data / server-side)
+# Backend Rules (API / data / server-side / CLI / library)
 
-> Stack-agnostic backend discipline. The concrete framework, database, and language come from
-> `.claude/rules/stack.md`. Pruned at `/init` time if the project has no backend.
+> Stack-agnostic discipline for all application logic outside the UI. The concrete framework,
+> database, and language come from `.claude/rules/stack.md`. In a CLI or library project the
+> "API" sections apply to its public interface (commands, options, exit codes, public functions);
+> sections about sessions or data stores apply only where those exist. Pruned at `/init` time only
+> for UI-only projects (`backend: none`).
 
 ## Data layer
 - **Access control at the data layer where the engine supports it.** For PostgreSQL on a

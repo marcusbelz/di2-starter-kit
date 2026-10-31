@@ -47,7 +47,7 @@ see [Symptom → Cause → Fix](#symptom--cause--fix).
 ## Option B — local copy script (no GitHub needed)
 
 The template ships two equivalent helper scripts under [`scripts/`](../../scripts/README.md) that
-copy the working tree into a fresh local repo:
+copy the **committed** template (`git archive HEAD`) into a fresh local repo:
 
 ```powershell
 # Windows / PowerShell
@@ -63,11 +63,18 @@ Both scripts do the same four things:
 
 1. **Guard the target:** the target directory must not exist yet or must be empty — the script
    aborts rather than overwrite anything.
-2. **Copy the template** excluding `.git` and dependency/build directories (`node_modules`,
-   `.venv`, `dist`, `build`, `.next`).
+2. **Copy the committed template** via `git archive HEAD` — exactly the tracked files of the
+   template's last commit, with its line endings and executable bits; no `.git`, no ignored or
+   untracked files (local settings such as `.claude/settings.local.json`, stray dumps, build
+   output).
 3. **Initialize a fresh repo** on branch `main`: `git init -b main` + `git add -A` + initial
    commit `chore: initialize from di2-starter-kit`.
 4. **Remind you** to open the new project in Claude Code and run `/init`.
+
+**Only committed content is copied.** Uncommitted edits in the template do not reach the new
+project — commit them in the template first (the scripts print a note when the template has
+uncommitted changes). The template must therefore be a git checkout: a ZIP download has no `HEAD`
+to copy from — clone it with git, or use Option A.
 
 The new repo has no remote. If the project should live on GitHub, create the remote afterwards
 (e.g. `gh repo create my-new-project --private --source . --push`).
@@ -110,5 +117,6 @@ ls .claude/skills          # the full skill set (still maximal — /init prunes 
 | `gh repo create --template` fails with "not a template repository" / no "Use this template" button | The template repo is not marked as a template on GitHub | The repo owner enables it: Settings → General → **"Template repository"**; then retry |
 | Copy script aborts with "Target … already exists and is not empty" | Deliberate guard against overwriting | Pick a new/empty target directory (a lone `.git/` in the target is tolerated) |
 | New project contains the template's full git history | The template was `git clone`d instead of using Option A/B | Start over with Option A or B; do not build on a direct clone |
-| `robocopy failed (exit ≥ 8)` (Windows) | Real copy error (locked files, permissions) | Close programs locking files (IDE/AV), check target permissions, retry |
+| A template edit is missing in the new project | The scripts copy the committed `HEAD` only — uncommitted (or untracked) changes are left out by design | Commit the edit in the template, delete the new project, run the script again |
+| Copy script aborts with "is not a git checkout with a commit" | The template was downloaded as a ZIP (no `.git`) — there is no `HEAD` to archive | `git clone` the template and run the script from the clone, or use Option A |
 | `/init` not offered / skills missing in the new project | Copy was made from an already-initialized (pruned) project, not from the template | Re-create from the actual template — pruned skills only exist there |

@@ -3,8 +3,10 @@
 .SYNOPSIS
   Create a new project from the DI2 Starter Kit (local copy + fresh git repo).
 .DESCRIPTION
-  Copies the template (excluding this repo's .git and dependency/build dirs) into -Target,
-  initializes a fresh git repository, makes an initial commit, and reminds you to run /init.
+  Copies the committed template (`git archive HEAD`) into -Target, initializes a fresh git
+  repository, makes an initial commit, and reminds you to run /init.
+  Only committed content is copied - untracked, ignored and uncommitted files never reach the
+  new project (local settings, stray dumps); commit template edits first if you want them.
 .PARAMETER Target
   Destination directory for the new project. Must not already exist (or must be empty).
 .EXAMPLE
@@ -21,6 +23,11 @@ $ErrorActionPreference = 'Stop'
 # Repo root = parent of the scripts/ dir this file lives in.
 $Source = Split-Path -Parent $PSScriptRoot
 
+$null = git -C $Source rev-parse --verify -q HEAD
+if ($LASTEXITCODE -ne 0) {
+  throw "Template '$Source' is not a git checkout with a commit - the copy is taken from HEAD. Clone the template with git (or use GitHub's 'Use this template'), then retry."
+}
+
 if (Test-Path -LiteralPath $Target) {
   $existing = Get-ChildItem -LiteralPath $Target -Force | Where-Object { $_.Name -ne '.git' }
   if ($existing) { throw "Target '$Target' already exists and is not empty." }
@@ -28,16 +35,31 @@ if (Test-Path -LiteralPath $Target) {
   New-Item -ItemType Directory -Path $Target -Force | Out-Null
 }
 
-Write-Host "Copying template -> $Target ..."
-# robocopy: /E recurse incl. empty dirs, /XD exclude dirs. Exit codes 0-7 are success.
-$null = robocopy $Source $Target /E /XD '.git' 'node_modules' '.venv' 'dist' 'build' '.next' /XF '*.log' /NFL /NDL /NJH /NJS /NP
-if ($LASTEXITCODE -ge 8) { throw "robocopy failed (exit $LASTEXITCODE)." }
+if (git -C $Source status --porcelain) {
+  Write-Host "Note: the template has uncommitted changes - they are NOT copied (only the committed HEAD is)." -ForegroundColor Yellow
+}
+
+Write-Host "Copying template (committed HEAD) -> $Target ..."
+# git archive: exactly the committed tree, checked out with the template's .gitattributes
+# (eol=lf files arrive with LF) - no .git, no ignored or untracked files.
+$zip = Join-Path ([System.IO.Path]::GetTempPath()) ("di2-starter-kit-" + [guid]::NewGuid().ToString('N') + '.zip')
+try {
+  git -C $Source archive --format=zip -o $zip HEAD
+  if ($LASTEXITCODE -ne 0) { throw "git archive failed (exit $LASTEXITCODE)." }
+  Expand-Archive -LiteralPath $zip -DestinationPath $Target -Force
+} finally {
+  if (Test-Path -LiteralPath $zip) { Remove-Item -LiteralPath $zip -Force }
+}
+
+# Executable files of the template - Windows has no executable bit, so git add records 644.
+$execPaths = @(git -C $Source ls-tree -r HEAD | Where-Object { $_ -match '^100755 ' } | ForEach-Object { ($_ -split "`t", 2)[1] })
 
 Push-Location $Target
 try {
   # -b main: deterministic initial branch regardless of the user's init.defaultBranch (git >= 2.28)
   git init -q -b main
   git add -A
+  if ($execPaths.Count -gt 0) { git update-index --chmod=+x -- @execPaths }
   git commit -q -m "chore: initialize from di2-starter-kit"
   Write-Host ""
   Write-Host "Done. New project created at: $Target" -ForegroundColor Green

@@ -9,12 +9,14 @@ user-invocable: true
 
 ## Role
 You review **the code changes of a single feature** after `/qa` reported "production-ready" and
-**before** the first deploy (`/deploy <first-stage>`). Result: a clear recommendation — **Approve**,
-**Approve with Comments**, or **Request Changes**.
+**before** the first deploy (`/deploy <first-stage>`) — or, in a project without a deploy target,
+before the release. Result: a clear recommendation — **Approve**, **Approve with Comments**, or
+**Request Changes**.
 
 ## Position in the workflow
 ```
 ... → /qa (passed) → /review (HERE) → /deploy <first> → … → /security → /deploy prod
+... → /qa (passed) → /review (HERE) → release: merge into main → Deployed (= released)   [deploy: none]
 ```
 - **Predecessor:** `/qa` reported production-ready (no open Critical/High; QA section present).
 - **Successor:** the first deploy stage.
@@ -71,9 +73,16 @@ convention-conformant.
 ## Recommendation logic
 | Findings | Recommendation | Next step |
 |---|---|---|
-| None / only Minor | Approve | `/deploy <first stage>` |
+| None / only Minor | Approve | `/deploy <first stage>` — or, without a deploy target, the release (below) |
 | Major (no Blocker) | Approve with Comments | user decides: fix now or follow-up |
-| ≥ 1 Blocker | Request Changes | back to `/frontend` / `/backend`, then `/qa` |
+| ≥ 1 Blocker | Request Changes | back to the fix skill that owns the code (`/backend`, and `/frontend` in UI projects), then `/qa` |
+
+**Projects without a deploy target (`deploy: none`, e.g. a library or CLI that is only released):**
+after Approve, the reviewed change goes onto the production branch per `release_merge` in
+`stack.md` (`user`: you prepare delta + merge message, the user merges). Once it is there (merged /
+tagged) and CI on that commit is green, set the spec and `features/INDEX.md` to **Deployed**
+(= released), add a short "Release" note (date, commit/tag) and archive the spec
+(`features/README.md`) — `/review` owns this step because there is no `/deploy`.
 
 ## Important
 - **Never fix bugs yourself.** Document findings, then back to Frontend/Backend.
@@ -90,9 +99,12 @@ convention-conformant.
 ## Handoff
 **Approve / Approve with Comments:**
 > "Code review for <prefix>-XXXX done — [N] Major, [M] Minor. Next step: `/deploy <first stage>`."
+> (Without a deploy target: "Next step: merge into the production branch — then I mark the
+> feature Deployed (released) and archive it.")
 
 **Request Changes:**
-> "Code review for <prefix>-XXXX found [N] Blocker(s). Back to `/frontend` / `/backend`, then `/qa` and `/review`."
+> "Code review for <prefix>-XXXX found [N] Blocker(s). Back to the fix skill (`/backend`, or
+> `/frontend` for UI code), then `/qa` and `/review`."
 
 ## Git Commit
 ```

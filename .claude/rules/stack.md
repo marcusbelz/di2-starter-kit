@@ -1,7 +1,7 @@
 # Tech Stack (single source of truth)
 
-> **This file is filled in by `/init`.** Until then it is a skeleton with `{{PLACEHOLDER}}`
-> values — that is the signal that the project is not yet initialized.
+> **This file is filled in by `/init`.** Until then the Profile table holds double-brace
+> placeholder values (`{{RUNTIME}}` …) — that is the signal that the project is not yet initialized.
 >
 > Every stack-agnostic skill (`/architecture`, `/backend`, `/review`, `/deploy`,
 > `/check-updates`, `/security`) reads THIS file to learn the concrete tech stack of the project.
@@ -15,15 +15,16 @@
 |-----|-------|-------|
 | `runtime` | `{{RUNTIME}}` | e.g. `python-3.12`, `node-22-ts`, `go-1.23` |
 | `package_manager` | `{{PACKAGE_MANAGER}}` | e.g. `uv` / `pip` / `poetry`, `npm` / `pnpm`, `go mod` |
-| `ui` | `{{UI}}` | `none` or e.g. `react-next-tailwind-shadcn`, `vue-nuxt`, `cli`, `tui` |
-| `backend` | `{{BACKEND}}` | `none` or e.g. `fastapi`, `flask`, `django`, `next-api`, `express` |
+| `ui` | `{{UI}}` | a **graphical** UI, e.g. `react-next-tailwind-shadcn`, `vue-nuxt`, `electron` — or `none` (a CLI/TUI is `none`) |
+| `backend` | `{{BACKEND}}` | application logic outside a UI, e.g. `fastapi`, `flask`, `django`, `next-api`, `express`, `cli`, `library` — `none` only for a UI-only project |
 | `database` | `{{DATABASE}}` | `none` / `postgres` / `mysql` / `mssql` / `sqlite` / `mongodb` |
 | `migrations` | `{{MIGRATIONS}}` | e.g. `none`, `plain-sql` (see `db-migrations.md`), `alembic`, `prisma` |
-| `tests` | `{{TESTS}}` | `keep` / `none` — optional test scaffold (currently the DB object tests under `db/tests/`); `/init` prunes it when `none`. Always `none` if `database == none` |
+| `db_tests` | `{{DB_TESTS}}` | `keep` / `none` — the DB object test scaffold under `db/tests/`; `/init` prunes it when `none`. Always `none` if `database == none`. (Application tests: see the notes below.) |
 | `auth` | `{{AUTH}}` | `none` / `oidc-keycloak` / `oidc-other` / `custom-jwt` / `session` |
 | `deploy` | `{{DEPLOY}}` | `none` or e.g. `docker-ssh-vps + github-actions`, `docker-compose`, `k8s`, `serverless` |
 | `ci` | `{{CI}}` | `none` / `github-actions` / `gitlab-ci` |
 | `env_stages` | `{{ENV_STAGES}}` | e.g. `single`, `dev,prod`, `dev,int,test,prod` |
+| `release_merge` | `{{RELEASE_MERGE}}` | `user` (default — Claude prepares the merge into the production branch, the user merges; `general.md`) / `claude` |
 | `feature_id_prefix` | `{{FEATURE_PREFIX}}` | default `feat` — the `XXXX` part is sequential |
 
 ## Build / Test / Run commands

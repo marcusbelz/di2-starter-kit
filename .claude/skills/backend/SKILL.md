@@ -1,7 +1,7 @@
 ---
 name: backend
-description: Build APIs, data model, and server-side logic. Use after the design (and UX mockups, if any) exist — backend is built before the frontend so the UI can consume real endpoints.
-argument-hint: "feature-spec-path"
+description: Build all application logic outside the UI — APIs, data model, server-side logic, and the code of CLI tools and libraries — and fix bugs in it. Use after the design (and UX mockups, if any) exist — in UI projects the backend is built before the frontend so the UI can consume real endpoints.
+argument-hint: "feature-spec-path | BUG-NNNN"
 user-invocable: true
 ---
 
@@ -9,7 +9,9 @@ user-invocable: true
 
 ## Role
 You read feature specs + tech design and implement APIs, the data model, and server-side logic —
-**against the project's actual stack**, not a hard-coded one.
+or, in a CLI/library project (`backend: cli` / `library` in `stack.md`), the commands, functions
+and modules themselves; there "endpoint" means a command or public function. Always **against the
+project's actual stack**, not a hard-coded one. You also own bug fixes in this code.
 
 ## Before Starting
 1. **Read `.claude/rules/stack.md`** — `backend`, `database`, `migrations`, `auth`, and the
@@ -18,7 +20,8 @@ You read feature specs + tech design and implement APIs, the data model, and ser
 3. Scan existing endpoints / data-access code in the project's actual source layout.
 4. **Test-case gate (projects with a UI / test-case catalog):** if the spec has ACs marked
    `*(manual-AC)*`, every one of them must be referenced by an **Active** case in
-   `docs/test-cases/cases/` (run `node scripts/check-testcases.mjs`). If one is missing, **stop** and
+   `docs/test-cases/cases/` (run `node scripts/check-testcases.mjs --gate <feature-id>` — it checks
+   this spec even when its UX section is still empty). If one is missing, **stop** and
    report it — `/ux` writes the case from the AC before the code exists; writing it after the build
    would derive the expectation from the code. The user may override explicitly; then note the
    override in the commit message. Bug-fix mode is exempt.
@@ -68,8 +71,9 @@ changes; scan existing endpoints again; continue — don't restart or duplicate.
 
 ## Bug-Fix Mode (`/backend BUG-NNNN`)
 - Read `docs/bugs/bug-NNNN-<slug>.md` (`Glob docs/bugs/bug-NNNN-*.md`).
-- **Only** accept API / data-model / access-control / auth / server-logic bugs. UI/interaction bugs
-  → `/frontend BUG-NNNN`; login/session/OIDC → `/auth BUG-NNNN`.
+- **Only** accept API / data-model / access-control / server-logic / CLI / library bugs.
+  UI/interaction bugs → `/frontend BUG-NNNN`; login/session/OIDC → `/auth BUG-NNNN` (where the
+  project has those skills — otherwise they are yours).
 - **No scope-creep:** fix only what the bug describes. Note systemic patterns as candidates for the
   next `/security` run instead of widening the fix.
 - **Regression lock (`.claude/rules/testing.md`):** if the fixed code has automated tests, add one

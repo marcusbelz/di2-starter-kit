@@ -11,7 +11,7 @@
 
 | Workflow | Trigger | What it does | Secrets |
 |----------|---------|--------------|---------|
-| [`ci.yml`](ci.yml) | PR → `main`/`master`, push → `dev`/`main` | Dry-run DB deploy against a throwaway `postgres:17` service (`create.sh local` → `deploy.sh all local` → `db/tests` → re-deploy as idempotency check) + shellcheck lint | **none** (ephemeral DB, committed local creds) |
+| [`ci.yml`](ci.yml) | PR → `main`/`master`, push → `dev`/`main` | `db-dry-run-deploy`: dry-run DB deploy against a throwaway `postgres:17` service (`create.sh local` → `deploy.sh all local` → `db/tests` → re-deploy as idempotency check); `lint`: shellcheck + the repo guards under `scripts/` (links, context budget, file size, bug index, test-case catalog); `app` (added by `/init`): the project's lint + test commands | **none** (ephemeral DB, committed local creds) |
 | [`db-create.yml`](db-create.yml) | manual dispatch (env) | one-time bootstrap: `db/scripts/create.sh <env>` on the host | SSH + all DB passwords |
 | [`db-deploy.yml`](db-deploy.yml) | manual dispatch (schema + env) | idempotent object deploy: `db/scripts/deploy.sh <schema> <env>` | SSH + `DB_FW_PASSWORD` |
 | [`db-clean.yml`](db-clean.yml) | manual dispatch (schema + env + typed `clean`) | drop schema objects (schema stays): `db/scripts/clean.sh` | SSH + `DB_FW_PASSWORD` |

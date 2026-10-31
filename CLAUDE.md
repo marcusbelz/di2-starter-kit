@@ -44,7 +44,8 @@ db/                 SQL DB artifacts (PostgreSQL): config/ · database/ · schem
                     (worked example slice; pruned by /init when database == none; tests/ is a
                     separate opt-out at /init even when a database is kept)
 scripts/            Helper scripts (new project from this template) + repo guards run in CI
-                    (dependency-free Node: markdown link check, file-size check)
+                    (dependency-free Node: markdown links, context budget, file size, bug index,
+                    test-case catalog)
 ```
 
 The application source layout (`src/`, `app/`, `cmd/`, …) depends on the chosen stack and is

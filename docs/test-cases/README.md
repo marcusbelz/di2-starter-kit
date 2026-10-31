@@ -189,7 +189,8 @@ when it has a **deadline**; the table below sets it.
 | **Author** | [`/ux`](../../.claude/skills/ux/SKILL.md) | writes a case for every marked AC as soon as the mockups are approved |
 | **Deadline** | `/backend` + [`/frontend`](../../.claude/skills/frontend/SKILL.md) | do **not** start while the spec has a marked AC without a case (bug-fix mode is exempt) |
 | **Consumer** | [`/qa`](../../.claude/skills/qa/SKILL.md) | runs the declared cases and writes a run protocol - or records why not; it does **not** write feature cases |
-| **Net** | `node scripts/check-testcases.mjs`, rule `[manual-ac]` | AC-level parity spec ↔ catalog, blocking in CI |
+| **Net** | `node scripts/check-testcases.mjs`, rule `[manual-ac]` | AC-level parity spec ↔ catalog, blocking in CI (for specs whose UX section is filled, or In Review/Deployed) |
+| **Gate** | `node scripts/check-testcases.mjs --gate <feature-id>` | the same parity for one spec **regardless** of status and UX section — run by `/backend` / `/frontend` before they start |
 
 **Why `/ux` and not `/qa`:** `/qa` runs **after** the code. A case written there is derived from the
 diff, not from the AC - and the only role separation the project has is gone. A gate at that point

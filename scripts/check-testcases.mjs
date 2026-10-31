@@ -66,12 +66,23 @@
 // in /backend + /frontend (a check after the build sees that a file exists, not that the
 // expectation came about independently).
 //
+// Gate mode: `node scripts/check-testcases.mjs --gate <spec-id>` (e.g. `--gate feat-0002`)
+// is the build gate of /backend and /frontend. For THAT spec the [manual-ac] parity runs
+// regardless of its status and of whether its "## UX Design" section is filled - /ux may
+// have been skipped, and the build must still not start with a marked AC that has no
+// ACTIVE case. All other checks run as usual. The last line is the gate result
+// ("gate <spec-id>: N manual-only AC, all covered" or the uncovered AC numbers); exit 1
+// when a marked AC of that spec is uncovered (or any other finding exists). Exit 2 for an
+// unknown spec ID or a missing argument - and when there is no catalog at all: a gate is
+// only requested by a project with a UI, and such a project must have one.
+//
 // No catalog: when docs/test-cases/ does not exist (a project without a UI - /init prunes
-// it), the guard reports that and exits 0.
+// it), the plain run reports that and exits 0; with --gate it exits 2 (see above).
 //
 // Convention: docs/test-cases/README.md. File set = git's view: tracked plus
 // untracked-but-not-ignored files, minus locally deleted ones - a local run checks what a
-// fresh CI checkout would. Exit codes: 0 clean, 1 findings, 2 environment problem.
+// fresh CI checkout would. Exit codes: 0 clean, 1 findings, 2 environment problem or
+// invalid --gate request.
 
 import { execFileSync } from "node:child_process"
 import { readFileSync } from "node:fs"
@@ -100,6 +111,34 @@ const MARK_MENTION = /\bmanual[\s_-]*ac\b/gi
 const PARITY_STATUSES = /^(In Review|Deployed)\b/
 
 // -----------------------------------------------------------------------------
+// Arguments: [--gate <spec-id>]
+// -----------------------------------------------------------------------------
+const USAGE = "usage: node scripts/check-testcases.mjs [--gate <spec-id>]   (e.g. --gate feat-0002)"
+let GATE = null
+{
+  const args = process.argv.slice(2)
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i]
+    let value
+    if (a === "--gate") value = args[++i]
+    else if (a.startsWith("--gate=")) value = a.slice("--gate=".length)
+    else {
+      console.error(`Test-case catalog: unknown argument '${a}'.\n${USAGE}`)
+      process.exit(2)
+    }
+    if (!value || value.startsWith("-")) {
+      console.error(`Test-case catalog: --gate needs a spec ID.\n${USAGE}`)
+      process.exit(2)
+    }
+    if (GATE !== null) {
+      console.error(`Test-case catalog: --gate given twice - one spec per gate run.\n${USAGE}`)
+      process.exit(2)
+    }
+    GATE = value.toLowerCase()
+  }
+}
+
+// -----------------------------------------------------------------------------
 // File set (git's view) and helpers
 // -----------------------------------------------------------------------------
 function gitLsFiles(args) {
@@ -125,6 +164,11 @@ const files = gitLsFiles(["--cached", "--others", "--exclude-standard"])
 
 const catalogFiles = files.filter((p) => p.startsWith(`${CATALOG}/`))
 if (catalogFiles.length === 0) {
+  if (GATE !== null) {
+    console.error(`Test-case catalog: gate requested for ${GATE}, but there is no test-case catalog (docs/test-cases/).`)
+    console.error("    -> a project with a UI keeps the catalog (/init prunes it only for ui == none); without a UI, drop the gate call.")
+    process.exit(2)
+  }
   console.log("Test-case catalog: no docs/test-cases/ - project without a UI catalog, nothing to check.")
   process.exit(0)
 }
@@ -244,6 +288,11 @@ for (const f of files) {
   const body = read(f)
   const status = (/^## Status:\s*(.+?)\s*$/m.exec(body) ?? /^(?:- )?\*\*Status:\*\*\s*(.+?)\s*$/m.exec(body))?.[1] ?? ""
   specs.set(id, { rel: f, body, status, ux: uxFilled(body), items: acItems(body) })
+}
+if (GATE !== null && !specs.has(GATE)) {
+  console.error(`Test-case catalog: gate requested for unknown spec ID '${GATE}' - no features/${GATE}-<name>.md (archive included).`)
+  console.error("    -> pass the feature ID exactly as in features/INDEX.md, e.g. --gate feat-0002.")
+  process.exit(2)
 }
 
 /** Reference value -> { specs: Map(spec ID -> Set(AC n)), bugs: Set } */
@@ -755,11 +804,13 @@ for (const f of catalogFiles.filter((p) => /^docs\/test-cases\/runs\/[^/]+$/.tes
 // -----------------------------------------------------------------------------
 // A promise that can only be checked on screen needs a DECLARED case. Author is /ux (last
 // step before the build, knows the click path), deadline are /backend + /frontend (they
-// do not start with an uncovered marked AC). This guard is the NET, not the gate: it keeps
-// a backlog visible in CI. It cannot see whether a case was written before the code -
-// that is why the deadline sits on the build skills, not here.
+// do not start with an uncovered marked AC). The plain run is the NET: it keeps a backlog
+// visible in CI. The build skills call `--gate <spec-id>` as the mechanical half of their
+// deadline - parity for that spec even before /ux (or without it). Neither mode can see
+// whether a case was written before the code - that judgment stays with the skills.
 let markedTotal = 0
 let markedSpecs = 0
+const gateResult = { marked: [], missing: [] } // AC numbers of the --gate spec
 for (const [specId, spec] of specs) {
   const numbered = spec.items.filter((it) => it.number !== null)
   const seenNumbers = new Map()
@@ -795,11 +846,17 @@ for (const [specId, spec] of specs) {
   markedTotal += marked.length
   markedSpecs++
 
-  if (/^Superseded\b/.test(spec.status)) continue
-  if (!spec.ux && !PARITY_STATUSES.test(spec.status)) continue
+  const gated = specId === GATE
+  if (gated) gateResult.marked = marked.map((it) => it.number)
+  // The gate spec is in scope regardless of status and UX section (see the header).
+  if (!gated) {
+    if (/^Superseded\b/.test(spec.status)) continue
+    if (!spec.ux && !PARITY_STATUSES.test(spec.status)) continue
+  }
   const have = covered.get(specId) ?? new Set()
   for (const it of marked) {
     if (have.has(it.number)) continue
+    if (gated) gateResult.missing.push(it.number)
     add("manual-ac", spec.rel, it.line, `AC ${it.number} is manual-only, but no active test case names '${specId} AC ${it.number}' in its Reference.`,
       `/ux writes the case in docs/test-cases/cases/ BEFORE /backend and /frontend, with 'Reference: ${specId} AC ${it.number}' (README, 'Who writes it, and by when').`)
   }
@@ -814,8 +871,20 @@ if (neverRun.length > 0) {
   console.log(`Note: ${neverRun.length} active case(s) appear in no run with PASS or FAIL yet - a written case is a promise, the run is the evidence:`)
   console.log(`    ${neverRun.join(", ")}`)
 }
+
+/** The one-line gate result - always the last line of a --gate run. */
+function gateLine() {
+  const { marked, missing } = gateResult
+  if (marked.length === 0) return `gate ${GATE}: no manual-only AC - nothing to cover, PASS`
+  const head = `gate ${GATE}: ${marked.length} manual-only AC`
+  if (missing.length === 0) return `${head}, all covered by an active test case - PASS`
+  const list = missing.map((n) => `AC ${n}`).join(", ")
+  return `${head}, ${missing.length} without an active test case (${list}) - FAIL: /ux writes the case(s) before the build`
+}
+
 if (findings.length === 0) {
   console.log(`Test-case catalog: 0 findings (${summary})`)
+  if (GATE !== null) console.log(gateLine())
   process.exit(0)
 }
 console.error(`Test-case catalog: ${findings.length} finding(s) (${summary})\n`)
@@ -824,4 +893,8 @@ for (const f of findings) {
   console.error(`    -> ${f.fix}`)
 }
 console.error(`\nConvention: ${README_REF}`)
+if (GATE !== null) {
+  const line = gateLine()
+  console.error(gateResult.missing.length === 0 ? `${line} (the findings above still fail the run)` : line)
+}
 process.exit(1)

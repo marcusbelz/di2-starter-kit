@@ -1,4 +1,4 @@
-# BUG-0002: Seed re-applies `is_active` on every deploy, overwriting manual changes
+# BUG-0002: Seed re-applies `is_active` on every deploy, overwriting manual changes *(sample)*
 
 - **Area:** [db/schemas/example/data/](../../db/schemas/example/data/) (`001.example.sql`)
 - **Status:** Open

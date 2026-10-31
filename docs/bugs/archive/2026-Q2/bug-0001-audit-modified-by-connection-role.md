@@ -1,4 +1,4 @@
-# BUG-0001: Audit column `modified_by` recorded the DB role, not the app user
+# BUG-0001: Audit column `modified_by` recorded the DB role, not the app user *(sample)*
 
 - **Area:** [db/schemas/example/procedures/](../../../../db/schemas/example/procedures/) (`001.sp_upd_example.sql`), [db/schemas/example/trigger/](../../../../db/schemas/example/trigger/) (`000.tf_set_modified.sql`)
 - **Status:** Fixed (2026-06-24)

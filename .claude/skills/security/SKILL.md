@@ -102,5 +102,7 @@ audit history at the end is **appended**, one row per run):
 
 ## Handoff
 > "Security audit done. [N] critical, [N] high. Saved to `docs/security-audit.md`.
-> If Critical/High open: `/backend` / `/frontend` / `/auth` to fix, then `/security update`.
-> If green (`Go-Live recommendation: ✅ YES`, none open): next step `/deploy prod` — the deploy skill reads this file as the gate."
+> If Critical/High open: fix via `/bug` + the fix skill that owns the code (`/backend`; `/frontend` /
+> `/auth` where present), then `/security update`.
+> If green (`Go-Live recommendation: ✅ YES`, none open): next step `/deploy prod` — the deploy skill
+> reads this file as the gate. (No deploy target: the release after `/review` is the go-live.)"

@@ -25,19 +25,23 @@ still being present in `stack.md` (and the PRD placeholder text).
 
 ## What `/init` asks
 Vision (→ `docs/PRD.md`) plus these axes (→ `stack.md` + `CLAUDE.md`):
-runtime · UI yes/no · backend yes/no · database · migrations (only when a database exists) ·
-tests (keep the DB test scaffold? — only when a database exists) · auth · deploy target · CI ·
-env stages · feature-ID prefix. Two `stack.md` keys are derived rather than asked and confirmed
-with the user: `package_manager` (from the runtime) and the build/test/run/audit commands.
+runtime · graphical UI yes/no (a CLI/TUI counts as no) · backend = application logic outside a UI
+yes/no (yes for CLI tools and libraries; no only for UI-only projects) · database · migrations
+(only when a database exists) · DB tests (keep the DB test scaffold? — only when a database exists)
+· auth · deploy target · CI · env stages · release merge (who merges into the production branch) ·
+feature-ID prefix. Two `stack.md` keys are derived rather than asked and confirmed with the user:
+`package_manager` (from the runtime) and the lint/build/test/run/audit commands. `/init` also
+removes the shipped samples (features, bugs, test cases), adds the app's lint + test job to CI,
+and ends with a gate: every remaining guard green, no placeholder left except the allowed ones.
 
 ## Pruning matrix
 | Condition (from /init answers) | Removed |
 |---|---|
 | `ui == none` | `skills/ux`, `skills/frontend`, `rules/ui/`, `rules/cookies.md`, the test-case catalog `docs/test-cases/` + `scripts/check-testcases.mjs` (+ its CI step); UX+Frontend lines dropped from the `CLAUDE.md` workflow |
 | `ui` is a different stack | only `rules/ui/react-tailwind-shadcn/` ships; add `rules/ui/<flavor>/` (port + adapt), then drop `react-tailwind-shadcn/` — same pattern as the SQL vendors |
-| `backend == none` | `skills/backend`, `rules/backend.md` |
-| `database == none` | `rules/sql/` (whole tree), `rules/db-migrations.md`, `db/` (whole tree — includes `db/tests/`), `.github/workflows/db-*.yml` + the db jobs in `ci.yml` |
-| `tests == none` (opt-out, `database != none`) | `db/tests/` (the test scaffold only) + the "db/tests assertions" step in `ci.yml` |
+| `backend == none` (UI-only project) | `skills/backend`, `rules/backend.md` |
+| `database == none` | `rules/sql/` (whole tree), `rules/db-migrations.md`, `db/` (whole tree — includes `db/tests/`), `.github/workflows/db-*.yml` + the `db-dry-run-deploy` job in `ci.yml`, the DB articles KB-002…009 + setup-001/002 |
+| `db_tests == none` (opt-out, `database != none`) | `db/tests/` (the test scaffold only) + the "db/tests assertions" step in `ci.yml` |
 | `database in {sqlite, mongodb}` | `rules/sql/` (keep `db-migrations.md` only if the migrations answer is SQL-based, i.e. `plain-sql`) |
 | `database == postgres` | `rules/sql/mssql/` (keep only the matching vendor) |
 | `database == mssql` | `rules/sql/postgres/` (keep only the matching vendor; adapt the PostgreSQL `db/` example tree) |
@@ -45,12 +49,13 @@ with the user: `package_manager` (from the runtime) and the build/test/run/audit
 | `auth == none` | `skills/auth` |
 | `deploy == none` | `skills/deploy`, `rules/deploy-infra.md`, `.github/workflows/db-create/deploy/clean/drop.yml` (SSH dispatch workflows), `scripts/check-env-files.sh` |
 | `ci == none` | `.github/workflows/` (whole tree) |
-| always | `skills/init` removes itself at the end (one-time bootstrap) |
+| always | `skills/init` removes itself at the end (one-time bootstrap); every removed item also loses its row in the index READMEs and its line in `CLAUDE.md` |
 
 Always kept: `requirements`, `architecture`, `qa`, `review`, `bug`, `help`, `check-updates`,
-`security`, and rules `general`, `documentation`, `stack`, `security`, `testing`; the repo guards
-`scripts/check-md-links.mjs` + `scripts/check-file-size.mjs` (`/init` sets the file-size scope) and
-the Bash-tool hook `.claude/hooks/block-inline-interpreter.mjs`.
+`security`, and rules `general`, `language`, `documentation`, `stack`, `security`, `testing`; the
+repo guards `scripts/check-md-links.mjs`, `check-context-budget.mjs`, `check-file-size.mjs`,
+`check-bugs.mjs` (`/init` sets the file-size scope and tightens the budget) and the Bash-tool hook
+`.claude/hooks/block-inline-interpreter.mjs`.
 
 ## The stack.md contract
 `stack.md` carries a Profile table + a build/test/run/audit command block + free-form notes. Every
@@ -59,8 +64,9 @@ When adding a new agnostic skill, read from `stack.md` rather than assuming a st
 
 ## Feature-ID prefix
 The scheme is `<prefix>-XXXX`; the default prefix is `feat`. Skills use `feat-XXXX` illustratively but
-always defer to "the scheme defined in CLAUDE.md / stack.md". If `/init` sets a non-default prefix, it
-updates `CLAUDE.md` (`feature_id_prefix`) + `features/INDEX.md`; skill text examples stay illustrative.
+always defer to "the scheme defined in CLAUDE.md / stack.md". `/init` records the prefix in
+`stack.md` (`feature_id_prefix`), fills it into `CLAUDE.md` (feature-ID scheme + commit format) and
+resets `features/INDEX.md` to `<prefix>-0001`; skill text examples stay illustrative.
 
 ## Intentional omissions (vs. the DI² source)
 This kit is distilled from the DI² project. Deliberately **not** carried over, because they are

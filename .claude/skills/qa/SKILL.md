@@ -136,7 +136,8 @@ If your context was compacted mid-task:
 - **Low:** UX/cosmetic/minor.
 
 ## Important
-- NEVER fix bugs yourself — that's `/frontend` / `/backend` / `/auth`.
+- NEVER fix bugs yourself — that's the fix skills (`/backend`; `/frontend` and `/auth` where the
+  project has them).
 - Find, Document, Prioritize. **In feature QA**, report even small bugs — thoroughness there is the
   point. It does not mean listing everything everywhere: eight Low findings on a one-line fix means
   the QA is miscalibrated (and in a bug-fix re-test it is out of mandate).
@@ -161,14 +162,15 @@ red/incomplete (fix first).
 ## Handoff
 **If production-ready:**
 > "All tests passed! Next step: `/review` for a code review of the diff against the spec and
-> conventions. After a green review → `/deploy dev`. Before `/deploy prod`, a project-wide
-> `/security` is mandatory."
+> conventions. After a green review → `/deploy <first stage>` (projects without a deploy target:
+> the release, see `/review`). Before production, a project-wide `/security` is mandatory."
 
 **If bugs found — start the bug loop:**
 > "Found [N] bugs ([severity breakdown]). **Bug loop:**
 > 1. For each bug, `/bug <description>` to document it as `BUG-NNNN` in `docs/bugs/`.
 > 2. Fix right away only Critical/High (and regressions in the same diff); file the rest and
->    prioritize. Fix: UI/Interaction → `/frontend BUG-NNNN`, API/DB/server → `/backend BUG-NNNN`,
+>    prioritize. Fix with the skill that owns the code (only those the project has): UI/interaction
+>    → `/frontend BUG-NNNN`, application logic / API / DB / CLI → `/backend BUG-NNNN`,
 >    login/session/OIDC → `/auth BUG-NNNN`. Commit per `.claude/rules/general.md`.
 > 3. Re-test each fix with `/qa BUG-NNNN` (narrow mandate), then `/bug close BUG-NNNN`. Only once
 >    no Critical/High remain does the feature move on to `/review`."

@@ -10,11 +10,12 @@ single source of truth for what is planned / in progress / deployed.
   zero-padded — `INDEX.md` tracks the next available ID.
 - **Statuses:** `Planned` → `In Progress` → `In Review` → `Deployed` (plus `Superseded`). The
   status in the spec header and the `INDEX.md` row must always match.
-- **Archive on completion:** `Deployed` (prod) and `Superseded` are terminal — the spec is
-  `git mv`'d to `features/archive/<YYYY-QN>/` (quarter of the prod deploy / supersede date; same
-  quarterly scheme as `docs/bugs/archive/`) and its `INDEX.md` row moves to the "Features
-  (archived)" table. Archiving is done by `/deploy` (after a verified prod deploy) or by the skill
-  that marks a spec `Superseded`. An archived spec never moves back; post-deploy fixes run via the
+- **Archive on completion:** `Deployed` and `Superseded` are terminal — the spec is
+  `git mv`'d to `features/archive/<YYYY-QN>/` (quarter of the prod deploy / release / supersede
+  date; same quarterly scheme as `docs/bugs/archive/`) and its `INDEX.md` row moves to the "Features
+  (archived)" table. Archiving is done by `/deploy` (after a verified prod deploy), by `/review` in
+  projects **without a deploy target** (there `Deployed` means *released*: the reviewed change is on
+  the production branch, merged / tagged), or by the skill that marks a spec `Superseded`. An archived spec never moves back; post-deploy fixes run via the
   bug-loop, follow-up work gets a new feature ID. Skills that look up a spec by ID search
   `features/**` (the archive included). **The move pulls the links along** (same commit): the spec
   goes from depth 1 to depth 3, so its repo-root links change `](../` → `](../../../`, and every
@@ -35,5 +36,5 @@ single source of truth for what is planned / in progress / deployed.
 
 ## Why not under docs/?
 Feature specs are *process state*, not documentation output: skills write to them at every workflow
-step, and `CLAUDE.md` imports `INDEX.md` into every session. Keeping them at the repo root keeps
-that hot path obvious. Long-term documentation lives in [`docs/`](../docs/).
+step and read `INDEX.md` first (it is read on demand, not `@`-included into every session, to keep
+the per-session context small). Keeping them at the repo root keeps that hot path obvious. Long-term documentation lives in [`docs/`](../docs/).

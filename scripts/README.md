@@ -11,7 +11,7 @@ workflow also land here).
 
 | Script | Platform | Purpose |
 |--------|----------|---------|
-| [`new-project.ps1`](new-project.ps1) | Windows / PowerShell | Copy the template into a fresh local repo (`git init` + initial commit), excluding this repo's `.git` |
+| [`new-project.ps1`](new-project.ps1) | Windows / PowerShell | Copy the template's **committed** state (`git archive HEAD` — no untracked or ignored files) into a fresh local repo (`git init` + initial commit); needs the template as a git clone |
 | [`new-project.sh`](new-project.sh) | macOS / Linux / Git Bash | Same, for POSIX shells |
 
 Usage — full walkthrough incl. verification and troubleshooting:

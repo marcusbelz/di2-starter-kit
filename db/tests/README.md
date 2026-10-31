@@ -5,7 +5,7 @@ procedure happy-paths / guards). Run against a throwaway database after `deploy`
 step in `.claude/rules/db-migrations.md`.
 
 > **Optional scaffold.** This test scaffold is opt-out: `/init` asks whether to keep it and removes
-> this `db/tests/` tree when you decline (`tests == none` in `.claude/rules/stack.md`). Keeping it is
+> this `db/tests/` tree when you decline (`db_tests == none` in `.claude/rules/stack.md`). Keeping it is
 > the default. If it was pruned and you later want tests back, copy this directory from a fresh clone
 > of the starter kit.
 

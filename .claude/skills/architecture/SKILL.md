@@ -41,8 +41,10 @@ roles? Third-party integrations?
 
 #### A) Backend needed? (explicit yes/no)
 The **first and most important** decision — it determines the implementation path:
-- **Yes** → needs a data store / APIs / server-side logic → `/backend` runs before `/frontend`.
-- **No** → local/client-side only → skip `/backend`.
+- **Yes** → needs application logic outside the UI — a data store, APIs, server-side logic, or (in a
+  CLI/library project) the commands/functions themselves → `/backend` builds it (before `/frontend`
+  in UI projects).
+- **No** → UI-only / client-side only → skip `/backend`.
 
 State it in one line at the top of the Tech Design, e.g. *"Backend needed: Yes — persistent user
 data, auth-gated."* (For a no-UI service, "frontend" simply doesn't apply — say so.)
@@ -89,12 +91,13 @@ Present the design; ask "Does this make sense? Any questions?"; wait for approva
 - [ ] Data model in plain language; API/interface endpoints listed (if backend) — purpose only
 - [ ] Tech decisions justified; new dependencies/services flagged for confirmation
 - [ ] No UI structure leaked in; design added to the feature spec; user approved
-- [ ] `features/INDEX.md` status updated to "In Progress"
+- [ ] Status "In Progress" set in the spec header, in `features/INDEX.md` and in `docs/roadmap.md`
 
 ## Handoff
-> "Design ready! Next step: for a feature with a UI, run `/ux` for critique & mockups, then
-> `/backend` (if a backend is needed) so the UI builds against real endpoints, then `/frontend`.
-> For a no-UI feature with a backend, go straight to `/backend`."
+> "Design ready! Next step: for a feature with a UI, run `/ux` for critique & mockups (and the
+> manual test cases), then `/backend` (if a backend is needed) so the UI builds against real
+> endpoints, then `/frontend`. For a feature without a UI (incl. CLI/library projects), go
+> straight to `/backend`."
 
 ## Git Commit
 ```

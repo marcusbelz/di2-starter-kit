@@ -13,7 +13,8 @@
 //              its outgoing links were not adjusted
 //   [moved]    target exists under a new path (basename unique in the repo)
 //              -> the TARGET was moved, incoming links were not adjusted
-//   [gone]     target exists nowhere (or the basename is ambiguous) -> check by hand
+//   [gone]     target missing and no unique new home: exists nowhere, or several
+//              other files share its basename (moved or removed - check by hand)
 //   [absolute] target starts with "/" -> resolves in no checkout (GitHub reads it
 //              repo-root-relative, an editor file-system-absolute); write it
 //              relative to the source file
@@ -226,7 +227,10 @@ function classify(fromDir, pathPart) {
     return { rule: "moved", hint: `correct would be: ](${relLink(fromDir, cand[0])})` }
   }
   if (cand.length > 1) {
-    return { rule: "gone", hint: `basename ambiguous (${cand.length} hits) - determine the target by hand` }
+    return {
+      rule: "gone",
+      hint: `target missing; ${cand.length} other files share the basename '${base}' - if it was moved, pick the right one by hand, if it was removed, remove the link`,
+    }
   }
   return { rule: "gone", hint: "target exists nowhere in the repo - check or remove the link" }
 }

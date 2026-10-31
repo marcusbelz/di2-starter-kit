@@ -21,7 +21,7 @@ component conventions below.
 3. Scan installed UI components, existing custom components, hooks, and pages in the project's layout.
 4. **Test-case gate:** if the spec has ACs marked `*(manual-AC)*`, every one of them must be
    referenced by an **Active** case in `docs/test-cases/cases/` (run
-   `node scripts/check-testcases.mjs`). If one is missing, **stop** and report it — `/ux` writes the
+   `node scripts/check-testcases.mjs --gate <feature-id>`). If one is missing, **stop** and report it — `/ux` writes the
    case from the AC before the code exists; writing it after the build would derive the expectation
    from the code. The user may override explicitly; then note the override in the commit message.
    Bug-fix mode is exempt. After the build, a case's *steps* may be corrected to the real UI (labels,

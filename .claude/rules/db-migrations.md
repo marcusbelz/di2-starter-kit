@@ -48,8 +48,8 @@ point to an **earlier section** (or a lower number within the same section):
   referenced view's number prefix to sort earlier (pick the higher table-group number, cf. the
   cross-table heuristic in `sql/<vendor>/sql.md`).
 - **Policy expressions** — policies load *before* functions; a predicate/helper function used by
-  a policy is created **inside the policy file**, not in `functions/` (the mssql ruleset's
-  drop-policy → create-function → create-policy layout does exactly this).
+  a policy is created **inside the policy file**, not in `functions/` (e.g. a policy file laid out
+  as drop policy → create predicate function → create policy, as the SQL Server ruleset does).
 - **SQL Server `WITH SCHEMABINDING`** objects and **PostgreSQL `LANGUAGE sql` string-body
   functions** (fully validated at `CREATE` under the default `check_function_bodies = on` — one
   reason the kit's skeletons are PL/pgSQL).
