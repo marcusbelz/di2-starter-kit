@@ -96,8 +96,11 @@ design choices in comments. Every screen-level mockup demonstrates the four stat
   assumptions for the rest.
 
 ## What this skill does NOT do
-- **Visual identity / branding** (colors, type systems, illustrations) — usability/interaction only.
-  For brand tokens see `brand.md` in the active flavor under `.claude/rules/ui/`; flag brand violations as Important and cite the token.
+- **Inventing a visual identity** (logo, illustrations, a new palette or type system) —
+  usability/interaction only. For brand tokens see `brand.md` in the active flavor under
+  `.claude/rules/ui/`; flag brand violations as Important and cite the token. **Recording** the
+  user's brand is in scope: if `brand.md` still holds its palette/typography placeholders, ask the
+  user for the basics (primary/accent color, fonts) before the first mockup and fill them in.
 - **User research** (personas, interviews, test plans) — out of scope; mention if it would help.
 - **Marketing / public consumer UI** — the density/keyboard-first/power-user defaults flip there.
 

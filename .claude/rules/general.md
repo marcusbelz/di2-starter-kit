@@ -2,7 +2,7 @@
 
 ## New Project Detection (MANDATORY)
 Before starting ANY work, check if the project has been initialized:
-1. Read `.claude/rules/stack.md` - if it still contains `{{PLACEHOLDER}}` values, the tech stack is NOT defined yet.
+1. Read `.claude/rules/stack.md` - if it still contains `{{…}}` values, the tech stack is NOT defined yet.
 2. Read `docs/PRD.md` - if it still contains placeholder text like "_Describe what you are building_", the project is NOT initialized.
 3. Read `features/INDEX.md` - if the features table is empty **or contains only the shipped
    `feat-000X` sample rows** (marked *(sample)*), no real features have been defined.

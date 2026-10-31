@@ -1,7 +1,7 @@
 # Deploy Infrastructure (host, containers, paths, secrets)
 
 > Single source of truth for deploy/runtime facts: SSH access, container names, paths, domains, and
-> secret-sync points. **`/init` fills the `{{PLACEHOLDER}}` values** (or leaves clear TODOs until the
+> secret-sync points. **`/init` fills the `{{…}}` values** (or leaves clear TODOs until the
 > server exists). `/deploy` and the host-side of `/check-updates` read this file — they never invent
 > host facts.
 >
@@ -78,7 +78,7 @@ One value per environment — the `/deploy` destructive-operation check reads it
 | Env | Data protection | Since / decided by |
 |-----|-----------------|--------------------|
 | {{ENV_1}} | greenfield | {{DATE}} / user |
-| prod | data to protect | {{DATE}} / user |
+| prod | greenfield | {{DATE}} / user — switch to `data to protect` at go-live |
 
 - **`greenfield`** — no data anyone needs yet (before go-live): destructive statements may run
   without a prior backup; the read-only preview and its record are still mandatory.

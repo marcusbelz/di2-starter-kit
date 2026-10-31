@@ -20,7 +20,7 @@ skill means copying it back from the template.
 
 The single source of truth for the concrete stack is `.claude/rules/stack.md`. Stack-agnostic skills
 (`/architecture`, `/backend`, `/review`, `/deploy`, `/check-updates`, `/security`) read it instead of
-hard-coding a language/framework/host. Uninitialized state is detected by the `{{PLACEHOLDER}}` values
+hard-coding a language/framework/host. Uninitialized state is detected by the `{{…}}` values
 still being present in `stack.md` (and the PRD placeholder text).
 
 ## What `/init` asks
@@ -86,7 +86,7 @@ product-specific rather than generic:
 - Keep every skill/rule **stack-neutral**: defer concrete facts to `stack.md` / `deploy-infra.md`.
 - A skill/rule that only applies to some stacks must be in the pruning matrix above and carry a
   one-line "Pruned at /init time if …" note at its top.
-- No `{{PLACEHOLDER}}` should survive `/init` — when adding placeholders, add the fill-in step to the
+- No `{{…}}` should survive `/init` — when adding placeholders, add the fill-in step to the
   `/init` skill too.
 - **Context budget:** a new rule with a file reference gets `paths:` frontmatter **and** a line in
   the "Rule map" of `CLAUDE.md` (except creation rules — see `documentation.md` → "Rule vs.

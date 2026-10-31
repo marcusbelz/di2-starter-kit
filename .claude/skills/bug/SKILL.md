@@ -89,8 +89,9 @@ Document a new bug — see **Filing a new bug** below.
    - **At least one named file changed** → continue to step 4.
    - **None changed** → **abort**: "BUG-NNNN can't be closed — none of the files in the fix block
      show changes since `<filed>`. `/bug close` is the document-and-archive phase and assumes an
-     implemented fix. Next: implement via `/frontend BUG-NNNN`, `/backend BUG-NNNN`, or
-     `/auth BUG-NNNN`, then re-test with `/qa`, then come back to `/bug close`." Write nothing.
+     implemented fix. Next: implement via the fix skill named in the bug's Fix commands
+     (`/backend BUG-NNNN`, or `/frontend` / `/auth` where the project has them), then re-test with
+     `/qa BUG-NNNN`, then come back to `/bug close`." Write nothing.
    - **Edge case** (pure doc/spec fix, no code): ask the user to confirm "doc-fix / spec-fix /
      won't-fix" before archiving.
 4. Ask for the solution steps (changed files + lines, the concrete change, why it fixes the bug). If
@@ -411,8 +412,9 @@ The history is never lost — it stays reachable via the old path (`git log -- d
 
 ## Handoff
 After filing a new bug:
-> "`BUG-NNNN` documented in `docs/bugs/bug-NNNN-<slug>.md`. To fix it: `/frontend|/backend|/auth
-> BUG-NNNN`, then `/qa`, then `/bug close BUG-NNNN`."
+> "`BUG-NNNN` documented in `docs/bugs/bug-NNNN-<slug>.md`. To fix it: the fix skill from its Fix
+> commands (`/backend BUG-NNNN`, or `/frontend` / `/auth` where present), then `/qa BUG-NNNN`, then
+> `/bug close BUG-NNNN`."
 
 After a status update:
 > "`BUG-NNNN` marked [status]; file moved to `docs/bugs/archive/<quarter>/`; `INDEX.md` updated."

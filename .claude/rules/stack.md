@@ -1,7 +1,7 @@
 # Tech Stack (single source of truth)
 
 > **This file is filled in by `/init`.** Until then the Profile table holds double-brace
-> placeholder values (`{{RUNTIME}}` …) — that is the signal that the project is not yet initialized.
+> placeholder values (`{{…}}`) — that is the signal that the project is not yet initialized.
 >
 > Every stack-agnostic skill (`/architecture`, `/backend`, `/review`, `/deploy`,
 > `/check-updates`, `/security`) reads THIS file to learn the concrete tech stack of the project.

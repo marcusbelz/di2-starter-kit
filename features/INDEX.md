@@ -11,7 +11,7 @@
 - **Superseded** - Replaced by another spec; not implemented
 
 **Deployed** and **Superseded** are terminal statuses: the spec file is `git mv`'d to the
-quarterly archive `features/archive/<YYYY-QN>/` (quarter of the prod deploy / supersede date) and
+quarterly archive `features/archive/<YYYY-QN>/` (quarter of the prod deploy / release / supersede date) and
 its row moves to the [archived table](#features-archived) below. Feature IDs are never reassigned,
 and an archived spec never moves back — follow-up work gets a new feature ID.
 

@@ -36,7 +36,7 @@ if (Test-Path -LiteralPath $Target) {
 }
 
 if (git -C $Source status --porcelain) {
-  Write-Host "Note: the template has uncommitted changes - they are NOT copied (only the committed HEAD is)." -ForegroundColor Yellow
+  Write-Host "Note: the template has uncommitted or untracked changes - they are NOT copied (only the committed HEAD is)." -ForegroundColor Yellow
 }
 
 Write-Host "Copying template (committed HEAD) -> $Target ..."

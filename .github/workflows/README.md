@@ -89,12 +89,15 @@ These apply to the shipped workflows and to every workflow you add (they are als
   (`uses: owner/action@<40-hex-sha> # vX.Y.Z`) — a tag can be moved to different code after you
   reviewed it. GitHub-owned `actions/*` may stay on a major tag. `/check-updates` reads the
   version from the comment.
-- **SSH steps verify the host key** (`fingerprint:` above).
+- **SSH steps verify the host key** (`fingerprint:` input; how to get the value: "Host-key
+  fingerprint" under [GitHub Environments](#github-environments-secrets-variables-branch-rules)).
 - **Least-privilege token:** every workflow sets `permissions:` explicitly — `{}` when no step
   uses the `GITHUB_TOKEN`, `contents: read` for a checkout.
 
 ## Adapting to your project
-- `/init` prunes this directory when the project has neither a database nor CI.
+- `/init` removes the `db-*.yml` workflows when the project has no database (and the SSH ones when
+  it has no deploy target), keeps `ci.yml` with an added `app` job, and removes the whole directory
+  when `ci: none`.
 - Rename the `schema` choice options in `db-deploy.yml` / `db-clean.yml` when you rename
   `db/schemas/example/` (deploy takes the **directory** name, clean the **deployed schema** name).
 - Adjust the `environment` choice lists to your `env_stages`.

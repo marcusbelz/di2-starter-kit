@@ -3,7 +3,7 @@
 > {{ONE_LINE_DESCRIPTION}}
 
 <!--
-  This is a TEMPLATE file. On a fresh project, the `{{PLACEHOLDER}}` values below are
+  This is a TEMPLATE file. On a fresh project, the `{{…}}` values below are
   still unfilled — that is the signal that the project has not been initialized yet.
   Run `/init` once: it asks for the product vision + tech-stack framework conditions,
   fills these placeholders, writes `.claude/rules/stack.md`, and prunes the skills/rules
@@ -66,14 +66,17 @@ projects without a UI.
 2. `/architecture` - Design the technical approach (PM-friendly, no code). Decides **backend yes/no**.
 3. `/ux` - UX critique & mockups *(only if the project has a UI)* — and, once the mockups are
    approved, the manual test cases (`TEST-NNNN`) for the marked ACs, **before** any code.
-4. `/backend` - Build APIs, data model, server-side logic *(only if the feature needs a backend)*.
+4. `/backend` - Build all non-UI code — APIs, data model, server-side logic, CLI tools, libraries
+   *(only if the feature has such logic; in CLI/library projects it is the code skill)*.
 5. `/frontend` - Build the UI against the real APIs *(only if the project has a UI)*. Both build
    skills stop while a marked AC has no test case.
 6. `/qa` - Test the feature against its acceptance criteria + feature-scoped security checks; runs
    the declared test cases and records the run in `docs/test-cases/runs/`.
-7. `/review` - Code review of the diff against spec & conventions (before the first deploy).
+7. `/review` - Code review of the diff against spec & conventions (before the first deploy — or,
+   without a deploy target, before the release; then it also marks the feature Deployed = released).
 8. `/check-updates` - Cross-cutting maintenance check (dependencies, base images, CI). Periodic.
-9. `/security` - Project-wide security audit. **Mandatory gate before `/deploy` to production.**
+9. `/security` - Project-wide security audit. **Mandatory gate before `/deploy` to production** (or
+   before the release in projects without a deploy target).
 10. `/deploy <env>` - Roll out to an environment *(only if the project has a deploy target)*.
 
 ### Cross-Cutting Skills (no fixed workflow slot)

@@ -91,7 +91,7 @@ Open the new project in Claude Code and run:
 backend yes/no, database, migrations, auth, deploy target, CI, env stages, feature-ID prefix),
 writes them to `.claude/rules/stack.md` + `CLAUDE.md`, prunes the skills/rules/workflows the
 project does not need, and hands off to `/requirements`. Until `/init` has run, the repo is in the
-detectable "uninitialized" state (`{{PLACEHOLDER}}` values in `stack.md`, placeholder text in
+detectable "uninitialized" state (`{{…}}` values in `stack.md`, placeholder text in
 `docs/PRD.md`) and the rules refuse feature work.
 
 If the project keeps a database and CI, the GitHub Actions side needs its own one-time
@@ -108,7 +108,7 @@ ls .claude/skills          # the full skill set (still maximal — /init prunes 
 ```
 
 - The commit history must **not** contain the template's commits.
-- `.claude/rules/stack.md` still shows `{{PLACEHOLDER}}` values — that is correct before `/init`.
+- `.claude/rules/stack.md` still shows `{{…}}` values — that is correct before `/init`.
 
 ## Symptom → Cause → Fix
 

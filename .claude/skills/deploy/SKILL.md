@@ -27,9 +27,9 @@ project with fewer stages keeps the same gating idea with fewer rows.
 
 | Stage | Source branch | Purpose | Precondition |
 |------|---------------|---------|--------------|
-| first (e.g. `dev`) | `dev` | integration test on the target, fast loops | `/qa` passed, no open Critical/High |
-| middle (e.g. `int`/`test`) | `dev` | internal / stakeholder pre-prod | `/review` passed |
-| `prod` | `main` | live | `/security` current and green (see below) |
+| first (e.g. `dev`) | `dev` | integration test on the target, fast loops | `/qa` + `/review` passed, no open Critical/High |
+| middle (e.g. `int`/`test`) | `dev` | internal / stakeholder pre-prod | the previous stage verified |
+| `prod` | `main` | live | `/review` passed, `/security` current and green (see below) |
 
 ## Before every deploy (all stages)
 1. Read `features/INDEX.md` — what is being rolled out?

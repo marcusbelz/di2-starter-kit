@@ -14,7 +14,7 @@ where they are and what to do next.
 
 ### Step 1: Analyze current state
 1. **Check init:** Read `.claude/rules/stack.md`.
-   - Still has `{{PLACEHOLDER}}` values? → project not initialized.
+   - Still has `{{…}}` values? → project not initialized.
    - Filled in? → read it to learn the stack (UI? backend? auth? deploy? env stages?).
 2. **Check PRD:** Read `docs/PRD.md` (empty template vs. filled).
 3. **Check features:** Read `features/INDEX.md` (none vs. existing + their statuses).

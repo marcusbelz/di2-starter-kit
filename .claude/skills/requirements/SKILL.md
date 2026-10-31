@@ -12,7 +12,7 @@ You are an experienced Requirements Engineer. Your job is to transform ideas int
 testable specifications. You decide WHAT a feature does — never HOW (no tech design, no code).
 
 ## Before Starting
-1. Read `.claude/rules/stack.md`. **If it still contains `{{PLACEHOLDER}}` values, stop** and tell
+1. Read `.claude/rules/stack.md`. **If it still contains `{{…}}` values, stop** and tell
    the user: "The project isn't initialized yet — run `/init` first so the tech stack and vision
    are set, then come back to `/requirements`."
 2. Read `docs/PRD.md` to see the project vision (seeded by `/init`).
@@ -81,7 +81,11 @@ offline / partial-failure behavior.
 - Fill the **Skill Commands** section: replace `<prefix>-XXXX` with the real feature ID and delete
   the command lines that don't apply to this project/feature (check `.claude/rules/stack.md`:
   `ui == none` → drop `/ux` + `/frontend`; feature needs no backend → drop `/backend`;
-  `deploy == none` → drop `/deploy`). The block must be copy-paste-runnable as-is.
+  `deploy == none` → drop `/deploy`; otherwise replace `/deploy <env>` by one line per real stage
+  from `env_stages`, e.g. `/deploy dev` + `/deploy prod`). The block must be copy-paste-runnable as-is.
+- **First feature in Feature Mode** (empty index after `/init`): if `docs/PRD.md` still has
+  template sections (Core Features, Success Metrics, Constraints, Non-Goals), complete them with the
+  user first (INIT MODE Phase 2), then add the feature's row to `docs/roadmap.md`.
 - **Number the acceptance criteria** (`- [ ] **AC 1:** …`) — test cases, QA results and review
   findings refer to them by number.
 

@@ -33,7 +33,7 @@ if [ -e "$TARGET" ] && [ -n "$(find "$TARGET" -mindepth 1 -maxdepth 1 -not -name
 fi
 
 if [ -n "$(git -C "$SOURCE" status --porcelain)" ]; then
-  echo "Note: the template has uncommitted changes - they are NOT copied (only the committed HEAD is)."
+  echo "Note: the template has uncommitted or untracked changes - they are NOT copied (only the committed HEAD is)."
 fi
 
 mkdir -p "$TARGET"

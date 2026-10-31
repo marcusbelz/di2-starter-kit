@@ -17,7 +17,7 @@ guards green. After you, the regular workflow (`/requirements` → `/architectur
 
 ## Gate — only run on an uninitialized project
 1. Read `.claude/rules/stack.md`. If its **Profile table** has no double-brace placeholder values
-   left (e.g. `{{RUNTIME}}`), the project is already initialized → tell the user: "This project is
+   left (`{{…}}`), the project is already initialized → tell the user: "This project is
    already initialized (see `.claude/rules/stack.md`). `/init` is a one-time bootstrap; use
    `/requirements` to add features." Then stop.
 2. Otherwise continue.
@@ -78,10 +78,23 @@ derived-and-confirmed, never silently guessed.
    - project structure: drop the lines of removed dirs (`db/`, `docs/test-cases/`, …);
    - "Rule map": drop the lines of removed vendor/flavor rules; if **no** scoped rule remains,
      replace the whole section by one sentence ("No path-scoped rules in this project.");
-   - `ui == none`: drop the "Cookie banner" legal note.
+   - `ui == none`: drop the "Cookie banner" legal note, and the manual-AC / test-case wording in
+     the `/requirements`, `/ux` and `/qa` workflow lines;
+   - `deploy == none`: reword "before the first deploy" / "gate before `/deploy` to production" to
+     the release ("before the release"; `/security` gates the release);
+   - structure comments: describe what this project's dirs hold (e.g. `.github/workflows/` = "CI"
+     when the DB deploy workflows are gone).
 3. **`docs/PRD.md`** — replace the template banner (the blockquote saying the file is the empty
    template) and the vision + target-user placeholders with the real content; leave the detailed
-   roadmap to `/requirements` (it keeps it in `docs/roadmap.md`).
+   roadmap to `/requirements` (it keeps it in `docs/roadmap.md`). In `docs/roadmap.md`, delete the
+   placeholder row (`_P0 (MVP)_ | _..._`), keep the table header.
+3a. **Project README + kit-only files** — replace the root `README.md` (the kit's own description)
+   with a short project README: Table of Contents, project name + one-line description, how to
+   build/test/run (the `stack.md` commands), a pointer to `CLAUDE.md` for the workflow, and one
+   lineage line ("Created from the DI² Starter Kit vX.Y.Z" — the version from the kit's latest tag
+   if known). Then `git rm` the files that only serve the **template itself**: `TEMPLATE.md`,
+   `scripts/new-project.sh`, `scripts/new-project.ps1`, `docs/kb/kb-001-create-new-project-from-template.md`
+   — and their rows in `scripts/README.md` and `docs/kb/README.md`.
 4. **Sample features** — `git rm` `features/feat-0002-*.md`, `features/feat-0003-*.md` **and**
    `features/archive/2026-Q2/feat-0001-*.md`; in `features/INDEX.md` delete their rows and the
    "shipped samples" note, and reset "Next Available ID" to `<prefix>-0001`; in `features/README.md`
@@ -111,7 +124,7 @@ from the Step-2 answers:
 | `ui == none` | `.claude/skills/ux/`, `.claude/skills/frontend/`, `.claude/rules/ui/`, `.claude/rules/cookies.md`, the test-case catalog `docs/test-cases/` + `scripts/check-testcases.mjs` + its step in `.github/workflows/ci.yml` |
 | `ui` is a different graphical stack (not React/Tailwind/shadcn) | the UI rules ship only for one flavor (`.claude/rules/ui/react-tailwind-shadcn/`). Create `.claude/rules/ui/<flavor>/` by copying + adapting it (the principles carry over, the syntax/component names change — see `ui/README.md`), then remove `react-tailwind-shadcn/` |
 | `backend == none` (UI-only project) | `.claude/skills/backend/`, `.claude/rules/backend.md` |
-| `database == none` | `.claude/rules/sql/` (whole tree), `.claude/rules/db-migrations.md`, `db/` (whole tree — includes `db/tests/`), `.github/workflows/db-*.yml`, the `db-dry-run-deploy` job in `.github/workflows/ci.yml`, and the DB-only articles `docs/kb/kb-002-*` … `kb-009-*` + `docs/setup/setup-001-*`, `setup-002-*` |
+| `database == none` | `.claude/rules/sql/` (whole tree), `.claude/rules/db-migrations.md`, `db/` (whole tree — includes `db/tests/`), `.github/workflows/db-*.yml`, in `.github/workflows/ci.yml` the `db-dry-run-deploy` job **and** the lint job's "table-group number lint" step (drop `db/scripts/*.sh db/tests/*.sh` from the shellcheck list too), and the DB-only articles `docs/kb/kb-002-*` … `kb-009-*` + `docs/setup/setup-001-*`, `setup-002-*` (+ adapt the intro of `docs/kb/README.md` / `docs/setup/README.md`) |
 | `db_tests == none` (user opted out, `database != none`) | `db/tests/` (the test scaffold only — keep the rest of `db/`) + the "db/tests assertions" step in `.github/workflows/ci.yml` |
 | `database in {sqlite, mongodb}` | `.claude/rules/sql/` (keep `db-migrations.md` only if the **Migrations** answer is SQL-based, i.e. `plain-sql` — else remove) |
 | `database == postgres` | `.claude/rules/sql/mssql/` (keep only the matching vendor directory) |
@@ -145,24 +158,35 @@ vendor/flavor directory gets the same frontmatter on every file **and** one rule
 **Sweep for leftovers (MANDATORY).**
 1. `node scripts/check-md-links.mjs` — every finding is a link to something you removed: delete the
    row/sentence (or reword it), never point it elsewhere by guess. Repeat until 0 findings.
-2. Prose references that are not links:
-   `git grep -nE "/(ux|frontend|backend|deploy|auth)\b|check-testcases|test-cases|sql/(postgres|mssql)|ui/react|deploy-infra|db-migrations|cookies\.md|db/scripts" -- "*.md" "*.yml"`
+2. Prose references that are not links — build the pattern from the items **you actually
+   removed** (a full list matches hundreds of harmless lines when little was pruned). Full form:
+   `git grep -nE "[/](ux|frontend|backend|deploy|auth)\b|check-testcases|test-cases|manual-AC|sql/(postgres|mssql)|ui/react|deploy-infra|db-migrations|cookies\.md|db/scripts|lint-numbers|apply smoke" -- "*.md" "*.yml"`
+   (the leading `[/]` instead of `/` matters on Windows: Git Bash rewrites an argument starting
+   with `/` as a path and the search then silently finds nothing).
    — an instruction that only applies when the item exists and **already says so** ("if the project
-   has a UI", "UI projects", "(if kept)") stays; an **unconditional** instruction or handoff to a
-   removed item is deleted or reworded (e.g. the next-step command of a kept skill).
+   has a UI", "UI projects", "(if kept)", "where present") stays, and so do the one-line "Pruned at
+   `/init` time if …" notes at the top of kept files; an **unconditional** instruction or handoff
+   to a removed item is deleted or reworded (e.g. the next-step command of a kept skill). Renumber
+   lists you shortened (e.g. the workflow steps in `.claude/skills/README.md`).
 
 After deleting, **show the user the resulting skill/rule list** and confirm it matches expectations.
 
 ## Step 5 — Stack-specific fill-in (where a kept skill needs concrete facts)
 - **CI (`ci != none`):** add an `app` job to `.github/workflows/ci.yml` that runs the project's
   `lint` and `test` commands from `stack.md` (set up the runtime with the provider's setup action;
-  the test command must fail when test files did not run — `testing.md` → "The gate"), and rewrite
-  the header comment of `ci.yml` for this project (which jobs exist and why). Update the `ci.yml`
-  row in `.github/workflows/README.md`.
+  the test command must fail when test files did not run — `testing.md` → "The gate"). Right after
+  `/init` there is no code yet, so the CI must not be red for that reason: guard the install/lint
+  step with the manifest (`if: hashFiles('package.json') != ''`, `pyproject.toml`, `go.mod`, …) and
+  the test step with the test files (`if: hashFiles('<test glob>') != ''` — e.g. pytest exits 5
+  when it collects no tests); the first build skill that adds them activates the steps. Rewrite the
+  header comment of `ci.yml` for this project (which jobs exist and why) and update the `ci.yml` row
+  in `.github/workflows/README.md`.
 - If `deploy != none`: open `.claude/rules/deploy-infra.md` and replace its host / container / path
   / secret placeholders with the project's real values (or leave clearly marked TODOs the user fills
   when the server exists). Trim the env-stage tables there **and** the stage table in
-  `.claude/skills/deploy/SKILL.md` to the chosen `env_stages`. Fill the `ENV_FILE` / `ENVS_DEFAULT`
+  `.claude/skills/deploy/SKILL.md` to the chosen `env_stages` (keep "`/review` passed" as a
+  precondition of the **first** stage, whichever it is), and replace `/deploy <env>` in the spec
+  template's command block by one line per real stage (`/deploy dev`, `/deploy prod`). Fill the `ENV_FILE` / `ENVS_DEFAULT`
   / `VARS` block at the top of `scripts/check-env-files.sh` from the same facts (it refuses to run
   while a placeholder is left — an allowed leftover until the server exists).
 - If `deploy != none` **and** `database != none`: fill the "Data protection" table in
@@ -174,23 +198,26 @@ After deleting, **show the user the resulting skill/rule list** and confirm it m
   project's source directories (and narrow `SOURCE_EXT` if useful). The guards and the hook need
   `node` (any LTS) on the PATH — confirm the user has it; if not, say that the hook then errors
   without blocking and the guards run in CI only.
-- `ui != none`: the brand palette/typography placeholders in the kept flavor's `brand.md` — fill
-  them if the user already knows the brand; otherwise leave them as the **allowed leftover** that
-  `/ux` fills (say so in the handoff).
+- `ui != none`: the brand palette/typography placeholders in the kept flavor's `brand.md` — ask
+  for the brand basics (primary/accent color, fonts) and fill them; if the user does not know yet,
+  leave them as the **allowed leftover** — `/ux` asks again before its first mockup (say so in the
+  handoff).
 - If `database` is a SQL engine and you kept `db-migrations.md`: confirm the migration command names.
 - If `auth != none`: note the actual provider (and IdP product) in the "Read the setup first"
   section of `.claude/skills/auth/SKILL.md`, so the diagnosis layers match the real setup.
 
 ## Step 6 — Finish
 1. `git rm -r .claude/skills/init` (this skill removes itself — it is a one-time bootstrap) and
-   delete its row in `.claude/skills/README.md` (and any remaining `/init` mention that is not
-   history). *(Tell the user first; if they'd rather keep it for re-running, skip this.)*
+   delete its row in `.claude/skills/README.md` and the `/init` line in `CLAUDE.md`'s workflow. The
+   "Pruned at `/init` time if …" notes in kept files stay — they explain where a file came from.
+   *(Tell the user first; if they'd rather keep it for re-running, skip this.)*
 2. **Final gate (MANDATORY — nothing is committed red):**
    - every guard that is still present reports 0 findings: `node scripts/check-md-links.mjs`,
      `check-context-budget.mjs`, `check-file-size.mjs`, `check-bugs.mjs`, `check-testcases.mjs`
      (if kept), `bash db/scripts/lint-numbers.sh` (if kept); then lower `BUDGET_TOKENS` in
      `check-context-budget.mjs` to the measured value plus a margin, so growth stays visible;
-   - the workflow files still parse (YAML) and reference no removed script;
+   - the workflow files still parse (YAML), and no step runs a script or directory that no longer
+     exists (a step guarded by `hashFiles(...)` / `nullglob` until its files exist is fine);
    - **no placeholder is left** except the allowed ones (brand palette until `/ux`,
      `check-env-files.sh` until the server exists):
      `git grep -nE "\{\{[A-Z_]+\}\}" -- . ":(exclude).github/**"` — GitHub `${{ … }}` expressions

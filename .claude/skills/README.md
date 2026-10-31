@@ -16,7 +16,7 @@ How skills are loaded (on-demand, vs. the always-on rules):
 | 1 | [`requirements/`](requirements/) | Feature specs (user stories, acceptance criteria) + PRD on first run |
 | 2 | [`architecture/`](architecture/) | PM-friendly technical design; decides backend yes/no |
 | 3 | [`ux/`](ux/) | UX critique & mockups *(UI projects only)* |
-| 4 | [`backend/`](backend/) | APIs, data model, server-side logic |
+| 4 | [`backend/`](backend/) | All non-UI code: APIs, data model, server-side logic, CLI tools, libraries (+ their bug fixes) |
 | 5 | [`frontend/`](frontend/) | UI against the real APIs *(UI projects only)* |
 | 6 | [`qa/`](qa/) | Feature test vs. acceptance criteria + feature-scoped security |
 | 7 | [`review/`](review/) | Code review of the diff vs. spec & conventions |

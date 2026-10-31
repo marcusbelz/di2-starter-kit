@@ -49,8 +49,8 @@ convention-conformant.
    Those two rule groups are **path-scoped** — reading the diff via `git diff` does not load them, so
    read the ones the diff touches explicitly (the "Rule map" in `CLAUDE.md` lists them).
    - **Trust the guards, review the logic:** where a machine check exists (CI lint/guards —
-     `scripts/check-*.mjs`, `db/scripts/lint-numbers.sh`, the deploy-twice apply smoke, the
-     project's linters), confirm it ran **green on this diff** instead of re-checking its subject by
+     `scripts/check-*.mjs`, the project's linters, and where present `db/scripts/lint-numbers.sh`
+     and the deploy-twice DB apply smoke), confirm it ran **green on this diff** instead of re-checking its subject by
      hand; spend the review on logic, contracts, permission checks and what no guard sees.
    - **Not findings:** untouched existing code that predates a convention change, and exceptions a
      rule file documents as deliberate. New or substantially changed code must follow the current rule.
@@ -78,10 +78,13 @@ convention-conformant.
 | ≥ 1 Blocker | Request Changes | back to the fix skill that owns the code (`/backend`, and `/frontend` in UI projects), then `/qa` |
 
 **Projects without a deploy target (`deploy: none`, e.g. a library or CLI that is only released):**
-after Approve, the reviewed change goes onto the production branch per `release_merge` in
-`stack.md` (`user`: you prepare delta + merge message, the user merges). Once it is there (merged /
-tagged) and CI on that commit is green, set the spec and `features/INDEX.md` to **Deployed**
-(= released), add a short "Release" note (date, commit/tag) and archive the spec
+after Approve, check the **security gate** exactly as `/deploy prod` would — `docs/security-audit.md`
+exists, is not stale (≤ 30 days, no security-relevant change since), no open Critical/High, and
+says `Go-Live recommendation: ✅ YES`; otherwise the next step is `/security` (or `/security
+update`), not the release. Then the reviewed change goes onto the production branch per
+`release_merge` in `stack.md` (`user`: you prepare delta + merge message, the user merges). Once it
+is there (merged / tagged) and CI on that commit is green, set the spec and `features/INDEX.md` to
+**Deployed** (= released), add a short "Release" note (date, commit/tag) and archive the spec
 (`features/README.md`) — `/review` owns this step because there is no `/deploy`.
 
 ## Important
