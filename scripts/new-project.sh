@@ -53,7 +53,10 @@ git -C "$SOURCE" ls-tree -r -z HEAD | while IFS= read -r -d '' entry; do
     100755\ *) git update-index --chmod=+x -- "${entry#*$'\t'}" ;;
   esac
 done
-git commit -q -m "chore: initialize from di2-starter-kit"
+# Record which kit version the project starts from (git archive copies no tags; /init's project
+# README quotes this for its lineage line).
+KIT_VERSION="$(git -C "$SOURCE" describe --tags --always 2>/dev/null || echo unknown)"
+git commit -q -m "chore: initialize from di2-starter-kit ${KIT_VERSION}"
 
 echo ""
 echo "Done. New project created at: $TARGET"

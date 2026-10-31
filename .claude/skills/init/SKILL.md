@@ -91,8 +91,9 @@ derived-and-confirmed, never silently guessed.
 3a. **Project README + kit-only files** — replace the root `README.md` (the kit's own description)
    with a short project README: Table of Contents, project name + one-line description, how to
    build/test/run (the `stack.md` commands), a pointer to `CLAUDE.md` for the workflow, and one
-   lineage line ("Created from the DI² Starter Kit vX.Y.Z" — the version from the kit's latest tag
-   if known). Then `git rm` the files that only serve the **template itself**: `TEMPLATE.md`,
+   lineage line ("Created from the DI² Starter Kit vX.Y.Z" — the version is in the project's first
+   commit message, written by `new-project.*`: `git log --reverse --format=%s | head -1`; projects
+   made with GitHub's "Use this template" name the kit commit instead, or "unknown"). Then `git rm` the files that only serve the **template itself**: `TEMPLATE.md`,
    `scripts/new-project.sh`, `scripts/new-project.ps1`, `docs/kb/kb-001-create-new-project-from-template.md`
    — and their rows in `scripts/README.md` and `docs/kb/README.md`.
 4. **Sample features** — `git rm` `features/feat-0002-*.md`, `features/feat-0003-*.md` **and**
@@ -111,9 +112,16 @@ derived-and-confirmed, never silently guessed.
    there and in the README head.
 7. **Spec template** (`.claude/skills/requirements/template.md`) — trim to the kept skills: drop the
    `/ux` / `/frontend` / `/backend` / `/deploy` / `/auth` lines of pruned skills from both command
-   blocks; `ui == none` → delete the "UX Design" section; `deploy == none` → rename the "Deployment"
-   section to "Release" with the hint "_Added when the reviewed change is on the production branch
-   (merged / tagged) — that sets the status to Deployed._".
+   blocks; `ui == none` → delete the "UX Design" section, the manual-AC note above the acceptance
+   criteria and the `*(manual-AC: …)*` marker in the AC example, and in `.claude/skills/qa/test-template.md`
+   the "Manual test cases" block and the manual-AC example row; `deploy == none` → rename the
+   "Deployment" section to "Release" with the hint "_Added when the reviewed change is on the
+   production branch (merged / tagged) — that sets the status to Deployed._", and end the command
+   block with `/security` followed by `/review <prefix>-XXXX` (a second `/review` run resumes the
+   release once the security gate is green).
+8. **Third-party CI actions** you add (e.g. a language setup action that is not `actions/*`) are
+   pinned to a commit SHA with a `# vX.Y.Z` comment (`.github/workflows/README.md` → "Hardening
+   rules").
 
 ## Step 4 — Reduce the toolkit (prune what this project doesn't need)
 Delete what doesn't apply, using `git rm -r` (the clone is a tracked git repo). Apply this matrix

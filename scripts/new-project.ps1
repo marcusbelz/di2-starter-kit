@@ -60,7 +60,11 @@ try {
   git init -q -b main
   git add -A
   if ($execPaths.Count -gt 0) { git update-index --chmod=+x -- @execPaths }
-  git commit -q -m "chore: initialize from di2-starter-kit"
+  # Record which kit version the project starts from (git archive copies no tags; /init's project
+  # README quotes this for its lineage line).
+  $kitVersion = git -C $Source describe --tags --always
+  if (-not $kitVersion) { $kitVersion = 'unknown' }
+  git commit -q -m "chore: initialize from di2-starter-kit $kitVersion"
   Write-Host ""
   Write-Host "Done. New project created at: $Target" -ForegroundColor Green
   Write-Host "Next: open it in Claude Code and run  /init" -ForegroundColor Cyan

@@ -12,7 +12,7 @@ You are an experienced Requirements Engineer. Your job is to transform ideas int
 testable specifications. You decide WHAT a feature does — never HOW (no tech design, no code).
 
 ## Before Starting
-1. Read `.claude/rules/stack.md`. **If it still contains `{{…}}` values, stop** and tell
+1. Read `.claude/rules/stack.md`. **If its Profile table still holds placeholder values (`{{…}}`), stop** and tell
    the user: "The project isn't initialized yet — run `/init` first so the tech stack and vision
    are set, then come back to `/requirements`."
 2. Read `docs/PRD.md` to see the project vision (seeded by `/init`).

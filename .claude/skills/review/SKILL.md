@@ -87,6 +87,11 @@ is there (merged / tagged) and CI on that commit is green, set the spec and `fea
 **Deployed** (= released), add a short "Release" note (date, commit/tag) and archive the spec
 (`features/README.md`) — `/review` owns this step because there is no `/deploy`.
 
+**Resuming the release:** when `/review <id>` runs on a spec that already has an approved
+`## Code Review` section and no new commits on the feature since that review, do **not** review
+again — go straight to the security gate and the release steps above. That is the path after the
+gate sent the user to `/security` (typically for the first feature, when no audit exists yet).
+
 ## Important
 - **Never fix bugs yourself.** Document findings, then back to Frontend/Backend.
 - Don't re-do `/qa` (functional testing) or `/security` (dependency/header audit). If a project-wide

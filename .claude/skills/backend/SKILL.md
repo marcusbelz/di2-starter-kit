@@ -91,6 +91,8 @@ changes; scan existing endpoints again; continue — don't restart or duplicate.
 - [ ] All planned endpoints implemented; auth enforced; input validation on all writes
 - [ ] Meaningful errors + correct status codes; no hardcoded secrets
 - [ ] API contract documented in the feature spec; every endpoint smoke-tested
+- [ ] Tests for the new/changed logic written where `.claude/rules/testing.md` asks for them; the
+      `test` command from `stack.md` green **and complete** (all test files ran)
 - [ ] `build`/`lint` (from `stack.md`) pass; `features/INDEX.md` status "In Progress"; committed
 
 ## Handoff

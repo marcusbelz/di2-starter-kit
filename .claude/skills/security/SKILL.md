@@ -105,4 +105,5 @@ audit history at the end is **appended**, one row per run):
 > If Critical/High open: fix via `/bug` + the fix skill that owns the code (`/backend`; `/frontend` /
 > `/auth` where present), then `/security update`.
 > If green (`Go-Live recommendation: ✅ YES`, none open): next step `/deploy prod` — the deploy skill
-> reads this file as the gate. (No deploy target: the release after `/review` is the go-live.)"
+> reads this file as the gate. (No deploy target: next step `/review <feature-id>` — it resumes the
+> release of an already approved feature without reviewing again.)"

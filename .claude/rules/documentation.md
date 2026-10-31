@@ -30,6 +30,10 @@ Feature specs stay in **`features/`** at the repo root — they are the workflow
   history, so always do it as **one atomic change**: `git mv` every affected file and update **all**
   `kb-00X` / `KB-00X` references across the repo in the same commit, then verify no link dangles
   (`node scripts/check-md-links.mjs` — see [Archiving pulls the links along](#archiving-pulls-the-links-along-mandatory)).
+- **Gaps from `/init` pruning stay.** When `/init` removes the kit's DB or template articles, the
+  remaining ones keep their numbers (no renumbering of a fresh project); the project's first own
+  article takes the next number after the highest remaining one, or a mid-sequence number with the
+  atomic renumbering above if it belongs earlier in the lifecycle.
 
 ## When what goes where
 | Situation | Directory | Example |
