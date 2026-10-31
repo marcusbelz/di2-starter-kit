@@ -15,7 +15,7 @@
 
 | | Rules (`.claude/rules/**/*.md`) | Skills (`.claude/skills/<name>/SKILL.md`) |
 |---|---|---|
-| Loaded | **Automatically at session start** — every file, injected into the context alongside `CLAUDE.md` and its `@`-imports (`docs/PRD.md`, `features/INDEX.md`) | **On demand** — when the user invokes `/name`, **or** when Claude matches the task against the skill's `description` (only `name` + `description` sit in context from session start) |
+| Loaded | **Automatically at session start** — every file **without** `paths:` frontmatter, injected into the context alongside `CLAUDE.md` and its `@`-imports (`docs/PRD.md`). Files **with** `paths:` (the kit's SQL vendor and UI flavor rules) load **lazily**, when a matching file is read/edited — listed in the "Rule map" of `CLAUDE.md` | **On demand** — when the user invokes `/name`, **or** when Claude matches the task against the skill's `description` (only `name` + `description` sit in context from session start) |
 | Role | Always-on conventions: language policy, SQL style, security floor, doc structure | Workflow steps: a procedure with inputs, checkpoints, and outputs |
 | Who "finds" them | Nobody has to — the harness loads them before the first prompt; no skill needs to say "read language.md" | The user (slash command) **or Claude itself** — the model sees every skill's `name` + `description` and can self-invoke on a match |
 
@@ -34,16 +34,19 @@ via `disable-model-invocation: true` in its frontmatter — the skill becomes in
 ## Why skills still mention specific rule files
 
 Skill texts contain lines like "Read `.claude/rules/stack.md`" or "`/deploy` reads
-`deploy-infra.md`". That is **not** how the file gets found — it is already in context. The
-explicit read exists for two other reasons:
+`deploy-infra.md`". For an always-loaded rule that is **not** how the file gets found — it is
+already in context. For a **path-scoped** rule it is: the rule arrives only with the result of a
+read/edit on a matching file — **after** that call — so a skill about to **create** the first file
+in a scoped area (a new SQL object, a new UI component) must read the rule explicitly first, or it
+writes the file without it. For always-loaded rules the explicit read exists for two other reasons:
 
 1. **Fresh data:** `stack.md` and `deploy-infra.md` are not style rules but *facts* (stack values,
    hosts, containers, commands). The context copy is a snapshot from session start; re-reading at
    execution time picks up edits made since.
 2. **Focus:** naming the one rule that governs the current step directs attention to it among the
    many loaded rules. This matters most when **similar rules coexist** in context: before `/init`
-   prunes, both SQL vendor rulesets (`sql/postgres/` *and* `sql/mssql/`) are loaded side by side —
-   near-identical conventions in different dialects. "Follow `sql/postgres/procedures.md`" is a
+   prunes, touching a `db/**` file loads both SQL vendor rulesets (`sql/postgres/` *and*
+   `sql/mssql/` share the scope) side by side — near-identical conventions in different dialects. "Follow `sql/postgres/procedures.md`" is a
    priority instruction that keeps the dialects from being mixed; it is steering, not loading.
 
 So a rule mention in a skill is neither redundant nor a prerequisite — it is a deliberate
@@ -68,11 +71,18 @@ the explicit read it does not know the rule exists.
 - **Every rule file without a `paths:` frontmatter costs context in every session** — including
   the `README.md` index files (kept deliberately small). Rules that carry a `paths:` glob in their
   frontmatter load **lazily** instead: only when Claude touches files matching the pattern, at
-  zero cost in sessions that never match. The kit's shipped rules deliberately carry no `paths:`
-  — `/init` pruning guarantees the surviving rules are always present instead of depending on
-  file matches; path-scoping remains an extra lever for grown projects (e.g. `paths: ["db/**"]`
-  on a vendor ruleset). Either way pruning is not cosmetic: a project without a UI would
-  otherwise carry the whole UI ruleset into every single session.
+  zero cost in sessions that never match. The kit scopes its two largest rule groups — the SQL
+  vendor rulesets (`db/**`) and the UI flavor (UI source) — and keeps everything without a file
+  reference global (commits, bug loop, security floor, creation rules like `testing.md`). Measured
+  in the project these conventions come from: 454,900 → 64,700 tokens of fixed cost before the
+  first prompt, after a subagent with a 200k window had stopped starting at all
+  (https://sql.marcus-belz.de/en/context-window-full-before-first-prompt/). Pruning stays
+  essential too: a project without a UI should not even carry the scoped UI rules.
+- **The limit of scoping:** a scoped rule arrives with the tool result, i.e. after the call — too
+  late for a file being created. Three safety nets: the rule map in `CLAUDE.md` (what exists, for
+  which area), skills that read the scoped rules before creating files in their area, and
+  unscoped creation rules. Plus a guard so the fixed cost does not creep back:
+  `scripts/check-context-budget.mjs` (budget, oversized rules, unreadable `paths:`, map parity).
 - **The vendor/flavor split acts directly on context size:** `/init` keeps exactly one
   `sql/<vendor>/` and one `ui/<flavor>/` directory — an added vendor (e.g. `mssql/`) is loaded
   *instead of* `postgres/` in a real project, never in addition.
@@ -85,7 +95,7 @@ the explicit read it does not know the rule exists.
 
 | Assumption | Reality | Practical fix |
 |------------|---------|---------------|
-| "A skill must list a rule, otherwise the rule is ignored" | Rules load unconditionally; skill mentions are focus + freshness only | Put the convention in `rules/` and it applies everywhere |
+| "A skill must list a rule, otherwise the rule is ignored" | Unscoped rules load unconditionally (skill mentions are focus + freshness); **path-scoped** rules load only on a matching file — for a new file the explicit read is required | Put the convention in `rules/`; scope it only if it has a file reference and is not a creation rule — then add the rule-map line |
 | "The 'Read rules/X.md' lines in skills are redundant, then" | They steer: re-read facts at execution time, prioritize the governing rule among similar ones | Keep them for fact files (`stack.md`, `deploy-infra.md`) and wherever sibling rulesets could be confused |
 | "I edited a rule but the session ignores it" | The context is a session-start snapshot | Start a new session, or ask for an explicit re-read |
 | "More rule files = better" | Every file is paid for in context, every session | One concern per file, prune what the project does not need, keep rules concise |

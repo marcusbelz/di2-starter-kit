@@ -1,3 +1,13 @@
+---
+paths:
+  - "src/**"
+  - "app/**"
+  - "components/**"
+  - "design/**"
+  - "**/*.tsx"
+  - "**/*.jsx"
+  - "**/*.css"
+---
 # Confirm Dialog (no native confirm/alert/prompt)
 
 > Pruned at `/init` time if the project has no UI.

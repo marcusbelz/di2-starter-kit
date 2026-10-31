@@ -1,3 +1,7 @@
+---
+paths:
+  - "db/**"
+---
 # SQL rules
 
 > **PostgreSQL.** These SQL rules were written for **PostgreSQL** (ported from a framework proven in a real-world

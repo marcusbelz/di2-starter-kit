@@ -82,3 +82,7 @@ product-specific rather than generic:
   one-line "Pruned at /init time if …" note at its top.
 - No `{{PLACEHOLDER}}` should survive `/init` — when adding placeholders, add the fill-in step to the
   `/init` skill too.
+- **Context budget:** a new rule with a file reference gets `paths:` frontmatter **and** a line in
+  the "Rule map" of `CLAUDE.md` (except creation rules — see `documentation.md` → "Rule vs.
+  record"); records/inventories go to `docs/inventories/`, never into a rule; no new `@`-includes
+  in `CLAUDE.md`. `node scripts/check-context-budget.mjs` checks budget and map.

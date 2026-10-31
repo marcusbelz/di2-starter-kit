@@ -14,7 +14,8 @@ is **React + Next.js + Tailwind + shadcn/ui** — but the authoritative UI stack
 component conventions below.
 
 ## Before Starting
-1. Read `.claude/rules/stack.md` (the `ui` stack) and `.claude/rules/ui/` (the project's UI rules:
+1. Read `.claude/rules/stack.md` (the `ui` stack) and — **explicitly, they are path-scoped and not
+   in context until a UI file was touched** — `.claude/rules/ui/<flavor>/` (the project's UI rules:
    component library, brand tokens, states, a11y).
 2. Read `features/INDEX.md` and the feature spec (incl. Tech Design + UX Design / mockups).
 3. Scan installed UI components, existing custom components, hooks, and pages in the project's layout.

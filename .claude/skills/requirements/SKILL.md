@@ -36,8 +36,9 @@ The vision is already in `docs/PRD.md` (from `/init`). Fill any gaps with `AskUs
 - Any features the user explicitly does NOT want (non-goals)?
 
 ### Phase 2: Complete the PRD
-Expand `docs/PRD.md` into: Vision, Target Users, Core Features roadmap (prioritized table
-P0/P1/P2 with status + spec link), Success Metrics, Constraints, Non-Goals.
+Expand `docs/PRD.md` into: Vision, Target Users, Core Features (one line each), Success Metrics,
+Constraints, Non-Goals. The prioritized roadmap table (P0/P1/P2 with status + spec link) goes into
+`docs/roadmap.md`, **not** the PRD — the PRD is loaded into every session, keep it short.
 
 ### Phase 3: Break down into features (Single Responsibility)
 - Each feature = ONE testable, deployable unit.
@@ -53,7 +54,7 @@ P0/P1/P2 with status + spec link), Success Metrics, Constraints, Non-Goals.
 
 ### Phase 5: Update tracking
 - Update `features/INDEX.md` with all new features + statuses, and the "Next Available ID" line.
-- Verify the PRD roadmap matches the specs.
+- Verify `docs/roadmap.md` matches the specs.
 
 ### Init Mode Handoff
 > "Setup complete: PRD finalized, X feature specs created. Recommended first feature: feat-0001
@@ -107,7 +108,7 @@ Present the spec; "Approved" → ready for architecture, "Changes needed" → it
 
 ### Phase 5: Update tracking
 - Add the feature to `features/INDEX.md` with status **Planned**; bump "Next Available ID".
-- Add the feature to the PRD roadmap table.
+- Add the feature to the roadmap table in `docs/roadmap.md`.
 
 ### Feature Mode Handoff
 > "Feature spec ready! Next step: run `/architecture` to design the technical approach."
@@ -141,4 +142,4 @@ projects); `INDEX.md` updated; build order recommended; user approved.
 **Feature Mode:** feature questions answered; 3–5 user stories; every AC testable and numbered;
 manual-only ACs marked in one of the two allowed forms (UI projects); 3–5 edge cases;
 feature ID assigned; Skill Commands section filled (real ID, non-applicable lines removed); file
-saved; `INDEX.md` + PRD roadmap updated; user approved.
+saved; `INDEX.md` + `docs/roadmap.md` updated; user approved.

@@ -114,7 +114,8 @@ done. Feature specs live in `features/<prefix>-XXXX-name.md`.
 
 - **One feature per spec file** (Single Responsibility).
 - **Human-in-the-loop:** every workflow phase has a user approval checkpoint.
-- **Conventions live in `.claude/rules/`** and auto-load each session. The authoritative tech stack
+- **Conventions live in `.claude/rules/`** and auto-load each session — except the path-scoped ones
+  (see "Rule map" below), which load on a matching file. The authoritative tech stack
   is `.claude/rules/stack.md` — when a skill needs a stack fact, it reads that file, never guesses.
 - **`README.md` files always start with a Table of Contents.**
 
@@ -135,4 +136,42 @@ done. Feature specs live in `features/<prefix>-XXXX-name.md`.
 
 ## Feature Overview
 
-@features/INDEX.md
+Not loaded as an include (every session would pay for the whole table) — read on demand:
+
+- **`features/INDEX.md`** — status of every feature and the next free ID. **Read it before any work
+  on a feature** (mandatory per `.claude/rules/general.md`; every workflow skill does it first).
+- **`docs/roadmap.md`** — prioritized roadmap (priority, status, spec per feature). Search it for a
+  feature ID instead of reading it whole.
+
+## Rule map (path-scoped rules)
+
+The rules below carry a `paths:` frontmatter: they load **only** when a matching file is read,
+written or edited — and then arrive with that tool result, i.e. **after** the call. Whoever answers
+a question on their topic without touching a matching file, or **creates a new file** in their area,
+reads the relevant rule explicitly first. Every scoped rule has exactly one line here;
+`node scripts/check-context-budget.mjs` checks it. Always loaded (no `paths:`): everything else
+under `.claude/rules/` — `general`, `language`, `documentation`, `stack`, `security`, `testing`, and,
+where kept, `backend`, `db-migrations`, `deploy-infra`, `cookies`, plus the small `sql/` and `ui/`
+index READMEs. `/init` deletes the lines of pruned vendors/flavors.
+
+- `.claude/rules/sql/postgres/README.md` — PostgreSQL ruleset index, `db/**`
+- `.claude/rules/sql/postgres/sql.md` — cross-cutting SQL style guide (naming, alignment, file numbering, layout), `db/**`
+- `.claude/rules/sql/postgres/tables.md` — tables, constraints, comments, seeds, convergent evolution, `db/**`
+- `.claude/rules/sql/postgres/procedures.md` — procedures (parameters, body structure, error messages), `db/**`
+- `.claude/rules/sql/postgres/functions.md` — functions, volatility, `db/**`
+- `.claude/rules/sql/postgres/trigger.md` — triggers and trigger functions, `db/**`
+- `.claude/rules/sql/postgres/views.md` — views, `db/**`
+- `.claude/rules/sql/postgres/policies.md` — row-level security policies, `db/**`
+- `.claude/rules/sql/mssql/README.md` — SQL Server ruleset index, `db/**`
+- `.claude/rules/sql/mssql/sql.md` — cross-cutting T-SQL style guide (naming, batches, file numbering, layout), `db/**`
+- `.claude/rules/sql/mssql/tables.md` — tables, constraints, descriptions, MERGE seeds, `db/**`
+- `.claude/rules/sql/mssql/procedures.md` — procedures (parameters, body structure, FORMATMESSAGE/THROW), `db/**`
+- `.claude/rules/sql/mssql/functions.md` — functions, scalar vs. inline TVF, SCHEMABINDING, `db/**`
+- `.claude/rules/sql/mssql/trigger.md` — set-based triggers, recursion guard, `db/**`
+- `.claude/rules/sql/mssql/views.md` — views, indexed views, `db/**`
+- `.claude/rules/sql/mssql/policies.md` — security policies (FILTER/BLOCK predicates), `db/**`
+- `.claude/rules/ui/react-tailwind-shadcn/README.md` — UI flavor index, UI source + `design/**`
+- `.claude/rules/ui/react-tailwind-shadcn/frontend.md` — component library first, four states, forms, a11y, UI source
+- `.claude/rules/ui/react-tailwind-shadcn/brand.md` — brand tokens, type scale, punctuation in UI strings, UI source + `design/**`
+- `.claude/rules/ui/react-tailwind-shadcn/confirm-dialog.md` — shared ConfirmDialog, no native confirm/alert, UI source
+- `.claude/rules/ui/react-tailwind-shadcn/tooltip.md` — centralized tooltip variants and delay, UI source

@@ -11,10 +11,8 @@ _What and why, in 2-3 sentences._
 _Who they are, their needs and pain points._
 
 ## Core Features (Roadmap)
-
-| Priority | Feature | Status | Spec |
-|----------|---------|--------|------|
-| _P0 (MVP)_ | _..._ | _Planned_ | _features/feat-0001-...md_ |
+_The prioritized roadmap table lives in [roadmap.md](roadmap.md) (not loaded every session).
+Name the 3–5 core capabilities here in one line each._
 
 ## Success Metrics
 _How you'll measure whether the product works._

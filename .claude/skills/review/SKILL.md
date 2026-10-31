@@ -44,6 +44,8 @@ convention-conformant.
 2. **Spec ↔ code** — for each AC, show where in the diff it's implemented. Mismatch → Request Changes.
 3. **Conventions** — `general.md` (status/tracking discipline); the stack-relevant rules; if a SQL DB
    is used, the `sql/<vendor>/` naming/layout; if a UI, the `ui/` rules (no hardcoded colors, components reused).
+   Those two rule groups are **path-scoped** — reading the diff via `git diff` does not load them, so
+   read the ones the diff touches explicitly (the "Rule map" in `CLAUDE.md` lists them).
    - **Trust the guards, review the logic:** where a machine check exists (CI lint/guards —
      `scripts/check-*.mjs`, `db/scripts/lint-numbers.sh`, the deploy-twice apply smoke, the
      project's linters), confirm it ran **green on this diff** instead of re-checking its subject by

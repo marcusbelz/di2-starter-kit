@@ -1,3 +1,13 @@
+---
+paths:
+  - "src/**"
+  - "app/**"
+  - "components/**"
+  - "design/**"
+  - "**/*.tsx"
+  - "**/*.jsx"
+  - "**/*.css"
+---
 # Frontend Rules (UI)
 
 > Conventions for UI work in the **react-tailwind-shadcn flavor** (the `ui` value in

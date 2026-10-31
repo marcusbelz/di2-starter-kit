@@ -98,6 +98,9 @@ jobs:
       - name: markdown link check (no dead relative links)
         run: node scripts/check-md-links.mjs
 
+      - name: context budget (instructions loaded in every session; rule map vs. scoped rules)
+        run: node scripts/check-context-budget.mjs --top
+
       - name: file-size guard (no source file above the line limit)
         run: node scripts/check-file-size.mjs
 

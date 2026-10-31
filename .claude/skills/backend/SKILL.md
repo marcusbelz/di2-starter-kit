@@ -37,7 +37,9 @@ specific input validations?
   migrations, follow `.claude/rules/db-migrations.md`. For an ORM/migration tool, follow its idiom.
 - **If `database` is a SQL engine, follow the vendor rules under `.claude/rules/sql/`** for
   naming/layout (PostgreSQL: `sql/postgres/`; other vendors get a sibling `sql/<vendor>/` — note
-  dialect differences for MySQL/MSSQL).
+  dialect differences for MySQL/MSSQL). They are **path-scoped** (`db/**`) and arrive only after a
+  `db/` file was read — so **read `sql/<vendor>/sql.md` and the object file you are about to create
+  (`tables.md`, `procedures.md`, …) explicitly before writing a new DDL file.**
 - **Idempotency:** every migration must run repeatably without error.
 - Add indexes on performance-critical columns; foreign keys with appropriate `ON DELETE` behavior.
 - **Access control at the data layer:** if the engine supports it (e.g. PostgreSQL Row-Level

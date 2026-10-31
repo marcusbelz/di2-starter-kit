@@ -69,7 +69,7 @@ derived-and-confirmed, never silently guessed.
    prose summary), `{{FEATURE_PREFIX}}`, `{{BUILD_TEST_COMMANDS}}`. If `ui` is `none`, delete the
    UX (3) and Frontend (5) lines from the workflow list and the "Cookie banner" legal note.
 3. **`docs/PRD.md`** — replace the placeholder vision with the real 2–3 sentence vision + target
-   users (leave the detailed roadmap for `/requirements`).
+   users (leave the detailed roadmap for `/requirements`, which keeps it in `docs/roadmap.md`).
 4. **`features/INDEX.md`** — delete the shipped **sample features** (`features/feat-0001-*.md` …
    `feat-0003-*.md` and their INDEX rows — they are format illustrations, not project features),
    then set the `feature_id_prefix` example and reset the "Next Available ID" line to the chosen
@@ -104,6 +104,15 @@ Always keep: `init` (until you finish — see Step 6), `requirements`, `architec
 `review`, `bug`, `help`, `check-updates`, `security`, and rules `general.md`, `documentation.md`,
 `stack.md`, `security.md`, `testing.md`; the guards `scripts/check-md-links.mjs` + `scripts/check-file-size.mjs`
 and the Bash-tool hook `.claude/hooks/block-inline-interpreter.mjs` (stack-independent).
+
+**Path-scoped rules after pruning:** the SQL vendor and UI flavor rules carry `paths:` frontmatter
+(they load only when a matching file is touched). (1) Delete the "Rule map" lines in `CLAUDE.md`
+for every vendor/flavor directory you removed. (2) Set the `paths:` globs of the kept UI flavor to
+the project's real UI source layout (the shipped defaults `src/**`, `app/**`, `components/**`,
+`design/**`, `**/*.tsx|jsx|css` are a guess). (3) A newly created vendor/flavor directory gets the
+same frontmatter on every file **and** one rule-map line per file. Then
+`node scripts/check-context-budget.mjs` must be green (and lower `BUDGET_TOKENS` there to the
+measured value plus a margin, so growth stays visible).
 
 After deleting, **show the user the resulting skill/rule list** and confirm it matches expectations.
 

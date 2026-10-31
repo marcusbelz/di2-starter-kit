@@ -1,7 +1,9 @@
 # SQL rules (vendor-specific)
 
 > SQL conventions are split **per database vendor**. Each vendor has its own subdirectory here;
-> every rule file inside it auto-loads each session (like every `*.md` under `.claude/rules/`).
+> every rule file inside it carries `paths: ["db/**"]` — it loads when a `db/` file is read or
+> edited, not in every session (listed in the "Rule map" of `CLAUDE.md`; read them explicitly
+> before creating a new DDL file). This index stays unscoped and small.
 > `/init` keeps only the subdirectory for the project's chosen `database` (see
 > `.claude/rules/stack.md`) and prunes the rest. Same pattern as the UI rules under
 > [`../ui/`](../ui/). How the auto-loading works and why pruning matters:

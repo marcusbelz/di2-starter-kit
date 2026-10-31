@@ -1,3 +1,7 @@
+---
+paths:
+  - "db/**"
+---
 # Rule: Policies / Row Level Security (PostgreSQL 17)
 
 > **PostgreSQL.** These SQL rules were written for **PostgreSQL** (ported from a framework proven in a real-world

@@ -16,7 +16,12 @@ Before starting ANY work, check if the project has been initialized:
 - Guide them to run `/requirements` first to create the feature spec before any implementation.
 
 ## Feature Tracking
-- All features are tracked in `features/INDEX.md` - read it before starting any work.
+- All features are tracked in `features/INDEX.md` - read it before starting any work. It is **not**
+  loaded automatically (no `@`-include, to keep the per-session fixed cost low) — read it
+  explicitly; the prioritized roadmap lives in `docs/roadmap.md`.
+- **Path-scoped rules** (listed in the "Rule map" of `CLAUDE.md`) arrive only after a matching file
+  was read/edited. Before **creating** a file in their area, or answering a question on their
+  topic, read the relevant ones explicitly.
 - Feature specs live in `features/<prefix>-XXXX-feature-name.md`.
 - The feature-ID prefix is defined in `CLAUDE.md` / `.claude/rules/stack.md` (`feature_id_prefix`, default `feat`). Feature IDs are sequential — check `INDEX.md` for the next available number.
 - One feature per spec file (Single Responsibility). Never combine multiple independent functionalities in one spec.

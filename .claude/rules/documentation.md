@@ -38,8 +38,36 @@ Feature specs stay in **`features/`** at the repo root — they are the workflow
 | Planned recovery/rotation procedure, run rarely but deliberately | `docs/kb/` (runbook style) | `kb-00N-secret-rotation.md` |
 | First-time setup of a component (DNS, SMTP, service account) | `docs/setup/` new `setup-NNN-…md` | `setup-00N-ci-deploy-key.md` |
 | Repeatable manual UI check (a click test for the next deployment) | `docs/test-cases/cases/test-NNNN-…md` (written by `/ux` from a `manual-AC`, run by `/qa` / `/deploy`) | "Status change shows immediately in the list" |
-| Architecture convention / coding rule every skill should auto-load | `.claude/rules/` new `*.md` | `sql/postgres/sql.md`, `deploy-infra.md` |
+| Architecture convention / coding rule the agent should know automatically | `.claude/rules/` new `*.md` — **without** `paths:` it loads every session (only for rules without a file reference: commits, bug loop, creation rules); **with** `paths:` only when a matching file is touched — then also a line in the `CLAUDE.md` rule map (see "Rule vs. record") | without: `general.md`, `testing.md`; with: `sql/postgres/sql.md` |
+| Inventory / measurement behind a rule (which file does what, and why) | `docs/inventories/<topic>.md` — not the rule file | `unguarded-invariants.md` |
 | Generic production hardening guide | `docs/production/` | `error-tracking.md`, `rate-limiting.md` |
+
+## Rule vs. record (MANDATORY)
+Everything under `.claude/rules/` **without** `paths:` frontmatter loads into **every** session,
+before the first prompt. In the project these conventions come from, that fixed cost grew in six
+months to more than twice a 200k context window — a subagent could no longer start — and 84 % of
+the largest rule file was an inventory table with one row per test file.
+
+| Kind | Answers | Belongs in |
+|---|---|---|
+| **Rule** | the **next** decision: where, how, what not | `.claude/rules/<topic>.md` |
+| **Record** | a **past** one: which file checks X, because Y went wrong, negative control Z | `docs/inventories/<topic>.md`, a bug file, a spec, a run protocol |
+
+- **A new inventory goes to `docs/inventories/`**, never into a rule file; the rule names its place
+  and the duty to maintain it in one sentence.
+- **Inventories are built for targeted access:** one row per file, the file name first, so a search
+  finds the row without reading the whole file.
+- **Rules with a file reference carry `paths:`** and get a line in the "Rule map" of `CLAUDE.md`.
+  Exception — **creation rules** (rules that govern files that do not exist yet, e.g.
+  `testing.md`): a scoped rule arrives only with the result of a read/write/edit, which is too
+  late for a new file. Such rules stay unscoped, with a comment saying why.
+- **No `@`-include of large files in `CLAUDE.md`** — imports always load. Name occasional reading
+  in `CLAUDE.md` with its path; the agent reads it when needed.
+
+**Machine-checked:** [`scripts/check-context-budget.mjs`](../../scripts/check-context-budget.mjs) —
+estimated fixed cost against a budget, oversized always-loaded rules, unreadable `paths:`
+frontmatter (silently loads globally), rule map ↔ scoped rules. Background:
+https://sql.marcus-belz.de/en/context-window-full-before-first-prompt/
 
 ## Mandatory: a README index per subdirectory
 `docs/kb/` and `docs/setup/` each need a `README.md` with a markdown list of all

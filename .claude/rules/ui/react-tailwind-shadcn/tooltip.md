@@ -1,3 +1,13 @@
+---
+paths:
+  - "src/**"
+  - "app/**"
+  - "components/**"
+  - "design/**"
+  - "**/*.tsx"
+  - "**/*.jsx"
+  - "**/*.css"
+---
 # Tooltip Pattern
 
 > Pruned at `/init` time if the project has no UI. Keep tooltip styling centralized so the whole app

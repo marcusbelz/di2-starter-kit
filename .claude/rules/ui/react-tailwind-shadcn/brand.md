@@ -1,3 +1,13 @@
+---
+paths:
+  - "src/**"
+  - "app/**"
+  - "components/**"
+  - "design/**"
+  - "**/*.tsx"
+  - "**/*.jsx"
+  - "**/*.css"
+---
 # Brand Guide (token skeleton)
 
 > Fill this in for your project's visual identity. Pruned at `/init` time if the project has no UI.

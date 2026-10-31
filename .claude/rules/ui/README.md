@@ -2,7 +2,9 @@
 
 > UI conventions are split **per UI stack ("flavor")** — the same pattern as the SQL rules under
 > [`../sql/`](../sql/): one implemented reference flavor, other stacks get sibling directories,
-> `/init` keeps exactly one. Every rule file inside auto-loads each session.
+> `/init` keeps exactly one. Every rule file inside a flavor carries `paths:` (the UI source
+> globs, set by `/init`) — it loads when a UI file is read or edited, not in every session (listed
+> in the "Rule map" of `CLAUDE.md`; read them explicitly before creating a new UI file).
 > Pruned entirely at `/init` time when `ui == none`. How the auto-loading works and why pruning
 > matters: [KB-010](../../../docs/kb/kb-010-how-rules-and-skills-are-loaded.md).
 

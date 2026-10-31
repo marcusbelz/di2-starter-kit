@@ -1,7 +1,11 @@
 # .claude/rules — always-on conventions
 
-Every `*.md` in this tree auto-loads into each Claude Code session (a rule with a `paths:`
-frontmatter would instead load lazily on file match — the shipped rules deliberately use none). Rules are the project's
+Every `*.md` in this tree **without** a `paths:` frontmatter auto-loads into each Claude Code
+session. The SQL vendor rules (`sql/<vendor>/`, scope `db/**`) and the UI flavor rules
+(`ui/<flavor>/`, scope: UI source) **carry** `paths:` — they load only when a matching file is read
+or edited, and are listed in the "Rule map" of the root `CLAUDE.md` (kept in sync by
+`scripts/check-context-budget.mjs`); before creating a file in their area, read them explicitly.
+Why: the fixed per-session cost (`documentation.md` → "Rule vs. record"). Rules are the project's
 standing conventions; skills (in `../skills/`) are the workflow steps that apply them. How the
 loading works (and what it means for pruning and rule edits):
 [KB-010](../../docs/kb/kb-010-how-rules-and-skills-are-loaded.md). How rules and skills relate to

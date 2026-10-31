@@ -1,3 +1,7 @@
+---
+paths:
+  - "db/**"
+---
 # Rule: Procedures (PostgreSQL 17 / PL/pgSQL)
 
 > **PostgreSQL.** These SQL rules were written for **PostgreSQL** (ported from a framework proven in a real-world

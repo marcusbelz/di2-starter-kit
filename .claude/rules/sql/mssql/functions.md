@@ -1,3 +1,7 @@
+---
+paths:
+  - "db/**"
+---
 # Rule: Functions (SQL Server 2022 / T-SQL)
 
 > **SQL Server (MSSQL).** This ruleset is the T-SQL sibling of the PostgreSQL ruleset under

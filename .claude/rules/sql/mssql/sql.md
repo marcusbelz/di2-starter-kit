@@ -1,3 +1,7 @@
+---
+paths:
+  - "db/**"
+---
 # SQL rules
 
 > **SQL Server (MSSQL).** This ruleset is the T-SQL sibling of the PostgreSQL ruleset under

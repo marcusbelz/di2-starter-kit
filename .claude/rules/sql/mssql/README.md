@@ -1,3 +1,7 @@
+---
+paths:
+  - "db/**"
+---
 # SQL vendor: SQL Server 2022 (MSSQL)
 
 > The T-SQL sibling of the PostgreSQL reference ruleset under [`../postgres/`](../postgres/) —

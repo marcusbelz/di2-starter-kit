@@ -1,3 +1,13 @@
+---
+paths:
+  - "src/**"
+  - "app/**"
+  - "components/**"
+  - "design/**"
+  - "**/*.tsx"
+  - "**/*.jsx"
+  - "**/*.css"
+---
 # UI flavor: React + Tailwind + shadcn/ui
 
 > The implemented UI flavor (proven in the source project). Directory overview:

@@ -1,3 +1,7 @@
+---
+paths:
+  - "db/**"
+---
 # SQL vendor: PostgreSQL 17
 
 > The reference vendor ruleset. Directory overview and vendor split:
