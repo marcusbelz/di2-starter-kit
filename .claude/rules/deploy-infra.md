@@ -63,8 +63,9 @@ either store = silent failure. Maintain the table below; verify both sides match
 | {{SECRET_1}} | env file ↔ {{BACKEND_1}} | {{SYMPTOM_1}} | {{SYNC_1}} |
 
 Completeness check before a prod release: every security-critical variable is `SET` (not missing,
-not a placeholder) in every env. A read-only script under `scripts/` that reports SET/MISSING/
-PLACEHOLDER (never the values) is the recommended way to enforce this.
+not a placeholder) in every env. [`scripts/check-env-files.sh`](../../scripts/check-env-files.sh)
+enforces this: run on the host, it reports SET / MISSING / EMPTY / PLACEHOLDER per variable and
+environment (never the values); fill its `ENV_FILE` / `ENVS_DEFAULT` / `VARS` from the table above.
 
 ## Migration drift (if `database != none`)
 The app-deploy step usually does **not** apply DB migrations. Before deploying, check whether the

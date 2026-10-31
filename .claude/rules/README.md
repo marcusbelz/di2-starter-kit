@@ -27,8 +27,26 @@ script). A prose rule raises the hit rate, but at AI generation volume it cannot
 the prose explains the *why*, the guard closes the gap between a high hit rate and zero drift.
 Existing instances: deploy idempotence (CI deploys twice, [`ci.yml`](../../.github/workflows/ci.yml)),
 table-group numbers ([`db/scripts/lint-numbers.sh`](../../db/scripts/lint-numbers.sh)), the UI
-type scale ([`ui/react-tailwind-shadcn/eslint-rules/no-raw-font-size.mjs`](ui/react-tailwind-shadcn/eslint-rules/no-raw-font-size.mjs)).
-When you add a rule whose core a machine could check, add the guard with it.
+type scale ([`ui/react-tailwind-shadcn/eslint-rules/no-raw-font-size.mjs`](ui/react-tailwind-shadcn/eslint-rules/no-raw-font-size.mjs)),
+dead links after a move ([`scripts/check-md-links.mjs`](../../scripts/check-md-links.mjs) for
+[`documentation.md`](documentation.md)), oversized source files
+([`scripts/check-file-size.mjs`](../../scripts/check-file-size.mjs)), and — on the harness side —
+the Bash-tool hook [`.claude/hooks/block-inline-interpreter.mjs`](../hooks/block-inline-interpreter.mjs)
+(a backslash in inline interpreter code is silently altered by the tool; a prose rule against it
+was broken in practice). When you add a rule whose core a machine could check, add the guard with it.
+
+**Guard anatomy** (new guards follow it, so they behave alike locally and in CI):
+- **Runtime:** a dependency-free script — bash for DB tooling next to `db/scripts/`, otherwise a
+  Node `.mjs` under `scripts/` using only `node:` builtins (no `package.json`; CI sets up Node).
+- **File set = git's view:** `git ls-files --cached --others --exclude-standard` minus deleted
+  files — ignored paths are invisible, so a local run checks what a fresh CI checkout would.
+- **Findings carry a rule tag and a fix hint** (`[depth] … -> correct would be: …`), one per line.
+- **Exit codes:** `0` clean, `1` findings, `2` environment problem (e.g. not a git checkout).
+- **Baseline for a known backlog** (`scripts/<guard>-baseline.txt`), and it **only shrinks**: an
+  entry that no longer matches a finding is itself a `[stale]` finding; `--update-baseline`
+  regenerates (removes/lowers, never adds). Growing it is a deliberate, visible manual edit.
+- **A negative control before merging:** the guard is shown red on a doctored input once — a
+  check that has never failed has not been shown to check anything.
 
 Conventions for writing rules: one concern per file, English, and if a rule references a file or
 path, keep that reference valid — rules are loaded verbatim into every session.

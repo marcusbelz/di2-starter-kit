@@ -87,3 +87,16 @@ jobs:
 
       - name: table-group number lint (NUMBERS.md registry)
         run: bash db/scripts/lint-numbers.sh
+
+      # Guards under scripts/*.mjs are dependency-free Node scripts (node: builtins only,
+      # no package.json) - see .claude/rules/README.md "Guard anatomy".
+      - name: Set up Node (repo guards)
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+
+      - name: markdown link check (no dead relative links)
+        run: node scripts/check-md-links.mjs
+
+      - name: file-size guard (no source file above the line limit)
+        run: node scripts/check-file-size.mjs

@@ -43,12 +43,14 @@ with the user: `package_manager` (from the runtime) and the build/test/run/audit
 | `database == mssql` | `rules/sql/postgres/` (keep only the matching vendor; adapt the PostgreSQL `db/` example tree) |
 | `database == mysql` (no shipped ruleset) | both shipped vendors; add `rules/sql/<vendor>/` (port + adapt from a shipped one) |
 | `auth == none` | `skills/auth` |
-| `deploy == none` | `skills/deploy`, `rules/deploy-infra.md`, `.github/workflows/db-create/deploy/clean/drop.yml` (SSH dispatch workflows) |
+| `deploy == none` | `skills/deploy`, `rules/deploy-infra.md`, `.github/workflows/db-create/deploy/clean/drop.yml` (SSH dispatch workflows), `scripts/check-env-files.sh` |
 | `ci == none` | `.github/workflows/` (whole tree) |
 | always | `skills/init` removes itself at the end (one-time bootstrap) |
 
 Always kept: `requirements`, `architecture`, `qa`, `review`, `bug`, `help`, `check-updates`,
-`security`, and rules `general`, `documentation`, `stack`, `security`.
+`security`, and rules `general`, `documentation`, `stack`, `security`; the repo guards
+`scripts/check-md-links.mjs` + `scripts/check-file-size.mjs` (`/init` sets the file-size scope) and
+the Bash-tool hook `.claude/hooks/block-inline-interpreter.mjs`.
 
 ## The stack.md contract
 `stack.md` carries a Profile table + a build/test/run/audit command block + free-form notes. Every

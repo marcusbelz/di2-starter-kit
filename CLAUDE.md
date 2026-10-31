@@ -26,6 +26,7 @@
 .claude/
   rules/            Always-on conventions (auto-loaded each session)
   skills/           Workflow + cross-cutting skills (slash commands)
+  hooks/            Claude Code hooks wired in .claude/settings.json (e.g. Bash inline-code guard)
 .github/
   workflows/        CI + DB deploy workflows (manual dispatch; pruned by /init when not needed)
 features/
@@ -40,7 +41,8 @@ docs/
 db/                 SQL DB artifacts (PostgreSQL): config/ · database/ · schemas/<schema>/ · scripts/ · tests/
                     (worked example slice; pruned by /init when database == none; tests/ is a
                     separate opt-out at /init even when a database is kept)
-scripts/            Helper scripts (e.g. spin up a new project from this template)
+scripts/            Helper scripts (new project from this template) + repo guards run in CI
+                    (dependency-free Node: markdown link check, file-size check)
 ```
 
 The application source layout (`src/`, `app/`, `cmd/`, …) depends on the chosen stack and is

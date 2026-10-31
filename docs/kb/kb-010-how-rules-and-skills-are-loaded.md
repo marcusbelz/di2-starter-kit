@@ -90,9 +90,11 @@ the explicit read it does not know the rule exists.
 | "I edited a rule but the session ignores it" | The context is a session-start snapshot | Start a new session, or ask for an explicit re-read |
 | "More rule files = better" | Every file is paid for in context, every session | One concern per file, prune what the project does not need, keep rules concise |
 | "I can drop a convention into `CLAUDE.md` instead" | Works (it auto-loads too), but mixes project identity with conventions and bypasses the pruning matrix | `CLAUDE.md` = project frame; conventions = `rules/` |
+| "A loaded rule is a followed rule" | A rule is prose the model weighs — it raises the hit rate, it does not guarantee it | Where the core is mechanical: a **guard** in CI (`scripts/`, see the rules README "Guard anatomy") or a **hook** (`.claude/hooks/`, wired in `.claude/settings.json`) — the harness runs a hook before the tool call, the model cannot skip it |
 
 ## Related
 - [KB-011](kb-011-skills-vs-agents-subagent-dispatch.md) — skills vs. **agents** (`.claude/agents/`) and how subagent dispatch works; extends this picture by the third `.claude/` citizen.
-- [.claude/rules/README.md](../../.claude/rules/README.md) — index of the shipped rules and their pruning conditions.
+- [.claude/rules/README.md](../../.claude/rules/README.md) — index of the shipped rules and their pruning conditions; the "enforcement counterpart" principle and the guard anatomy.
+- [.claude/hooks/block-inline-interpreter.mjs](../../.claude/hooks/block-inline-interpreter.mjs) — the shipped hook: blocks Bash calls that pass backslash-containing code inline to an interpreter (the tool alters it silently).
 - [.claude/skills/README.md](../../.claude/skills/README.md) — index of the workflow skills.
 - `.claude/rules/documentation.md` — where which kind of content lives.

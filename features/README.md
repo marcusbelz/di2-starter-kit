@@ -16,7 +16,10 @@ single source of truth for what is planned / in progress / deployed.
   (archived)" table. Archiving is done by `/deploy` (after a verified prod deploy) or by the skill
   that marks a spec `Superseded`. An archived spec never moves back; post-deploy fixes run via the
   bug-loop, follow-up work gets a new feature ID. Skills that look up a spec by ID search
-  `features/**` (the archive included).
+  `features/**` (the archive included). **The move pulls the links along** (same commit): the spec
+  goes from depth 1 to depth 3, so its repo-root links change `](../` → `](../../../`, and every
+  incoming link to it is rewritten — procedure in `.claude/rules/documentation.md` → "Archiving
+  pulls the links along"; `node scripts/check-md-links.mjs` must stay green.
 - **Created by `/requirements`** (user stories, acceptance criteria, edge cases); enriched by
   `/architecture` (tech design) and the implementation skills (implementation notes, deviations).
 - **Skill Commands section (mandatory):** every spec carries a copy-paste block with the workflow

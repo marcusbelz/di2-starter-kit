@@ -87,19 +87,26 @@ Apply this matrix from the Step-2 answers:
 | `database == mssql` | `.claude/rules/sql/postgres/` (keep only the matching vendor directory). Note: the `db/` artifact tree is a PostgreSQL worked example — adapt it to T-SQL/sqlcmd or rebuild it per `sql/mssql/` |
 | `database in {mysql, sqlite, …}` (SQL, no shipped ruleset) | both shipped vendor dirs. Create `.claude/rules/sql/<vendor>/` by copying + adapting a shipped one (quoting/dialect/identity differ — see `sql/README.md`) |
 | `auth == none` | `.claude/skills/auth/` |
-| `deploy == none` | `.claude/skills/deploy/`, `.claude/rules/deploy-infra.md`, `.github/workflows/db-create.yml` / `db-deploy.yml` / `db-clean.yml` / `db-drop.yml` (the SSH dispatch workflows — keep `ci.yml` if `ci != none`) |
+| `deploy == none` | `.claude/skills/deploy/`, `.claude/rules/deploy-infra.md`, `.github/workflows/db-create.yml` / `db-deploy.yml` / `db-clean.yml` / `db-drop.yml` (the SSH dispatch workflows — keep `ci.yml` if `ci != none`), `scripts/check-env-files.sh` |
 | `ci == none` | `.github/workflows/` (whole tree) |
 
 Always keep: `init` (until you finish — see Step 6), `requirements`, `architecture`, `qa`,
 `review`, `bug`, `help`, `check-updates`, `security`, and rules `general.md`, `documentation.md`,
-`stack.md`, `security.md`.
+`stack.md`, `security.md`; the guards `scripts/check-md-links.mjs` + `scripts/check-file-size.mjs`
+and the Bash-tool hook `.claude/hooks/block-inline-interpreter.mjs` (stack-independent).
 
 After deleting, **show the user the resulting skill/rule list** and confirm it matches expectations.
 
 ## Step 5 — Stack-specific fill-in (where a kept skill needs concrete facts)
 - If `deploy != none`: open `.claude/rules/deploy-infra.md` and replace its `{{PLACEHOLDER}}` host /
   container / path / secret facts with the project's real values (or leave clearly marked TODOs the
-  user fills when the server exists). Trim the env-stage tables to the chosen `env_stages`.
+  user fills when the server exists). Trim the env-stage tables to the chosen `env_stages`. Fill the
+  `ENV_FILE` / `ENVS_DEFAULT` / `VARS` block at the top of `scripts/check-env-files.sh` from the
+  same facts (it refuses to run while a `{{…}}` placeholder is left).
+- **Guards (always):** set `SOURCE_ROOTS` at the top of `scripts/check-file-size.mjs` to the
+  project's source directories (and narrow `SOURCE_EXT` if useful). The guards and the hook need
+  `node` (any LTS) on the PATH — confirm the user has it; if not, say that the hook then errors
+  without blocking and the guards run in CI only.
 - If `database` is a SQL engine and you kept `db-migrations.md`: confirm the migration command names.
 - If `auth != none` and not Keycloak: note the actual provider in `.claude/skills/auth/SKILL.md`'s
   context line so the diagnosis layers match the real setup.

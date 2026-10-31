@@ -103,7 +103,11 @@ Document a new bug — see **Filing a new bug** below.
    ```
    **Precondition:** a QA protocol that `/qa` wrote into the bug file is committed **before** the
    close — see [Git Commit Convention](#git-commit-convention) for why.
-7. **Update `docs/bugs/INDEX.md`:** repoint the ID link to `archive/<quarter>/…`; set "Closed
+7. **Incoming links:** find references to the old path elsewhere in the repo
+   (`git grep -n "bug-NNNN-<slug>.md" -- '*.md'`) and rewrite them to the archive path, relative to
+   each linking file (rules: `.claude/rules/documentation.md` → "Archiving pulls the links along").
+   Then `node scripts/check-md-links.mjs` must report 0 findings.
+8. **Update `docs/bugs/INDEX.md`:** repoint the ID link to `archive/<quarter>/…`; set "Closed
    on"; change the status hint; bump the header status table. The row stays in place (only its
    content changes).
 

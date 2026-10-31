@@ -26,7 +26,8 @@ Feature specs stay in **`features/`** at the repo root — they are the workflow
 - **Numbers encode lifecycle order, not history.** When a new article belongs mid-sequence, renumber
   the following articles so the order stays right. Piecemeal renumbering breaks cross-refs and Git
   history, so always do it as **one atomic change**: `git mv` every affected file and update **all**
-  `kb-00X` / `KB-00X` references across the repo in the same commit, then verify no link dangles.
+  `kb-00X` / `KB-00X` references across the repo in the same commit, then verify no link dangles
+  (`node scripts/check-md-links.mjs` — see [Archiving pulls the links along](#archiving-pulls-the-links-along-mandatory)).
 
 ## When what goes where
 | Situation | Directory | Example |
@@ -46,6 +47,41 @@ files start with a Table of Contents (markdown heading anchors).
 - Within `docs/kb/`: relative links — `[KB-003](kb-003-….md)`.
 - From `docs/setup/` to `kb/`: `[KB-004](../kb/kb-004-….md)`.
 - From skills, features, code comments: full path with slug — `docs/kb/kb-006-….md`.
+
+## Archiving pulls the links along (MANDATORY)
+A `git mv` of a doc file breaks **two** kinds of links. Both are fixed in the **same** commit as the move:
+
+| Direction | What breaks | Fix |
+|---|---|---|
+| **Outgoing** — links **in** the moved file | the number of `../` no longer matches the new directory depth | adjust every relative link by the depth difference |
+| **Incoming** — links **to** the moved file | they still point at the old location | rewrite every reference repo-wide to the new path |
+
+**Rule of thumb (outgoing):** number of `../` to reach the repo root = depth of the directory the
+file lives in — `features/` = 1, `features/archive/<quarter>/` = 3, `docs/bugs/` = 2,
+`docs/bugs/archive/<quarter>/` = 4.
+
+**Procedure:** (1) `git mv`; (2) adjust the outgoing links to the new depth; (3) find the incoming
+ones — `git grep -n "<old-basename>" -- '*.md'` — and rewrite them; (4) run the checker below.
+
+- **Leave code blocks and code spans alone** — they hold link syntax as an *example*; a blunt
+  find-and-replace on `](…)` rewrites the examples and falsifies the doc.
+- **Rewrite existence-gated, not textually:** touch only links that are provably dead at the old
+  target and provably resolve at the new one — a blind replace breaks links that were already right.
+- **Compute the new path relative to the linking file**, not the repo path.
+- **Ambiguous basenames** (`README.md`, `INDEX.md`): a name hit is no proof of a move — resolve by hand.
+- **Target really deleted?** Leave the link; it documents the state at the time.
+
+**Where it applies:** feature archive (`/deploy`, `Superseded`), bug archive (`/bug close`), KB
+renumbering, any restructuring under `docs/`. **Where it does not:** files that by convention never
+move (e.g. test cases, when the project keeps a test-case catalog).
+
+**Machine-checked:** [`scripts/check-md-links.mjs`](../../scripts/check-md-links.mjs) — blocking
+CI step. It checks that every relative link target **exists** (anchors and external URLs are out of
+scope, code blocks/spans are masked) and classifies a dead link with the fix: `[depth]` (the file
+moved, outgoing links not adjusted), `[moved]` (the target moved — it names the new path), `[gone]`,
+`[absolute]` (a `/`-rooted link resolves in no checkout). It sees exactly what git sees (tracked +
+untracked-not-ignored files), so a local run equals the CI run. A known backlog can live in
+`scripts/md-links-baseline.txt`, which only shrinks (a resolved entry is a `[stale]` finding).
 
 ## What does NOT belong in `docs/kb/` / `docs/setup/`
 - **Bug reports** → `docs/bugs/bug-NNNN-<slug>.md` (index in `docs/bugs/INDEX.md`). Distill a KB
