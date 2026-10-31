@@ -13,7 +13,7 @@
 ## What ships
 | Workflow | Trigger | Runs |
 |----------|---------|------|
-| `ci.yml` | PR → `main`/`master`, push → `dev` | dry-run deploy against a throwaway Postgres + `db/tests` + idempotency re-deploy + shellcheck — **needs no secrets** |
+| `ci.yml` | PR → `main`/`master`, push → `dev`/`main` | dry-run deploy against a throwaway Postgres + `db/tests` + idempotency re-deploy + shellcheck — **needs no secrets** |
 | `db-create.yml` | manual dispatch | `create.sh <env>` on the deploy host via SSH |
 | `db-deploy.yml` | manual dispatch | `deploy.sh <schema> <env>` via SSH |
 | `db-clean.yml` | manual dispatch + typed `clean` | `clean.sh <schema> <env>` via SSH |
@@ -32,6 +32,7 @@ in `.claude/rules/stack.md`; delete unused ones from the workflows' choice lists
 | Secret | Used by | Value |
 |--------|---------|-------|
 | `DEPLOY_SSH_HOST` / `DEPLOY_SSH_USER` / `DEPLOY_SSH_PRIVATE_KEY` | all four | SSH access to the deploy host (a dedicated low-privilege deploy user; key without passphrase) |
+| `DEPLOY_SSH_FINGERPRINT` | all four | SHA256 fingerprint of the host's **ECDSA** host key, read on the host: `ssh-keygen -lf /etc/ssh/ssh_host_ecdsa_key.pub -E sha256` → store `SHA256:…`. Empty = no host-key check (works, but MITM-able) — set it. Why ECDSA: [workflows README](../../.github/workflows/README.md#github-environments-secrets-variables-branch-rules) |
 | `DB_ADMIN_PASSWORD_POSTGRES` | create, drop | postgres superuser |
 | `DB_OWNER_PASSWORD` | create | database-owner role |
 | `DB_FW_PASSWORD` | create, deploy, clean | schema owner |
@@ -64,6 +65,7 @@ also enable *Required reviewers* (human approval before the job starts).
 |---------|-------|-----|
 | `ERROR: environment variable DEPLOY_PATH is not set` | Variable missing on that Environment | Set it (step 3) |
 | SSH step: `permission denied (publickey)` | Wrong key/user, or the public key is not on the host | Fix the secret / add the key to the deploy user's `authorized_keys` |
+| SSH step fails in the handshake with a host-key / fingerprint error | `DEPLOY_SSH_FINGERPRINT` holds the ED25519 (or an outdated) key's fingerprint, or the host was rebuilt | Re-read the **ECDSA** fingerprint on the host (step 2); after a rebuild, verify the new key before updating the secret |
 | Dispatch workflow runs from the wrong branch | No deployment-branch rule on the Environment | Configure step 4 |
 | Secrets appear empty in the job | Secrets were created at repo level while the job pins `environment:` | Create them **inside** the Environment (or use repo-level consistently) |
 | Destructive workflow exits early with a confirmation error | The typed word did not match `clean` / `drop` exactly | Intentional guard — retype exactly |

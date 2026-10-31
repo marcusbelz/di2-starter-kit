@@ -54,7 +54,11 @@ Audit areas that don't apply (e.g. web headers for a no-UI service) are marked *
 9. **Data store & connection** (if `database != none`) — connection string only from env; sensible
    pool size; TLS for prod connections.
 10. **CI/CD** (if `ci != none`) — secrets referenced via the CI secret store (never echoed); deploy
-    key has minimal privileges; workflows trigger only on intended branches.
+    key has minimal privileges; workflows trigger only on intended branches; free-text dispatch
+    inputs reach scripts only via `env:` (never interpolated into `run:`/remote script text, never
+    echoed); third-party actions pinned to a full commit SHA (`# vX.Y.Z` comment); SSH steps verify
+    the host key (fingerprint set for every environment); every workflow sets `permissions:`
+    explicitly (least privilege). Rules: `.github/workflows/README.md` → "Hardening rules".
 
 ## Output
 **Step 1 — in chat:** a summary (date, areas, counts Critical/High/Medium/Low, Go-Live YES/NO),

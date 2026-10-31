@@ -16,15 +16,22 @@ on:
         description: 'Type "drop" to confirm dropping the whole database'
         required: true
 
+# No step uses the GITHUB_TOKEN — grant it nothing (least privilege).
+permissions: {}
+
 jobs:
   guard:
     name: Confirmation guard
     runs-on: ubuntu-latest
     steps:
+      # Free-text input goes through env:, never into the script text (script injection),
+      # and is never echoed back.
       - name: Require typed confirmation
+        env:
+          CONFIRM: ${{ github.event.inputs.confirm }}
         run: |
-          if [ "${{ github.event.inputs.confirm }}" != "drop" ]; then
-            echo "ERROR: confirmation input must be exactly 'drop' (got '${{ github.event.inputs.confirm }}')."
+          if [ "$CONFIRM" != "drop" ]; then
+            echo "ERROR: the confirmation input did not match - type exactly 'drop' to run this workflow."
             exit 1
           fi
 
@@ -36,7 +43,7 @@ jobs:
 
     steps:
       - name: drop.sh via SSH
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         env:
           DB_ADMIN_PASSWORD_POSTGRES: ${{ secrets.DB_ADMIN_PASSWORD_POSTGRES }}
         with:
@@ -44,6 +51,7 @@ jobs:
           username: ${{ secrets.DEPLOY_SSH_USER }}
           key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           port: ${{ vars.SSH_PORT || 22 }}
+          fingerprint: ${{ secrets.DEPLOY_SSH_FINGERPRINT }}   # host-key check; empty = no check (see README)
           envs: DB_ADMIN_PASSWORD_POSTGRES
           script: |
             set -e

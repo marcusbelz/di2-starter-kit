@@ -16,7 +16,9 @@ on:
   pull_request:
     branches: [main, master]
   push:
-    branches: [dev]
+    # main too: a merge that lands on main without a PR (local merge + push) must get a CI run,
+    # because /deploy prod requires a green run on exactly that merge commit.
+    branches: [dev, main]
 
 permissions:
   contents: read

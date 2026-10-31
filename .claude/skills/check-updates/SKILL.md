@@ -30,7 +30,9 @@ Determine current vs. latest for:
 3. **Runtime / base images** — the `FROM` lines in `Dockerfile` / compose files (if containerized),
    and the runtime version pinned in the manifest.
 4. **CI action / image versions** — if `ci != none`, the pinned action/image versions in the CI
-   workflow files.
+   workflow files. Actions pinned to a commit SHA carry their version as a comment
+   (`@<sha> # vX.Y.Z`) — read the version from the comment; an update replaces **both** the SHA
+   and the comment (resolve the new tag's SHA, e.g. `git ls-remote https://github.com/<owner>/<action> refs/tags/vX.Y.Z`).
 
 Record each as: component · current · latest · type (patch/minor/major) · note.
 

@@ -20,6 +20,9 @@ on:
         type: choice
         options: [dev, int, test, prod]
 
+# No step uses the GITHUB_TOKEN — grant it nothing (least privilege).
+permissions: {}
+
 # Serialize deploys per environment: deploy.sh's run-once check (SELECT ->
 # execute -> record) is not concurrency-safe, so two overlapping runs against
 # the same database could both pass the check and execute a transition twice.
@@ -37,7 +40,7 @@ jobs:
 
     steps:
       - name: deploy.sh via SSH
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         env:
           DB_FW_PASSWORD: ${{ secrets.DB_FW_PASSWORD }}
         with:
@@ -45,6 +48,7 @@ jobs:
           username: ${{ secrets.DEPLOY_SSH_USER }}
           key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           port: ${{ vars.SSH_PORT || 22 }}
+          fingerprint: ${{ secrets.DEPLOY_SSH_FINGERPRINT }}   # host-key check; empty = no check (see README)
           envs: DB_FW_PASSWORD
           script: |
             set -e

@@ -4,13 +4,14 @@
 - [Workflows](#workflows)
 - [How the DB workflows reach the target](#how-the-db-workflows-reach-the-target)
 - [GitHub Environments: secrets, variables, branch rules](#github-environments-secrets-variables-branch-rules)
+- [Hardening rules for workflows](#hardening-rules-for-workflows)
 - [Adapting to your project](#adapting-to-your-project)
 
 ## Workflows
 
 | Workflow | Trigger | What it does | Secrets |
 |----------|---------|--------------|---------|
-| [`ci.yml`](ci.yml) | PR → `main`/`master`, push → `dev` | Dry-run DB deploy against a throwaway `postgres:17` service (`create.sh local` → `deploy.sh all local` → `db/tests` → re-deploy as idempotency check) + shellcheck lint | **none** (ephemeral DB, committed local creds) |
+| [`ci.yml`](ci.yml) | PR → `main`/`master`, push → `dev`/`main` | Dry-run DB deploy against a throwaway `postgres:17` service (`create.sh local` → `deploy.sh all local` → `db/tests` → re-deploy as idempotency check) + shellcheck lint | **none** (ephemeral DB, committed local creds) |
 | [`db-create.yml`](db-create.yml) | manual dispatch (env) | one-time bootstrap: `db/scripts/create.sh <env>` on the host | SSH + all DB passwords |
 | [`db-deploy.yml`](db-deploy.yml) | manual dispatch (schema + env) | idempotent object deploy: `db/scripts/deploy.sh <schema> <env>` | SSH + `DB_FW_PASSWORD` |
 | [`db-clean.yml`](db-clean.yml) | manual dispatch (schema + env + typed `clean`) | drop schema objects (schema stays): `db/scripts/clean.sh` | SSH + `DB_FW_PASSWORD` |
@@ -44,6 +45,7 @@ Create one **GitHub Environment** per stage (`dev`, `int`, `test`, `prod` — ma
 | Secret | Used by | Meaning |
 |--------|---------|---------|
 | `DEPLOY_SSH_HOST` / `DEPLOY_SSH_USER` / `DEPLOY_SSH_PRIVATE_KEY` | all dispatch workflows | SSH access to the deploy host |
+| `DEPLOY_SSH_FINGERPRINT` | all dispatch workflows | SHA256 fingerprint of the deploy host's SSH host key — the runner refuses any other host (no MITM). **Empty = no check**, so the workflows keep working until you set it; set it for every environment. How to get it: see below |
 | `DB_ADMIN_PASSWORD_POSTGRES` | create, drop | postgres superuser |
 | `DB_OWNER_PASSWORD` | create | database owner role |
 | `DB_FW_PASSWORD` | create, deploy, clean | schema owner (object owner) |
@@ -59,6 +61,37 @@ Create one **GitHub Environment** per stage (`dev`, `int`, `test`, `prod` — ma
 `dev`/`int` deployable from `dev`, `test`/`prod` only from `main`) — the workflows then refuse to
 run from the wrong branch natively, without extra script guards. For `prod`, additionally enable
 *required reviewers* on the Environment for a human approval gate.
+
+**Host-key fingerprint (`DEPLOY_SSH_FINGERPRINT`).** Read it **on the host itself** (or over a
+channel you already trust), never from a first, unverified connection:
+
+```bash
+ssh-keygen -lf /etc/ssh/ssh_host_ecdsa_key.pub -E sha256     # -> 256 SHA256:AbC… (ECDSA)
+```
+
+Use the **ECDSA** key's fingerprint: the action's Go SSH client takes the first host-key type of
+its own preference list that the server offers — ECDSA before RSA, ED25519 last — so a fingerprint
+of the ED25519 key never matches on a host that also offers ECDSA. (No ECDSA key on the host? Then
+RSA.) Store the `SHA256:…` value (with the prefix) as the secret; cross-check from outside with
+`ssh-keyscan -t ecdsa -p <port> <host> | ssh-keygen -lf -`. If the host
+key changes (server rebuild), the deploy fails closed until the secret is updated — that is the point.
+
+## Hardening rules for workflows
+
+These apply to the shipped workflows and to every workflow you add (they are also checked by
+`/security`, area "CI/CD & supply chain"):
+
+- **Free-text inputs never go into script text.** A `workflow_dispatch` text input interpolated
+  into `run:` (`if [ "${{ inputs.x }}" … ]`) is executed as shell code. Pass it through `env:` and
+  compare the shell variable; don't echo the raw value back. Prefer `type: choice` wherever the
+  value set is known (the shipped `schema` / `environment` inputs are choices for this reason).
+- **Third-party actions are pinned to a full commit SHA** with the version as a comment
+  (`uses: owner/action@<40-hex-sha> # vX.Y.Z`) — a tag can be moved to different code after you
+  reviewed it. GitHub-owned `actions/*` may stay on a major tag. `/check-updates` reads the
+  version from the comment.
+- **SSH steps verify the host key** (`fingerprint:` above).
+- **Least-privilege token:** every workflow sets `permissions:` explicitly — `{}` when no step
+  uses the `GITHUB_TOKEN`, `contents: read` for a checkout.
 
 ## Adapting to your project
 - `/init` prunes this directory when the project has neither a database nor CI.
