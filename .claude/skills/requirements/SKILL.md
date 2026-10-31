@@ -48,6 +48,8 @@ P0/P1/P2 with status + spec link), Success Metrics, Constraints, Non-Goals.
 - One spec per feature using [template.md](template.md).
 - Save to `features/<prefix>-XXXX-feature-name.md`.
 - Include user stories, acceptance criteria, edge cases, and dependencies.
+- **Mark the manual-only ACs** exactly as in Feature Mode Phase 3 ([Manual-only acceptance
+  criteria](#manual-only-acceptance-criteria-projects-with-a-ui)).
 
 ### Phase 5: Update tracking
 - Update `features/INDEX.md` with all new features + statuses, and the "Next Available ID" line.
@@ -78,6 +80,27 @@ offline / partial-failure behavior.
   the command lines that don't apply to this project/feature (check `.claude/rules/stack.md`:
   `ui == none` → drop `/ux` + `/frontend`; feature needs no backend → drop `/backend`;
   `deploy == none` → drop `/deploy`). The block must be copy-paste-runnable as-is.
+- **Number the acceptance criteria** (`- [ ] **AC 1:** …`) — test cases, QA results and review
+  findings refer to them by number.
+
+#### Manual-only acceptance criteria (projects with a UI)
+Decide **per AC, while writing the spec**, whether it can be verified **only by a human at the
+screen** (the moment a message appears, behavior on a small screen, a path through several views,
+two accounts at once). Everything a program can check reliably stays an ordinary AC and is covered
+by automated tests.
+- **Mark it** at the end of the AC line in exactly one of two forms: `*(manual-AC)*` or
+  `*(manual-AC: <what to do>)*`. No other spelling — the guard checks the form, and a counter that
+  misses a second spelling looks like a measurement while being wrong.
+- **Word it as the expected result a test case will copy verbatim:** observable on screen, no
+  implementation vocabulary (no procedure, table, internal code — terms the UI itself shows are
+  fine), and say **when** the result shows where timing matters ("immediately, without leaving the
+  view"). Add at least one "must not" where the feature could plausibly do something wrong.
+- `/requirements` only marks — `/ux` writes the test case (`TEST-NNNN`) once the mockups are
+  approved, **before** any code; `/backend` and `/frontend` do not start while a marked AC has no
+  case. Why this order: the same agent writes spec, code and test case; fixing the expectation in
+  writing before the code exists is the only separation of roles there is. Catalog convention:
+  `docs/test-cases/README.md`.
+- `ui == none`: no markers (the catalog is pruned by `/init`).
 
 ### Phase 4: User review
 Present the spec; "Approved" → ready for architecture, "Changes needed" → iterate.
@@ -113,8 +136,9 @@ Separate UI component/screen? → each "yes" suggests its own feature.
 
 ## Checklist
 **Init Mode:** vision confirmed; PRD complete; features split by Single Responsibility; dependencies
-documented; specs created with stories/AC/edge-cases; `INDEX.md` updated; build order recommended;
-user approved.
-**Feature Mode:** feature questions answered; 3–5 user stories; every AC testable; 3–5 edge cases;
+documented; specs created with stories/AC/edge-cases; ACs numbered and manual-only ACs marked (UI
+projects); `INDEX.md` updated; build order recommended; user approved.
+**Feature Mode:** feature questions answered; 3–5 user stories; every AC testable and numbered;
+manual-only ACs marked in one of the two allowed forms (UI projects); 3–5 edge cases;
 feature ID assigned; Skill Commands section filled (real ID, non-applicable lines removed); file
 saved; `INDEX.md` + PRD roadmap updated; user approved.

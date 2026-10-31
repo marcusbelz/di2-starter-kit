@@ -44,14 +44,26 @@ convention-conformant.
 2. **Spec ↔ code** — for each AC, show where in the diff it's implemented. Mismatch → Request Changes.
 3. **Conventions** — `general.md` (status/tracking discipline); the stack-relevant rules; if a SQL DB
    is used, the `sql/<vendor>/` naming/layout; if a UI, the `ui/` rules (no hardcoded colors, components reused).
+   - **Trust the guards, review the logic:** where a machine check exists (CI lint/guards —
+     `scripts/check-*.mjs`, `db/scripts/lint-numbers.sh`, the deploy-twice apply smoke, the
+     project's linters), confirm it ran **green on this diff** instead of re-checking its subject by
+     hand; spend the review on logic, contracts, permission checks and what no guard sees.
+   - **Not findings:** untouched existing code that predates a convention change, and exceptions a
+     rule file documents as deliberate. New or substantially changed code must follow the current rule.
+   - **Test placement:** a bug fix on tested code brings a test that is red against the pre-fix
+     state; a newly extracted, tested building block is also shown to be wired in at its call site
+     (a test or a manual case) — or the spec says why not.
 4. **Code quality** — small single-responsibility functions; error paths handled; no `console.log` /
    `print` debug / `TODO` without a ticket; resources closed; no obvious perf/re-render issues.
 5. **Security on the diff** — new endpoint → auth + role check; no raw user input in queries
    (parameterized only); no hardcoded secrets/keys/hosts; safe output handling.
 6. **Build / lint** — run the `lint` and `build` commands from `stack.md`; both must be green.
 7. **Document** — append a `## Code Review` section to the feature spec: reviewer, date, commit
-   range; findings by severity (**Blocker** → Request Changes, **Major** → Approve with Comments,
-   **Minor** → nice-to-have) with file:line + suggestion; final recommendation.
+   range; gates run (command → result); AC → code location table; findings by severity, **numbered**
+   `B-1…` (**Blocker** → Request Changes), `M-1…` (**Major** → Approve with Comments), `m-1…`
+   (**Minor** → nice-to-have), each with file:line + suggestion; candidates for `/security`; final
+   recommendation. Fix commits cite the IDs (`fix(<prefix>-XXXX): review findings M-1, m-2 …`);
+   after the fixes, add a short "Fixes after review" subsection (finding → commit → re-checked).
 8. **User review & handoff.**
 
 ## Recommendation logic

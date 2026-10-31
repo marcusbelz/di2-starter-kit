@@ -9,6 +9,7 @@
 |---|---|---|---|
 | **`docs/`** (top level) | Project-wide docs — PRD, security audit, update check. | Single file per topic. | `PRD.md`, `security-audit.md`, `update-check.md` |
 | **`docs/bugs/`** | Bug tracking — one file per bug + index + quarterly archive. | One-per-bug; closed bugs `git mv`'d to `archive/<quarter>/`. | `INDEX.md`, `bug-NNNN-…md`, `archive/2026-Q2/…` |
+| **`docs/test-cases/`** | **Manual test cases** (UI projects) — what only a human at the screen can verify; declaration (`cases/`) separate from execution (`runs/`), grouped by `suites/`. | One file per case, **never moved** (retired, not archived); runs are never rewritten. | `INDEX.md`, `cases/test-NNNN-…md`, `suites/suite-NNN-…md`, `runs/YYYY-MM-DD-<env>.md` — convention in its `README.md` |
 | **`docs/kb/`** | **Knowledge base** — troubleshooting articles and recovery/rotation runbooks. Pattern: Symptom → Cause → Diagnosis → Fix. | Ordered by lifecycle step; may be renumbered atomically to keep the sequence right. | `kb-001-…md` … `kb-NNN-…md` + `README.md` (index) |
 | **`docs/setup/`** | **Setup guides** — one-time configuration/setup walkthroughs (local dev, server/deploy, CI, service accounts). | Grows; survives refactors. | `setup-001-…md` … `setup-NNN-…md` + `README.md` (index) |
 | **`docs/production/`** | Generic production hardening guides. | Single file per topic. | `error-tracking.md`, `rate-limiting.md` |
@@ -35,6 +36,7 @@ Feature specs stay in **`features/`** at the repo root — they are the workflow
 | Recurring class of symptoms with a fix | `docs/kb/` new `kb-NNN-…md` | "Service X fails to start after a container restart" |
 | Planned recovery/rotation procedure, run rarely but deliberately | `docs/kb/` (runbook style) | `kb-00N-secret-rotation.md` |
 | First-time setup of a component (DNS, SMTP, service account) | `docs/setup/` new `setup-NNN-…md` | `setup-00N-ci-deploy-key.md` |
+| Repeatable manual UI check (a click test for the next deployment) | `docs/test-cases/cases/test-NNNN-…md` (written by `/ux` from a `manual-AC`, run by `/qa` / `/deploy`) | "Status change shows immediately in the list" |
 | Architecture convention / coding rule every skill should auto-load | `.claude/rules/` new `*.md` | `sql/postgres/sql.md`, `deploy-infra.md` |
 | Generic production hardening guide | `docs/production/` | `error-tracking.md`, `rate-limiting.md` |
 
@@ -72,8 +74,9 @@ ones — `git grep -n "<old-basename>" -- '*.md'` — and rewrite them; (4) run 
 - **Target really deleted?** Leave the link; it documents the state at the time.
 
 **Where it applies:** feature archive (`/deploy`, `Superseded`), bug archive (`/bug close`), KB
-renumbering, any restructuring under `docs/`. **Where it does not:** files that by convention never
-move (e.g. test cases, when the project keeps a test-case catalog).
+renumbering, any restructuring under `docs/`. **Where it does not:** `docs/test-cases/cases/` —
+test cases never move (a retired case keeps its path with `Status: Retired`), which is exactly why
+links to them from run protocols and bug files stay valid forever.
 
 **Machine-checked:** [`scripts/check-md-links.mjs`](../../scripts/check-md-links.mjs) — blocking
 CI step. It checks that every relative link target **exists** (anchors and external URLs are out of

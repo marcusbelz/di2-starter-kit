@@ -14,6 +14,13 @@ closed counts). Managed by the `/bug` skill — use it to file, update, and clos
   its predecessor (see `.claude/rules/general.md` → "Bug-Tracking — No Reopens").
 - Bug numbers are sequential and never reassigned.
 - A feature moves on to `/review` → `/deploy` only with no open Critical/High bugs.
+- **Threshold and reach** (`.claude/rules/general.md` → "Bug Loop"): only Critical/High are fixed
+  right away; pre-existing findings are their own bug; chain depth at most two generations.
+- A bug-fix re-test (`/qa BUG-NNNN`) checks only the repro + regressions in the diff; what it
+  notices on the way goes into the bug file's `**Follow-up findings:**` block, which `/bug close`
+  resolves with the user.
+- The status counters in `INDEX.md` are **recounted** from the table on every write;
+  `node scripts/check-bugs.mjs` checks counts, order, file ↔ row parity and status ↔ location.
 
 ## Worked examples (delete when starting your project)
 The template ships **two illustrative bugs** so the format is visible end-to-end, both grounded in

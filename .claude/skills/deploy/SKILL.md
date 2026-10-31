@@ -55,6 +55,12 @@ For each stage, follow `deploy-infra.md`:
 **Verify:** deploy job green; the stage URL/endpoint responds healthy; smoke-test the feature (one
 happy path + auth if applicable); no errors in the first minutes of logs; service stable (no restart loop).
 
+**Manual test cases (projects with a test-case catalog, `docs/test-cases/`):** after **every**
+deployment run the `Smoke` cases of the affected area, plus the `Regression` cases whose `Coverage:`
+files changed since the stage's previous state (`git diff --name-only <env-sha>..HEAD`, then grep
+`docs/test-cases/cases/`). Record the run as `docs/test-cases/runs/YYYY-MM-DD-<env>.md` — a `FAIL`
+gets a `BUG-NNNN` reference, a `SKIP` a reason. A failing Smoke case means "do not ship it like this".
+
 **Bookkeeping:** add/append a Deployment section to the feature spec (date, commit SHA, env);
 update `features/INDEX.md` status (→ **Deployed** once on prod).
 
@@ -67,7 +73,11 @@ update `features/INDEX.md` status (→ **Deployed** once on prod).
    Prod blocked — fix, then `/security update`."
 4. The header must say `Go-Live recommendation: ✅ YES`. Otherwise STOP.
 5. The intended commit must be on the prod branch (`main`).
-6. Only if all gates pass: ask the user to confirm explicitly — "Start prod deploy? (yes/no)".
+6. **Regression run on record (projects with a test-case catalog):** a run protocol since the last
+   prod deploy covers **all** `Active` `Regression` cases (on the stage before prod) — coverage-based
+   selection prevents forgetting in daily work, it does not replace the full run before prod. Open
+   `FAIL`s with Critical/High bugs → STOP; `SKIP`s are listed to the user as a visible backlog.
+7. Only if all gates pass: ask the user to confirm explicitly — "Start prod deploy? (yes/no)".
 
 ### After prod
 Verify (HTTPS healthy, cert valid, login end-to-end, data loads, no 5xx, stable). Bookkeeping:

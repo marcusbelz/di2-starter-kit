@@ -29,7 +29,7 @@ Bug-loop, when QA (or production) finds a defect in this feature:
 ```
 /bug <description>
 /backend BUG-NNNN     (or /frontend BUG-NNNN / /auth BUG-NNNN, by area)
-/qa <prefix>-XXXX
+/qa BUG-NNNN
 /bug close BUG-NNNN
 ```
 
@@ -37,8 +37,12 @@ Bug-loop, when QA (or production) finds a defect in this feature:
 - As a [user type], I want to [action] so that [goal]
 
 ## Acceptance Criteria
-- [ ] Criterion 1
-- [ ] Criterion 2
+> Numbered — test cases, QA results and review findings cite `AC n`. An AC that only a human at the
+> screen can verify ends with `*(manual-AC)*` or `*(manual-AC: <what to do>)*` (exactly these two
+> forms; UI projects only) — `/ux` writes its test case before the code.
+
+- [ ] **AC 1:** <observable criterion>
+- [ ] **AC 2:** <observable criterion, incl. what must NOT happen and when the result shows> *(manual-AC: <what to click>)*
 
 ## Edge Cases
 - What happens when...?

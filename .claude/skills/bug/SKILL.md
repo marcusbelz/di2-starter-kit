@@ -29,9 +29,13 @@ affected files, repro steps, proposed fix), status `Open`, and a new row in `doc
 - Each fix skill reads the bug file, fixes it **without scope-creep**, and commits per the bug-fix
   convention in `.claude/rules/general.md` (`fix(<prefix>-XXXX): BUG-NNNN; …`).
 
-**Closing:** `/qa` re-tests against the original repro. On success, `/bug close BUG-NNNN` appends the
-`**Solution:**` block and `git mv`s the file into the quarterly archive (`docs/bugs/archive/YYYY-QN/`).
-A feature only moves on once it has no open Critical/High bugs.
+**Closing:** `/qa BUG-NNNN` re-tests against the original repro (narrow mandate — observations go
+into the bug file's `**Follow-up findings:**`, not into new bugs). On success, `/bug close BUG-NNNN`
+resolves the follow-up findings with the user, appends the `**Solution:**` block and `git mv`s the
+file into the quarterly archive (`docs/bugs/archive/YYYY-QN/`). A feature only moves on once it has
+no open Critical/High bugs. **Threshold and reach** of the loop (only Critical/High fixed right
+away, pre-existing findings separate, chain depth max two generations):
+`.claude/rules/general.md` → "Bug Loop — Threshold and Reach".
 
 ---
 
@@ -91,32 +95,53 @@ Document a new bug — see **Filing a new bug** below.
      won't-fix" before archiving.
 4. Ask for the solution steps (changed files + lines, the concrete change, why it fixes the bug). If
    step 3 already inspected the diff, you may derive these and present them for confirmation.
-5. **Update the bug file:** flip `**Status:** Open` → `**Status:** Fixed (YYYY-MM-DD)` (or
+5. **Follow-up findings & evidence (MANDATORY before archiving):**
+   - **`**Follow-up findings:**` block not empty** → show the lines to the user **once, together**,
+     each with a one-word recommendation — `own bug` / `resolves itself` / `drop` — and the reason.
+     Default is: none becomes a bug. For each line the user picks, file a new bug (`/bug …`) —
+     respecting the chain-depth rule (`.claude/rules/general.md` → "Bug Loop"): if *this* bug
+     already has a `**Predecessor:**`, a new bug from its follow-up findings gets **no**
+     Predecessor line (standalone, own description) and only when it is Critical/High or the user
+     explicitly continues the chain. Mark each line in the block with the outcome
+     (`→ BUG-NNNN` / `→ dropped` / `→ resolved by the fix`); the block moves into the archive with the file.
+   - **Test-case evidence** (projects with a test-case catalog): if the bug file names a test case
+     (`TEST-NNNN`, e.g. a case derived from this bug), that case must appear in a run protocol under
+     `docs/test-cases/runs/` dated **after** the fix — or the backlog is recorded visibly in the
+     `**Solution:**` block (`TEST-NNNN not yet run: <reason>`). A written case is a promise; only a
+     logged run is evidence.
+   - **Re-test on record:** the `/qa BUG-NNNN` result (`**Re-test:**` block) is in the file and
+     already committed — if not, stop and run the re-test first.
+6. **Update the bug file:** flip `**Status:** Open` → `**Status:** Fixed (YYYY-MM-DD)` (or
    `Won't Fix`); append the `**Solution:**` block; adjust the relative markdown links **two** levels
    deeper (`](../../` → `](../../../../`) because the file moves from `docs/bugs/` (depth 2) into
    `docs/bugs/archive/<quarter>/` (depth 4) — details and the neighbour links in
    [Path adjustment on close](#on-closing--the-solution-block-appended-at-the-end) below.
-6. **`git mv`** into the quarterly archive (quarter from the **close date** — see below; `mkdir -p`
+7. **`git mv`** into the quarterly archive (quarter from the **close date** — see below; `mkdir -p`
    the quarter dir first if needed):
    ```bash
    git mv docs/bugs/bug-NNNN-<slug>.md docs/bugs/archive/<quarter>/bug-NNNN-<slug>.md
    ```
    **Precondition:** a QA protocol that `/qa` wrote into the bug file is committed **before** the
    close — see [Git Commit Convention](#git-commit-convention) for why.
-7. **Incoming links:** find references to the old path elsewhere in the repo
+8. **Incoming links:** find references to the old path elsewhere in the repo
    (`git grep -n "bug-NNNN-<slug>.md" -- '*.md'`) and rewrite them to the archive path, relative to
    each linking file (rules: `.claude/rules/documentation.md` → "Archiving pulls the links along").
    Then `node scripts/check-md-links.mjs` must report 0 findings.
-8. **Update `docs/bugs/INDEX.md`:** repoint the ID link to `archive/<quarter>/…`; set "Closed
-   on"; change the status hint; bump the header status table. The row stays in place (only its
-   content changes).
+9. **Update `docs/bugs/INDEX.md`:** find the row with `grep -n "BUG-NNNN" docs/bugs/INDEX.md` and
+   read only that range; repoint the ID link to `archive/<quarter>/…`; set "Closed on" (the close
+   date, matching the `Fixed (YYYY-MM-DD)` in the file and the archive quarter); the `Close note`
+   **starts with the status word** (`Fixed — <one-line summary>` / `Won't Fix — <reason>`). The row stays in place (only its content changes). **Recount** the status block
+   from the history table — never "+1 / −1" (hand-kept counters drift) — and run
+   `node scripts/check-bugs.mjs`: 0 findings.
 
 ---
 
 ## Filing a new bug
 
 ### Step 1 — Prep
-1. Read `docs/bugs/INDEX.md` — next ID = highest + 1. If `INDEX.md` doesn't exist, create it (see
+1. **Next ID** — read the index selectively, not the whole file: the newest row is the first data
+   row (`grep -m1 "^| \[BUG-" docs/bugs/INDEX.md`); next ID = that number + 1, and no
+   `docs/bugs/**/bug-<next>-*.md` may exist yet. If `INDEX.md` doesn't exist, create it (see
    structure below) starting at `BUG-0001`.
 2. Read the affected files named in the argument (if any).
 
@@ -126,6 +151,19 @@ Document a new bug — see **Filing a new bug** below.
 - **Description** (what happens / what should happen), **Root Cause** (technical cause if known),
   **Affected file(s)** (path + lines), **Repro** steps, **Proposed Fix**, **Fix commands** (which
   skill fixes it, derived from the Area).
+- **Pre-existing?** If the defect also occurs on the state before the change under test (same probe,
+  same result), say so in the Description: `pre-existing, not a regression` — it is its own bug,
+  not part of the current fix (`.claude/rules/general.md` → "Bug Loop", rule 2).
+- **Predecessor / chain depth:** a regression or refinement of a closed bug gets a
+  `**Predecessor:**` line — **unless that predecessor itself has one** (chain depth max two
+  generations). Then: below High → no new bug; if the chain's last bug is still **open**, the
+  finding becomes a line in its `**Follow-up findings:**` block (closed files are immutable — never
+  write into the archive), otherwise report it to the user and stop; Critical/High → a standalone
+  bug **without** Predecessor line, described on its own. Continuing a chain beyond two generations
+  is the user's decision — ask.
+- **Fix timing:** only Critical/High are fixed right away; a lower severity is filed and waits for
+  prioritization (exception: a regression inside the diff currently being worked on). Say which
+  applies in the summary.
 
 ### Step 3 — Derive the slug (algorithm above).
 
@@ -144,8 +182,14 @@ Ask: "Document this bug as shown? (yes / corrections)"
 
 ### Step 5 — Write file + INDEX
 1. Write `docs/bugs/bug-NNNN-<slug>.md` (format below).
-2. Add a history row at the **top** of the table (ID descending, newest first); bump the header
-   status table (`Open bugs` +1, `Last updated` today).
+2. Add a history row at the **top** of the table (ID descending, newest first) — `Closed on` is
+   `-` and `Close note` is `Open` while the bug is open; **recount** the
+   header status table from the history rows (not "+1") and set `Last updated` to today.
+3. **Collision check after writing** (parallel sessions share the counter): `ls docs/bugs/**/bug-NNNN-*`
+   must show exactly your file, and `node scripts/check-bugs.mjs` must report 0 findings. On a
+   duplicate ID: the slug that sorts first alphabetically keeps the number, the other moves to the
+   next free one — announce it (`.claude/rules/general.md` → "Parallel Sessions"). Commit only your
+   own paths (`git commit --only docs/bugs/INDEX.md docs/bugs/bug-NNNN-<slug>.md`).
 
 ---
 
@@ -175,9 +219,20 @@ Ask: "Document this bug as shown? (yes / corrections)"
    (not all variants): `/frontend` for UI/interaction/layout/client-state, `/backend` for
    API/DB/server logic, `/auth` for login/session/OIDC. For cross-cutting/doc bugs with no clear
    fix skill: describe what to do in prose.
-2. `/qa` — re-test against the repro above.
+2. `/qa BUG-NNNN` — narrow re-test against the repro above.
 3. `/bug close BUG-NNNN` — close + move into the quarterly archive.
 ```
+
+Blocks added later in the bug's life (appended in this order, each only when it has content):
+```markdown
+**Re-test:** YYYY-MM-DD — repro holds: no (fixed) | yes; regression in the diff: none | <one line>;
+test case: TEST-NNNN PASS in [runs/<file>](../test-cases/runs/<file>) | none
+
+**Follow-up findings:** <observations from the bug-fix re-test — not work items yet; resolved at close>
+- <one sentence: what was noticed> — [file.ext](../../path/file.ext)
+```
+`**Follow-up findings:**` lines are one sentence each — no root-cause analysis, no fix proposal.
+`/bug close` resolves them with the user (own bug / resolves itself / drop).
 
 **Path convention for links in bug files:**
 - Open files live in `docs/bugs/` (**depth 2**) → repo-root targets need **two** `../`: `](../../<path>)`.
@@ -308,7 +363,8 @@ enforces it (archived files never move back to flat — the `/bug update` pre-ch
 ## Rules
 - Bug IDs are sequential, never reused. One file per bug, never multiple bugs per file.
 - Never delete a bug file — only change status and/or move to archive.
-- Always update `docs/bugs/INDEX.md` after a new bug or status change; re-read to verify.
+- Always update `docs/bugs/INDEX.md` after a new bug or status change; recount the status block
+  from the table and run `node scripts/check-bugs.mjs` (0 findings) instead of re-reading by eye.
 - History is one row per bug, ID descending; on update the existing row changes in place.
 - Estimate severity conservatively (one level higher rather than too low).
 - Use `git mv` (not raw move) when archiving, so `git log --follow` keeps the trail.

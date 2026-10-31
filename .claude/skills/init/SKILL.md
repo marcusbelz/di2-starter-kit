@@ -70,6 +70,12 @@ derived-and-confirmed, never silently guessed.
    `feat-0003-*.md` and their INDEX rows — they are format illustrations, not project features),
    then set the `feature_id_prefix` example and reset the "Next Available ID" line to the chosen
    prefix (e.g. `feat-0001`).
+5. **`docs/test-cases/`** (kept only when `ui != none`) — delete the shipped *(sample)* files
+   `cases/test-0001-*.md`, `suites/suite-001-*.md` and `runs/2026-07-03-local.md`, but **keep the
+   three `.gitkeep` files** (the INDEX links the directories). Reset `docs/test-cases/INDEX.md`:
+   Active test cases `0`, Retired `0`, Next free ID `TEST-0001`, From a bug `0 of 0`, Next free suite
+   number `SUITE-001`; empty both tables (keep the header rows); remove the "shipped samples" note.
+   Then `node scripts/check-testcases.mjs` and `node scripts/check-md-links.mjs` must be green.
 
 ## Step 4 — Reduce the toolkit (prune what this project doesn't need)
 Delete the skills/rules that don't apply, using `git rm -r` (the clone is a tracked git repo).
@@ -77,7 +83,7 @@ Apply this matrix from the Step-2 answers:
 
 | Condition | Remove |
 |---|---|
-| `ui == none` | `.claude/skills/ux/`, `.claude/skills/frontend/`, `.claude/rules/ui/`, `.claude/rules/cookies.md` |
+| `ui == none` | `.claude/skills/ux/`, `.claude/skills/frontend/`, `.claude/rules/ui/`, `.claude/rules/cookies.md`, the manual test-case catalog `docs/test-cases/` + `scripts/check-testcases.mjs` + its step in `.github/workflows/ci.yml` + its row in `scripts/README.md` (no `/ux` to write cases; the `manual-AC` marker is not used) |
 | `ui` is a different stack (not React/Tailwind/shadcn) | the UI rules ship only for one flavor (`.claude/rules/ui/react-tailwind-shadcn/`). Create `.claude/rules/ui/<flavor>/` by copying + adapting it (the principles carry over, the syntax/component names change — see `ui/README.md`), then remove `react-tailwind-shadcn/` |
 | `backend == none` | `.claude/skills/backend/`, `.claude/rules/backend.md` |
 | `database == none` | `.claude/rules/sql/` (whole tree), `.claude/rules/db-migrations.md`, `db/` (whole tree — includes `db/tests/`), `.github/workflows/db-*.yml` + the db jobs in `.github/workflows/ci.yml` |

@@ -16,6 +16,12 @@ You read feature specs + tech design and implement APIs, the data model, and ser
    build/test/run commands. Everything below adapts to these values.
 2. Read `features/INDEX.md` and the referenced feature spec (incl. Tech Design).
 3. Scan existing endpoints / data-access code in the project's actual source layout.
+4. **Test-case gate (projects with a UI / test-case catalog):** if the spec has ACs marked
+   `*(manual-AC)*`, every one of them must be referenced by an **Active** case in
+   `docs/test-cases/cases/` (run `node scripts/check-testcases.mjs`). If one is missing, **stop** and
+   report it — `/ux` writes the case from the AC before the code exists; writing it after the build
+   would derive the expectation from the code. The user may override explicitly; then note the
+   override in the commit message. Bug-fix mode is exempt.
 
 ## Workflow
 

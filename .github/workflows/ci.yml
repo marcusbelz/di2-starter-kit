@@ -100,3 +100,10 @@ jobs:
 
       - name: file-size guard (no source file above the line limit)
         run: node scripts/check-file-size.mjs
+
+      - name: bug index check (counts, order, file/row parity, status vs. location)
+        run: node scripts/check-bugs.mjs
+
+      # UI projects only - /init removes this step together with docs/test-cases/ when ui == none.
+      - name: test-case catalog check (cases/suites/INDEX parity, manual-AC parity)
+        run: node scripts/check-testcases.mjs

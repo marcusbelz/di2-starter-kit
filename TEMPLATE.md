@@ -33,7 +33,7 @@ with the user: `package_manager` (from the runtime) and the build/test/run/audit
 ## Pruning matrix
 | Condition (from /init answers) | Removed |
 |---|---|
-| `ui == none` | `skills/ux`, `skills/frontend`, `rules/ui/`, `rules/cookies.md`; UX+Frontend lines dropped from the `CLAUDE.md` workflow |
+| `ui == none` | `skills/ux`, `skills/frontend`, `rules/ui/`, `rules/cookies.md`, the test-case catalog `docs/test-cases/` + `scripts/check-testcases.mjs` (+ its CI step); UX+Frontend lines dropped from the `CLAUDE.md` workflow |
 | `ui` is a different stack | only `rules/ui/react-tailwind-shadcn/` ships; add `rules/ui/<flavor>/` (port + adapt), then drop `react-tailwind-shadcn/` — same pattern as the SQL vendors |
 | `backend == none` | `skills/backend`, `rules/backend.md` |
 | `database == none` | `rules/sql/` (whole tree), `rules/db-migrations.md`, `db/` (whole tree — includes `db/tests/`), `.github/workflows/db-*.yml` + the db jobs in `ci.yml` |

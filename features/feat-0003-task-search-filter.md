@@ -32,7 +32,7 @@ Bug-loop, when QA (or production) finds a defect in this feature:
 ```
 /bug <description>
 /backend BUG-NNNN     (or /frontend BUG-NNNN / /auth BUG-NNNN, by area)
-/qa feat-0003
+/qa BUG-NNNN
 /bug close BUG-NNNN
 ```
 

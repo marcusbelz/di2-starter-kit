@@ -35,6 +35,7 @@ features/
 docs/
   PRD.md            Product Requirements Document
   bugs/             One file per bug (docs/bugs/bug-NNNN-<slug>.md) + INDEX.md + archive/
+  test-cases/       Manual test cases (cases/test-NNNN-*.md, never moved) + suites/ + runs/ (UI projects)
   kb/               Knowledge-base / troubleshooting articles (kb-NNN-*.md)
   setup/            One-time setup guides (setup-NNN-*.md)
   production/       Generic production hardening guides
@@ -58,12 +59,16 @@ projects without a UI.
    (language/runtime, UI yes/no, backend yes/no, database, auth, hosting/deploy, CI), writes
    `.claude/rules/stack.md` + this Tech-Stack section, and removes the skills/rules the project
    does not need. Hands off to `/requirements`.
-1. `/requirements` - Create feature specs from an idea (and the PRD on first run).
+1. `/requirements` - Create feature specs from an idea (and the PRD on first run). Numbers the ACs
+   and marks those only a human at the screen can verify `*(manual-AC)*`.
 2. `/architecture` - Design the technical approach (PM-friendly, no code). Decides **backend yes/no**.
-3. `/ux` - UX critique & mockups *(only if the project has a UI)*.
+3. `/ux` - UX critique & mockups *(only if the project has a UI)* — and, once the mockups are
+   approved, the manual test cases (`TEST-NNNN`) for the marked ACs, **before** any code.
 4. `/backend` - Build APIs, data model, server-side logic *(only if the feature needs a backend)*.
-5. `/frontend` - Build the UI against the real APIs *(only if the project has a UI)*.
-6. `/qa` - Test the feature against its acceptance criteria + feature-scoped security checks.
+5. `/frontend` - Build the UI against the real APIs *(only if the project has a UI)*. Both build
+   skills stop while a marked AC has no test case.
+6. `/qa` - Test the feature against its acceptance criteria + feature-scoped security checks; runs
+   the declared test cases and records the run in `docs/test-cases/runs/`.
 7. `/review` - Code review of the diff against spec & conventions (before the first deploy).
 8. `/check-updates` - Cross-cutting maintenance check (dependencies, base images, CI). Periodic.
 9. `/security` - Project-wide security audit. **Mandatory gate before `/deploy` to production.**
@@ -82,9 +87,13 @@ projects without a UI.
 1. `/bug <description>` documents it as `BUG-NNNN` in `docs/bugs/bug-NNNN-<slug>.md` (status `Open`).
 2. Fix it via `/frontend BUG-NNNN` (UI), `/backend BUG-NNNN` (API/DB/server), or `/auth BUG-NNNN`
    (login/session/OIDC) — commit convention in `.claude/rules/general.md`.
-3. `/qa` re-tests → `/bug close BUG-NNNN` closes it and `git mv`s it into the quarterly archive.
+3. `/qa BUG-NNNN` re-tests (narrow mandate: does the repro hold, any regression in the diff?) →
+   `/bug close BUG-NNNN` resolves the follow-up findings with you, closes it and `git mv`s it into
+   the quarterly archive.
 
-A feature only moves on toward `/review` → `/deploy` once it has no open Critical/High bugs.
+A feature only moves on toward `/review` → `/deploy` once it has no open Critical/High bugs. Only
+Critical/High are fixed right away; chains stop after two generations — `.claude/rules/general.md`
+→ "Bug Loop — Threshold and Reach".
 
 ## Feature Tracking
 

@@ -39,12 +39,21 @@ no `/deploy`).
 **Has Tech Design, project has a UI, no UX section:**
 > feat-XXXX is ready for UX. Run `/ux` for `features/feat-XXXX-name.md`.
 
+**UX done, but a `*(manual-AC)*` has no test case** (`node scripts/check-testcases.mjs` reports it):
+> The build skills stop until each marked AC has a case. Finish `/ux` for feat-XXXX — it writes the
+> cases from the ACs before any code.
+
 **Ready for implementation:**
 > If the feature needs a backend (per its Tech Design): run `/backend` first, then `/frontend`
 > (UI projects). If it's frontend-only or a no-UI project: run `/frontend` or `/backend` directly.
 
 **Implemented, no QA:**
-> Run `/qa` to test `features/feat-XXXX-name.md` against its acceptance criteria.
+> Run `/qa` to test `features/feat-XXXX-name.md` against its acceptance criteria (it also runs the
+> feature's manual test cases and records the run).
+
+**Open bug with a fix in the working tree / a recent fix commit:**
+> Run `/qa BUG-NNNN` (narrow re-test), then `/bug close BUG-NNNN`. Only Critical/High bugs are
+> fixed right away — lower ones wait for prioritization.
 
 **Passed QA, no code review:**
 > Run `/review features/feat-XXXX-name.md` before the first deploy.

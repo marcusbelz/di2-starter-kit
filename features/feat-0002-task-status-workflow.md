@@ -28,7 +28,7 @@ Bug-loop, when QA (or production) finds a defect in this feature:
 ```
 /bug <description>
 /backend BUG-NNNN     (or /frontend BUG-NNNN / /auth BUG-NNNN, by area)
-/qa feat-0002
+/qa BUG-NNNN
 /bug close BUG-NNNN
 ```
 
@@ -38,11 +38,13 @@ Bug-loop, when QA (or production) finds a defect in this feature:
 - As a user, I want invalid transitions blocked so that the board stays consistent.
 
 ## Acceptance Criteria
-- [ ] Status changes via a single action on the task row; allowed transitions only
+- [ ] **AC 1:** Status changes via a single action on the task row; allowed transitions only
       (`open ↔ in progress → done → open`).
-- [ ] Every transition is persisted with actor + timestamp (audit columns).
-- [ ] An invalid transition returns a clear error and does not change state.
-- [ ] The list from feat-0001 shows the current status and can be visually distinguished per state.
+      *(manual-AC: change a task's status from its row and check which next states are offered)*
+- [ ] **AC 2:** Every transition is persisted with actor + timestamp (audit columns).
+- [ ] **AC 3:** An invalid transition returns a clear error and does not change state.
+- [ ] **AC 4:** The list from feat-0001 shows the current status and can be visually distinguished
+      per state.
 
 ## Edge Cases
 - Concurrent transition on the same task → second request gets a state-conflict error, UI refreshes.

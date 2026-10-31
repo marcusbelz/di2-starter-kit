@@ -111,12 +111,42 @@ spec (`features/<prefix>-XXXX-*.md`):
    inline-only.
 3. Update the spec's **UX Design** section: pointer(s) to the mockup file(s) + 3–6 bullets on key
    decisions (density, state coverage, bulk actions, form patterns). No code dump in the spec.
-4. Leave `features/INDEX.md` status untouched (still "In Progress").
+4. **Write the manual test cases** (MANDATORY once the user approved the mockups) — see below.
+5. Leave `features/INDEX.md` status untouched (still "In Progress").
+
+### Manual test cases are a `/ux` deliverable (MANDATORY)
+Every AC the spec marks `*(manual-AC)*` / `*(manual-AC: …)*` gets a test case `TEST-NNNN` in
+`docs/test-cases/cases/` **now** — after the mockups are approved, **before** `/backend` / `/frontend`
+start (they stop while a marked AC has no case). Convention, template and writing rules:
+[docs/test-cases/README.md](../../../docs/test-cases/README.md).
+- **Expected result = copied from the AC** (the spec fixed it before the code); **steps, precondition
+  and cleanup = from the approved mockups** (now it is known where one clicks). Never derive the
+  expectation from what you imagine the code will do.
+- `Reference:` names the spec ID and every AC number the case covers (`feat-0007 AC 2, AC 4`); one
+  case may cover several ACs, one AC may need several cases (each question from the README's writing
+  checklist that applies — reverse direction, blocked path, point in time, screen size, permission,
+  failure case — becomes its **own** case).
+- At least one "must not" expectation per case; no implementation vocabulary in the expected
+  results (only terms the screen itself shows); the point in time where it matters.
+- Every case runs on its own (its precondition never relies on another case's end state). Put it in
+  a suite that shares its baseline, or create a suite (`suites/suite-NNN-<name>.md`) when no
+  existing session fits. Update `docs/test-cases/INDEX.md` and run `node scripts/check-testcases.mjs`.
+- **Don't second-guess the marking:** no cases for unmarked ACs (they go to automated tests); if you
+  think an AC is wrongly marked or unmarked, raise it with the user instead of silently deviating.
+- Later, after the build, only *steps* may be corrected to the real UI (labels, paths) — the
+  *Expected result* column stays; a deviation there is a finding for `/qa`, not an edit.
 
 **Ownership:** the component structure is owned by `/ux` via the mockups, not by `/architecture`.
 
 For ad-hoc reviews (no feature spec), just produce critique + mockup.
 
 ## Handoff
-> "UX design ready! Next step: `/backend` to build the APIs/data so the frontend implements against
-> real endpoints. If the feature has no backend, run `/frontend` directly."
+> "UX design ready — mockups in `<path>`; manual test cases written: TEST-NNNN … (covering AC n, …).
+> Next step: `/backend` to build the APIs/data so the frontend implements against real endpoints.
+> If the feature has no backend, run `/frontend` directly."
+
+Then show the next command in its own block (`.claude/rules/general.md` → "Handoffs Between Skills"):
+
+```
+/backend <prefix>-XXXX
+```
