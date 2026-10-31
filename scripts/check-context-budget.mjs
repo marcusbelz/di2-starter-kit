@@ -56,12 +56,17 @@
 // the repo's share and are ignored.
 //
 // Token estimate: UTF-8 bytes / BYTES_PER_TOKEN, line endings normalized to LF
-// (a CRLF checkout counts like CI). 3.5 is an UNCALIBRATED default for English
-// markdown. Calibrate once per project: in a fresh session run `/context`, divide
-// the bytes `--top` prints for the memory files by the tokens `/context` reports
-// for them, and set the factor. Calibrate only against the method you will later
-// compare with - in the origin project a factor taken from another source halved
-// every number (its German text measured about 2 bytes per token).
+// (a CRLF checkout counts like CI). 2.65 is MEASURED for this template: on
+// 2026-10-31 a fresh session (Claude Opus 5.5) reported 28.7k tokens of memory
+// files in `/context` (incl. ~0.4k of the user's auto-memory index) for ~74,900
+// bytes of always-loaded kit files -> 2.65 bytes/token; the five largest files
+// individually gave 2.44-2.85 (markdown tables, code spans and symbols cost more
+// tokens per byte than prose). Re-calibrate when the model or the content style
+// changes: in a fresh session run `/context`, divide the bytes `--top` prints by
+// the tokens `/context` reports for the same files, and set the factor. Calibrate
+// only against the method you will later compare with - in the origin project a
+// factor taken from another source halved every number (its German text measured
+// about 2 bytes per token).
 //
 // Not included (project-specific): the origin project also checked the share of
 // inventory tables (one row per file or user - a record, not a rule) inside rule
@@ -93,7 +98,7 @@ import { fileURLToPath } from "node:url"
 // template default); raising it is a deliberate edit, visible in the diff.
 const BUDGET_TOKENS = 40_000 // estimated tokens loaded in every session
 const MAX_RULE_TOKENS = 8_000 // estimated tokens of one always-loaded rule file
-const BYTES_PER_TOKEN = 3.5 // UNCALIBRATED default for English markdown - see header
+const BYTES_PER_TOKEN = 2.65 // measured with /context on 2026-10-31 - see header
 
 const IMPORT_MAX_HOPS = 5 // Claude Code follows @-imports up to five hops deep
 const TOP_N = 10
@@ -587,7 +592,7 @@ const stale = entries.filter((e) => !baselineableKeys.has(e.key))
 const pct = Math.round((total / BUDGET_TOKENS) * 100)
 console.log(
   `Context budget: ~${fmt(total)} tokens loaded in every session, ${pct} % of budget ${fmt(BUDGET_TOKENS)} ` +
-    `(estimate at ${BYTES_PER_TOKEN} bytes/token; calibrate with /context) - ` +
+    `(estimate at ${BYTES_PER_TOKEN} bytes/token, measured with /context) - ` +
     `${repoFiles.has(CLAUDE_MD) ? "CLAUDE.md, " : ""}${importCount} @-import(s), ` +
     `${unscoped.length} rule file(s) always loaded, ${scoped.length} scoped`,
 )
