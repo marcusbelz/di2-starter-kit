@@ -25,6 +25,13 @@ Before starting ANY work, check if the project has been initialized:
 - Feature commit format: `type(<prefix>-XXXX): description`
 - Bug-fix commit format: first line `fix(<prefix>-XXXX): BUG-NNNN; description`, from line 2 the solution writeup from the bug report (root cause, changed files, solution steps, why it works). If no feature applies: `fix(NA): BUG-NNNN; description`.
 - Types (features): feat, fix, refactor, test, docs, deploy, chore.
+- **The production branch belongs to the user (MANDATORY).** Claude never merges or pushes toward
+  the branch that deploys to prod (`main` unless `deploy-infra.md` says otherwise) — the release
+  merge is the user's step (PR in the web UI or a local merge, their choice). Claude prepares and
+  verifies: show the delta (`git log --oneline origin/main..origin/<dev-branch>`), propose a merge
+  message, and after the user's merge check that the delta is empty and CI on the merge commit is
+  green. Commits/pushes to the working branch are unaffected. In single-branch projects
+  (`env_stages: single`) the user decides once, at `/init`, whether this rule applies.
 - Check existing features before creating new ones, and existing modules/APIs before building (use the project's actual source layout — see `.claude/rules/stack.md`).
 
 ## Bug-Tracking — No Reopens (MANDATORY)

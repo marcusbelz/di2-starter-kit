@@ -100,3 +100,6 @@ These apply to the shipped workflows and to every workflow you add (they are als
 - Adjust the `environment` choice lists to your `env_stages`.
 - App build/test/deploy workflows are added later by the workflow skills against
   `.claude/rules/stack.md` — this directory ships only the stack-agnostic DB + CI part.
+  **Every app-deploy workflow gets a test job** (the `test` command from `stack.md`, checking that
+  all test files ran — `.claude/rules/testing.md` → "The gate") and the deploy job declares
+  `needs: <test-job>`: red or incomplete tests = no deploy. Add the same test step to `ci.yml`.

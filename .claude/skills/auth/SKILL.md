@@ -65,7 +65,8 @@ secret matches on **both** sides before changing code.
   discovery position — usually `production` or `manual`), then fix.
 - Commit per `.claude/rules/general.md` bug-fix format. Don't change bug status — `/bug close` does
   that after a green `/qa` re-test.
-- Handoff: "Fix for `BUG-NNNN` committed. Next: `/qa` re-tests the login flow, then `/bug close BUG-NNNN`."
+- Handoff: "Fix for `BUG-NNNN` committed. Next: `/qa BUG-NNNN` re-tests the login flow (narrow
+  mandate), then `/bug close BUG-NNNN`."
 
 ## Important
 - **Logs before code.** Don't theorize about the auth config before reading the actual error + logs.

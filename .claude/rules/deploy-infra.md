@@ -72,6 +72,20 @@ The app-deploy step usually does **not** apply DB migrations. Before deploying, 
 target env has the latest schema and apply migrations first if not (command from `db-migrations.md` /
 `stack.md`). Symptom of a forgotten migration: the app starts but breaks on first data access.
 
+## Data protection (if `database != none`)
+One value per environment — the `/deploy` destructive-operation check reads it:
+
+| Env | Data protection | Since / decided by |
+|-----|-----------------|--------------------|
+| {{ENV_1}} | greenfield | {{DATE}} / user |
+| prod | data to protect | {{DATE}} / user |
+
+- **`greenfield`** — no data anyone needs yet (before go-live): destructive statements may run
+  without a prior backup; the read-only preview and its record are still mandatory.
+- **`data to protect`** — backup before every apply that contains `DELETE` / `TRUNCATE` / `DROP`.
+- Switching an environment to `greenfield` is a **user decision** with a date, written here — never
+  a silent skip in the moment. Switching back happens at the latest with go-live.
+
 ## When to update this file
 After any verified `docker ps` / host inventory that corrects a drift; after a path/container
 refactor; after any deploy-relevant domain or secret change.

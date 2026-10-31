@@ -10,7 +10,8 @@ loading works (and what it means for pruning and rule edits):
 
 | Rule | Scope | Pruned by `/init` when… |
 |------|-------|-------------------------|
-| [`general.md`](general.md) | Project detection, feature tracking, git conventions, bug-loop discipline | never |
+| [`general.md`](general.md) | Project detection, feature tracking, git conventions, bug-loop threshold and reach, parallel sessions | never |
+| [`testing.md`](testing.md) | Automated tests: location, "green means complete" gate, regression lock with negative control, wiring, unguarded-invariant inventory, flakes, load-test hygiene | never |
 | [`language.md`](language.md) | English-only repo policy | never |
 | [`documentation.md`](documentation.md) | What doc goes where under `docs/` | never |
 | [`stack.md`](stack.md) | **Single source of truth for the tech stack** — filled by `/init` | never (filled, not pruned) |

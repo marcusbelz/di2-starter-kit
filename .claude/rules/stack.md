@@ -33,7 +33,7 @@
 ```
 lint:   {{LINT_CMD}}        # e.g. ruff check .            | npm run lint
 build:  {{BUILD_CMD}}       # e.g. docker build -t app .   | npm run build
-test:   {{TEST_CMD}}        # e.g. pytest                  | npm test
+test:   {{TEST_CMD}}        # e.g. pytest                  | npm test   (app tests; must fail when a test file did not run - testing.md)
 run:    {{RUN_CMD}}         # e.g. uvicorn app.main:app    | npm run dev
 audit:  {{AUDIT_CMD}}       # e.g. pip-audit / uv pip audit | npm audit
 ```
@@ -56,4 +56,7 @@ audit:  {{AUDIT_CMD}}       # e.g. pip-audit / uv pip audit | npm audit
 
 {{STACK_NOTES}}
 
-<!-- Free-form: anything a skill should know that doesn't fit the table above. Filled by /init. -->
+<!-- Free-form: anything a skill should know that doesn't fit the table above. Filled by /init.
+     Always record here: where application tests live (colocated next to the source vs. a tests/
+     tree) and the test runner - .claude/rules/testing.md reads it. -->
+

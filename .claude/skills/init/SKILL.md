@@ -61,6 +61,10 @@ derived-and-confirmed, never silently guessed.
 ## Step 3 — Write the framework conditions
 1. **`.claude/rules/stack.md`** — replace every `{{PLACEHOLDER}}` with the captured values (the
    Profile table, the build/test/run block, and `STACK_NOTES`). This is the authoritative record.
+   In `STACK_NOTES`, record the **test runner and where application tests live** (colocated next to
+   the source, or a `tests/` tree — the runtime's convention unless the user prefers otherwise);
+   `.claude/rules/testing.md` reads it. If the runner can report success while test files did not
+   run, note that the `test` command needs a completeness wrapper (testing.md → "The gate").
 2. **`CLAUDE.md`** — fill `{{PROJECT_NAME}}`, `{{ONE_LINE_DESCRIPTION}}`, `{{TECH_STACK}}` (a short
    prose summary), `{{FEATURE_PREFIX}}`, `{{BUILD_TEST_COMMANDS}}`. If `ui` is `none`, delete the
    UX (3) and Frontend (5) lines from the workflow list and the "Cookie banner" legal note.
@@ -98,7 +102,7 @@ Apply this matrix from the Step-2 answers:
 
 Always keep: `init` (until you finish — see Step 6), `requirements`, `architecture`, `qa`,
 `review`, `bug`, `help`, `check-updates`, `security`, and rules `general.md`, `documentation.md`,
-`stack.md`, `security.md`; the guards `scripts/check-md-links.mjs` + `scripts/check-file-size.mjs`
+`stack.md`, `security.md`, `testing.md`; the guards `scripts/check-md-links.mjs` + `scripts/check-file-size.mjs`
 and the Bash-tool hook `.claude/hooks/block-inline-interpreter.mjs` (stack-independent).
 
 After deleting, **show the user the resulting skill/rule list** and confirm it matches expectations.
@@ -108,7 +112,10 @@ After deleting, **show the user the resulting skill/rule list** and confirm it m
   container / path / secret facts with the project's real values (or leave clearly marked TODOs the
   user fills when the server exists). Trim the env-stage tables to the chosen `env_stages`. Fill the
   `ENV_FILE` / `ENVS_DEFAULT` / `VARS` block at the top of `scripts/check-env-files.sh` from the
-  same facts (it refuses to run while a `{{…}}` placeholder is left).
+  same facts (it refuses to run while a `{{…}}` placeholder is left). If `database != none`, fill
+  the "Data protection" table (one row per env; a fresh project is usually `greenfield` everywhere
+  until go-live — ask) and ask whether the production branch is user-only for merges/pushes
+  (`general.md`; default yes when there is more than one env stage).
 - **Guards (always):** set `SOURCE_ROOTS` at the top of `scripts/check-file-size.mjs` to the
   project's source directories (and narrow `SOURCE_EXT` if useful). The guards and the hook need
   `node` (any LTS) on the PATH — confirm the user has it; if not, say that the hook then errors

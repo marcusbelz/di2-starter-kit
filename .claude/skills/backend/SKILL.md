@@ -70,9 +70,14 @@ changes; scan existing endpoints again; continue — don't restart or duplicate.
   → `/frontend BUG-NNNN`; login/session/OIDC → `/auth BUG-NNNN`.
 - **No scope-creep:** fix only what the bug describes. Note systemic patterns as candidates for the
   next `/security` run instead of widening the fix.
+- **Regression lock (`.claude/rules/testing.md`):** if the fixed code has automated tests, add one
+  that reproduces the bug and show it **red against the pre-fix state**, green after; DB behavior
+  goes into the DB tests / apply smoke. No test possible → say why in the bug file.
+- Fix timing: only Critical/High are fixed right away; a regression you just caused in this diff is
+  part of the fix (`.claude/rules/general.md` → "Bug Loop").
 - Commit per `.claude/rules/general.md` bug-fix format. Don't change bug status — `/bug close` does
   that after a green `/qa` re-test.
-- Handoff: "Fix for `BUG-NNNN` committed. Next: `/qa` re-tests, then `/bug close BUG-NNNN`."
+- Handoff: "Fix for `BUG-NNNN` committed. Next: `/qa BUG-NNNN` re-tests, then `/bug close BUG-NNNN`."
 
 ## Checklist
 - [ ] Read `stack.md`; implemented against the actual backend/database

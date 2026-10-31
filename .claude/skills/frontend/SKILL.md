@@ -49,9 +49,15 @@ re-scan existing components; continue — don't restart or duplicate.
   login/session/OIDC → `/auth BUG-NNNN`.
 - **No scope-creep:** touch only the files/symptoms in the bug entry. Unplanned refactors/features →
   a separate bug or ask the user.
+- **Regression lock (`.claude/rules/testing.md`):** if the fixed code has automated tests, add one
+  that reproduces the bug and show it **red against the pre-fix state**, green after. If the repro
+  is UI-only and no automated test can lock it, the bug gets a manual test case (catalog README →
+  "Origin") — or the bug file says why not.
+- Fix timing: only Critical/High are fixed right away; a regression you just caused in this diff is
+  part of the fix (`.claude/rules/general.md` → "Bug Loop").
 - Commit per `.claude/rules/general.md` bug-fix format. Don't change bug status — `/bug close` does
   that after a green `/qa` re-test.
-- Handoff: "Fix for `BUG-NNNN` committed. Next: `/qa` re-tests, then `/bug close BUG-NNNN`."
+- Handoff: "Fix for `BUG-NNNN` committed. Next: `/qa BUG-NNNN` re-tests, then `/bug close BUG-NNNN`."
 
 ## Sanity check before handing off to QA
 - No leftover mock data / "TODO: connect API" / placeholder calls where a real endpoint belongs.

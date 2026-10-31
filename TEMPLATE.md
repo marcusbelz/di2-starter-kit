@@ -48,7 +48,7 @@ with the user: `package_manager` (from the runtime) and the build/test/run/audit
 | always | `skills/init` removes itself at the end (one-time bootstrap) |
 
 Always kept: `requirements`, `architecture`, `qa`, `review`, `bug`, `help`, `check-updates`,
-`security`, and rules `general`, `documentation`, `stack`, `security`; the repo guards
+`security`, and rules `general`, `documentation`, `stack`, `security`, `testing`; the repo guards
 `scripts/check-md-links.mjs` + `scripts/check-file-size.mjs` (`/init` sets the file-size scope) and
 the Bash-tool hook `.claude/hooks/block-inline-interpreter.mjs`.
 

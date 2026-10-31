@@ -36,6 +36,7 @@ docs/
   PRD.md            Product Requirements Document
   bugs/             One file per bug (docs/bugs/bug-NNNN-<slug>.md) + INDEX.md + archive/
   test-cases/       Manual test cases (cases/test-NNNN-*.md, never moved) + suites/ + runs/ (UI projects)
+  inventories/      Records behind rules (one row per file; read by search, not loaded each session)
   kb/               Knowledge-base / troubleshooting articles (kb-NNN-*.md)
   setup/            One-time setup guides (setup-NNN-*.md)
   production/       Generic production hardening guides
