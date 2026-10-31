@@ -92,13 +92,17 @@ Document a new bug — see **Filing a new bug** below.
 4. Ask for the solution steps (changed files + lines, the concrete change, why it fixes the bug). If
    step 3 already inspected the diff, you may derive these and present them for confirmation.
 5. **Update the bug file:** flip `**Status:** Open` → `**Status:** Fixed (YYYY-MM-DD)` (or
-   `Won't Fix`); append the `**Solution:**` block; adjust relative markdown links one level deeper
-   (`](../../` → `](../../../`) because the file moves into an archive subfolder.
+   `Won't Fix`); append the `**Solution:**` block; adjust the relative markdown links **two** levels
+   deeper (`](../../` → `](../../../../`) because the file moves from `docs/bugs/` (depth 2) into
+   `docs/bugs/archive/<quarter>/` (depth 4) — details and the neighbour links in
+   [Path adjustment on close](#on-closing--the-solution-block-appended-at-the-end) below.
 6. **`git mv`** into the quarterly archive (quarter from the **close date** — see below; `mkdir -p`
    the quarter dir first if needed):
    ```bash
    git mv docs/bugs/bug-NNNN-<slug>.md docs/bugs/archive/<quarter>/bug-NNNN-<slug>.md
    ```
+   **Precondition:** a QA protocol that `/qa` wrote into the bug file is committed **before** the
+   close — see [Git Commit Convention](#git-commit-convention) for why.
 7. **Update `docs/bugs/INDEX.md`:** repoint the ID link to `archive/<quarter>/…`; set "Closed
    on"; change the status hint; bump the header status table. The row stays in place (only its
    content changes).
@@ -171,8 +175,19 @@ Ask: "Document this bug as shown? (yes / corrections)"
 3. `/bug close BUG-NNNN` — close + move into the quarterly archive.
 ```
 
-**Path convention for links in bug files:** open files live in `docs/bugs/` (depth 2 → `](../../…)`);
-archived files in `docs/bugs/archive/<quarter>/` (depth 4 → `](../../../…)`).
+**Path convention for links in bug files:**
+- Open files live in `docs/bugs/` (**depth 2**) → repo-root targets need **two** `../`: `](../../<path>)`.
+- Archived files live in `docs/bugs/archive/<quarter>/` (**depth 4**) → **four** `../`: `](../../../../<path>)`.
+- **Rule of thumb:** number of `../` = depth of the directory the bug file lives in. Three `../` from
+  the archive land in `docs/` — the link is dead.
+- **Links to `docs/bugs/` neighbours** follow the same arithmetic, not the repo-root rule:
+
+  | Target | from `docs/bugs/` (open) | from `docs/bugs/archive/<quarter>/` (closed) |
+  |---|---|---|
+  | `docs/bugs/INDEX.md` | `](INDEX.md)` | `](../../INDEX.md)` |
+  | bug in the **same** quarter archive | `](archive/<quarter>/bug-XXXX-<slug>.md)` | `](bug-XXXX-<slug>.md)` |
+  | bug in **another** quarter archive | `](archive/<quarter>/bug-XXXX-<slug>.md)` | `](../<quarter>/bug-XXXX-<slug>.md)` |
+  | a still **open** bug | `](bug-XXXX-<slug>.md)` | `](../../bug-XXXX-<slug>.md)` |
 
 **Predecessor on follow-up bugs (regression / refinement):** optional line right after `**Source:**`:
 ```markdown
@@ -186,14 +201,35 @@ archived files in `docs/bugs/archive/<quarter>/` (depth 4 → `](../../../…)`)
 **Solution:**
 - **Root Cause (confirmed):** <final confirmed cause>
 - **Changed files:**
-  - [path/to/file.ext](../../../path/to/file.ext) line(s) XX–XX: <what changed>
+  - [path/to/file.ext](../../../../path/to/file.ext) line(s) XX–XX: <what changed>
 - **Solution steps:**
   1. <step 1>
   2. <step 2>
 - **Why it works:** <rationale>
 ```
-**Path adjustment on close (MANDATORY):** the file moves from depth 2 to depth 4 — bump every
-existing `](../../<path>)` to `](../../../<path>)`. Leave absolute URLs and anchor-only links alone.
+**Path adjustment on close (MANDATORY):** the file moves from `docs/bugs/` (depth 2) to
+`docs/bugs/archive/<quarter>/` (depth 4) — **two** levels deeper:
+- Repo-root targets: `](../../<path>)` → `](../../../../<path>)` (two `../` added, not one).
+- `docs/bugs/` neighbours per the table under "Path convention" above: `](INDEX.md)` →
+  `](../../INDEX.md)`, `](archive/<quarter>/bug-XXXX-….md)` → `](bug-XXXX-….md)` (same quarter) or
+  `](../<quarter>/bug-XXXX-….md)` (other quarter).
+- Link syntax that appears only as an **example** inside backticks or code blocks: leave it alone.
+- Absolute URLs and anchor-only links (`#…`): leave them alone.
+
+New links in the `**Solution:**` block are written with archive depth (`](../../../../…)`) directly.
+
+**Verification (MANDATORY, five seconds):** after the `git mv`, check that no link points nowhere:
+```bash
+cd docs/bugs/archive/<quarter>
+awk '/^[[:space:]]*```/{f=!f; next} !f' bug-NNNN-<slug>.md \
+  | sed 's/`[^`]*`//g' \
+  | grep -o '](\([^)]*\))' | sed 's/^](//;s/)$//' \
+  | grep -v '^http\|^mailto:\|^#' \
+  | while read -r t; do [ -e "${t%%#*}" ] || echo "DEAD: $t"; done
+```
+Expected: no output (exception: targets deleted or renamed since the bug was filed — leave those
+links, they document the state at the time). The `awk` drops code blocks and the `sed` drops code
+spans, otherwise the example link syntax in the bug file reports as dead; `${t%%#*}` strips anchors.
 
 ---
 
@@ -290,8 +326,27 @@ Solution steps:
 
 Why it works: <rationale>
 ```
-When the close also moves the file (`git mv`), the move is committed in the **same** commit (Git
-detects it by content similarity — shows `R100` + the body changes).
+When the close also moves the file (`git mv`), the move is committed in the **same** commit as the
+body changes (status line, `**Solution:**` block, path adjustment). Git does not store renames — it
+detects them when reading, by content similarity (default threshold 50 %). A normal close lands at
+roughly 60–92 % similarity (`R060`–`R092`), **not** `R100`, because the close edits the file.
+
+Two things push the similarity below the threshold — the move is then recorded as `D` + `A`, and
+`git log --follow` on the archive path stops at the close commit:
+- **A QA protocol in the same commit.** If `/qa` wrote its results into the bug file, commit them
+  separately (`test(…)`/`docs(…): BUG-NNNN; QA result …`) **before** `/bug close` runs.
+- **Link-dense bug files.** The mandatory path adjustment alone can touch a large share of the
+  lines. Rule of thumb: from about **15 outgoing links**, or when the path adjustment touches more
+  than a fifth of the lines, split the close into two commits — (1) the pure `git mv` (`R100`),
+  (2) the content at the new location (status, `**Solution:**`, path adjustment, INDEX).
+
+Small bug files are closer to the threshold than large ones (the `**Solution:**` block has a fixed
+size, so the relative growth is larger). Counter-check after the close when the trail matters:
+```bash
+git show --name-status --find-renames <commit> -- docs/bugs | grep -E '^R'
+```
+The history is never lost — it stays reachable via the old path (`git log -- docs/bugs/bug-NNNN-….md`)
+— only the convenient `--follow` path breaks.
 
 ## Handoff
 After filing a new bug:
